@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('brand');
-            $table->foreignId('mode_id')->constrained('models')->onDelete('cascade');
+            $table->foreignId('model_id')->constrained('models')->onDelete('cascade');
             $table->foreignId('engine_id')->constrained('engines')->onDelete('cascade');
             $table->enum('transmission',['manual','automatic']);
             $table->integer('seats')->check('seats IN (5,7)');
