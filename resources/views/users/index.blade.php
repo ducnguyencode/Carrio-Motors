@@ -12,7 +12,7 @@
   <table class="table table-bordered">
     <thead>
       <tr>
-        <th>#</th><th>Username</th><th>Fullname</th><th>Email</th><th>Active</th><th>Hành động</th>
+        <th>#</th><th>Username</th><th>Fullname</th><th>Email</th><th>Role</th><th>Active</th><th>Hành động</th>
       </tr>
     </thead>
     <tbody>
@@ -22,14 +22,15 @@
         <td>{{ $user->username }}</td>
         <td>{{ $user->fullname }}</td>
         <td>{{ $user->email }}</td>
+        <td>{{ $user->role }}</td>
         <td>{{ $user->is_active ? '✔' : '✖' }}</td>
         <td>
-          <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-info">Xem</a>
-          <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-warning">Sửa</a>
+          <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-info">Show</a>
+          <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-warning">Edit</a>
           <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline">
             @csrf @method('DELETE')
             <button class="btn btn-sm btn-danger"
-                    onclick="return confirm('Chắc chắn vô hiệu hóa?')">Xóa</button>
+                    onclick="return confirm('Deactivated?')">Delete</button>
           </form>
         </td>
       </tr>
