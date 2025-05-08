@@ -21,13 +21,3 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 }
-
-
-//Sao datab
-// bua em xoa het de chay thu
-// em phai dong bo code ve roi moi lam chu
-// bua em tai code chu kh co connect
-// troi v gio
-// de a thu connect coi sao, bao ghe
-// okok
-
