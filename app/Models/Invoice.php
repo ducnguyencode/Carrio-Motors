@@ -10,20 +10,13 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_name',
-        'customer_phone',
-        'customer_email',
+        'buyer_name',
+        'buyer_email',
+        'buyer_phone',
         'purchase_date',
         'total_price',
         'payment_method',
-        'process',
-        'isActive',
-    ];
-
-    protected $casts = [
-        'purchase_date' => 'datetime',
-        'total_price' => 'decimal:2',
-        'isActive' => 'boolean',
+        'process_status',
     ];
 
     public function details()

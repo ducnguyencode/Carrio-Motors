@@ -14,12 +14,6 @@ class InvoiceDetail extends Model
         'car_detail_id',
         'quantity',
         'price',
-        'isActive',
-    ];
-
-     protected $casts = [
-        'price' => 'decimal:2',
-        'isActive' => 'boolean',
     ];
 
     public function invoice()
