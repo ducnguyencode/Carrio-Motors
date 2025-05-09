@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\BuyController;
+use App\Http\Controllers\InvoiceController;
 
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/cars', [PageController::class, 'cars']);
@@ -17,3 +18,6 @@ Route::get('/', function () {
 Route::resource('users', UserController::class)
     ->middleware('auth');
 
+
+Route::resource('invoices', InvoiceController::class);
+Route::put('/invoices/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.updateStatus');
