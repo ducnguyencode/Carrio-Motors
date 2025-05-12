@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Car Dealership</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .ticker {
             position: fixed;
@@ -76,6 +77,28 @@
         .carousel-indicators .dot.active {
             opacity: 1;
         }
+        .dropdown-menu {
+            min-width: 12rem;
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        }
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border: none;
+            box-shadow: 0 4px 6px rgba(13, 110, 253, 0.25);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(13, 110, 253, 0.35);
+        }
     </style>
 </head>
 <body>
@@ -84,12 +107,35 @@
             <img src="/logo.png" alt="Logo" style="height: 60px;">
             <div class="visit-counter">Visits: {{ session('visit_count', 1) }}</div>
         </div>
-        <nav class="nav nav-pills my-3">
-            <a class="nav-link" href="/">Home</a>
-            <a class="nav-link" href="/about">About</a>
-            <a class="nav-link" href="/cars">Cars</a>
-            <a class="nav-link" href="/buy">Buy</a>
-            <a class="nav-link" href="/contact">Contact</a>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mt-3 mb-3">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/cars"><i class="fas fa-car me-1"></i> Cars</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/buy"><i class="fas fa-shopping-cart me-1"></i> Buy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fas fa-envelope me-1"></i> Contact</a>
+                        </li>
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        <!-- Admin Login button removed as requested -->
+                    </ul>
+                </div>
+            </div>
         </nav>
 
         @yield('content')
@@ -99,6 +145,7 @@
         Loading location and time...
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function updateTicker() {
             const ticker = document.getElementById('ticker');

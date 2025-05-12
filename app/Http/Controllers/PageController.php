@@ -17,7 +17,7 @@ class PageController extends Controller
     }
 
     public function cars() {
-        $cars = Car::with('engine')->get();
+        $cars = Car::all();
         return view('cars', compact('cars'));
     }
 

@@ -17,6 +17,7 @@ class CreateInvoicesTable extends Migration
             $table->decimal('total_price', 15, 2)->default(0);
             $table->enum('payment_method', ['cash', 'credit', 'installment'])->default('cash');
             $table->enum('process_status', ['deposit', 'payment', 'warehouse', 'success', 'cancel'])->default('deposit');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
         });
     }

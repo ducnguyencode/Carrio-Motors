@@ -4,20 +4,93 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\BuyController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\MakeController;
+use App\Http\Controllers\Admin\ModelController;
+use App\Http\Controllers\Admin\EngineController;
+use App\Http\Controllers\Admin\CarColorController;
+use App\Http\Controllers\Admin\CarController;
+use App\Http\Controllers\Admin\CarDetailController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+use App\Http\Controllers\UserDashboardController;
 
+// Public routes
+Route::get('/', function () {
+    return view('home');
+});
 Route::get('/about', [PageController::class, 'about']);
-Route::get('/cars', [PageController::class, 'cars']);
+Route::get('/cars', [PageController::class, 'cars'])->name('cars');
 Route::get('/cars/{id}', [PageController::class, 'carDetail']);
 Route::get('/buy/{id?}', [PageController::class, 'buyForm']);
 Route::post('/buy/submit', [BuyController::class, 'submit']);
 Route::get('/contact', [PageController::class, 'contact']);
-Route::get('/', function () {
-    return view('home');
+
+// Registration routes (public)
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+
+// Admin login routes only (no public registration)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Password reset routes (admin only)
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+// Admin redirect route
+Route::redirect('/admin', '/admin/dashboard');
+
+// Admin routes
+Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Admin only routes
+    Route::middleware(['role:admin'])->group(function () {
+        Route::resource('users', AdminUserController::class);
+        Route::resource('makes', MakeController::class);
+        Route::resource('models', ModelController::class);
+        Route::resource('engines', EngineController::class);
+        Route::resource('car_colors', CarColorController::class);
+    });
+
+    // Routes accessible by both Admin and Saler
+    Route::resource('cars', CarController::class)->except(['destroy']);
+    Route::resource('car_details', CarDetailController::class)->except(['destroy']);
+    Route::resource('banners', BannerController::class);
+    Route::resource('invoices', AdminInvoiceController::class);
+    Route::put('/invoices/{id}/status', [AdminInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
+
+    // Admin-only destroy routes
+    Route::middleware(['role:admin'])->group(function () {
+        Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
+        Route::delete('/car_details/{car_detail}', [CarDetailController::class, 'destroy'])->name('car_details.destroy');
+    });
 });
 
-Route::resource('users', UserController::class)
-    ->middleware('auth');
+// Email Verification Routes
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
 
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/dashboard')->with('success', 'Your email has been successfully verified!');
+})->middleware(['auth', 'signed'])->name('verification.verify');
 
-Route::resource('invoices', InvoiceController::class);
-Route::put('/invoices/{id}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.updateStatus');
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+// User dashboard (for normal users)
+Route::get('/dashboard', [UserDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');

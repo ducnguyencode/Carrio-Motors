@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success mt-4" role="alert">
+        {{ session('success') }}
+    </div>
+@endif
 <div class="video-carousel">
     <div class="carousel-slide active">
         <video class="background-video" autoplay muted loop playsinline>

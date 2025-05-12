@@ -14,15 +14,24 @@ class RoleMiddleware
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  mixed ...$roles
+     * @param  string  $roles
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, $roles)
     {
         $user = Auth::user();
-        if (!$user || !in_array($user->role, $roles)) {
+
+        if (!$user) {
+            return redirect('/')->with('error', 'Authentication required!');
+        }
+
+        // Split roles by comma if multiple roles are provided
+        $allowedRoles = explode(',', $roles);
+
+        if (!in_array($user->role, $allowedRoles)) {
             return redirect('/')->with('error', 'You do not have permission to access this function!');
         }
+
         return $next($request);
     }
 }

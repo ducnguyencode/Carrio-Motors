@@ -1,0 +1,232 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Car;
+use App\Models\Make;
+use App\Models\Model;
+use App\Models\Engine;
+use Illuminate\Support\Facades\Storage;
+
+class CarController extends Controller
+{
+    /**
+     * Display a listing of the cars.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $cars = Car::with(['model.make', 'engine'])->paginate(10);
+        return view('admin.cars.index', compact('cars'));
+    }
+
+    /**
+     * Show the form for creating a new car.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        $makes = Make::all();
+        $models = [];
+        $engines = Engine::all();
+        return view('admin.cars.create', compact('makes', 'models', 'engines'));
+    }
+
+    /**
+     * Store a newly created car in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'model_id' => 'required|exists:models,id',
+            'engine_id' => 'required|exists:engines,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'base_price' => 'required|numeric|min:0',
+            'status' => 'required|in:available,soon,sold_out',
+            'features' => 'nullable|string',
+            'specification' => 'nullable|string',
+            'main_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $car = new Car();
+        $car->model_id = $validated['model_id'];
+        $car->engine_id = $validated['engine_id'];
+        $car->name = $validated['name'];
+        $car->description = $validated['description'] ?? null;
+        $car->base_price = $validated['base_price'];
+        $car->status = $validated['status'];
+        $car->features = $validated['features'] ?? null;
+        $car->specification = $validated['specification'] ?? null;
+
+        // Xử lý upload ảnh chính
+        if ($request->hasFile('main_image')) {
+            $mainImagePath = $request->file('main_image')->store('cars', 'public');
+            $car->main_image = $mainImagePath;
+        }
+
+        $car->save();
+
+        // Xử lý upload các ảnh bổ sung
+        if ($request->hasFile('additional_images')) {
+            $additionalImages = [];
+            foreach ($request->file('additional_images') as $image) {
+                $path = $image->store('cars', 'public');
+                $additionalImages[] = $path;
+            }
+            $car->additional_images = json_encode($additionalImages);
+            $car->save();
+        }
+
+        return redirect()->route('admin.cars.index')
+            ->with('success', 'Xe đã được tạo thành công.');
+    }
+
+    /**
+     * Display the specified car.
+     *
+     * @param  \App\Models\Car  $car
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Car $car)
+    {
+        $car->load(['model.make', 'engine', 'carDetails.carColor']);
+        return view('admin.cars.show', compact('car'));
+    }
+
+    /**
+     * Show the form for editing the specified car.
+     *
+     * @param  \App\Models\Car  $car
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Car $car)
+    {
+        $makes = Make::all();
+        $car->load('model.make');
+        $models = Model::where('make_id', $car->model->make_id)->get();
+        $engines = Engine::all();
+        return view('admin.cars.edit', compact('car', 'makes', 'models', 'engines'));
+    }
+
+    /**
+     * Update the specified car in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Car  $car
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Car $car)
+    {
+        $validated = $request->validate([
+            'model_id' => 'required|exists:models,id',
+            'engine_id' => 'required|exists:engines,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'base_price' => 'required|numeric|min:0',
+            'status' => 'required|in:available,soon,sold_out',
+            'features' => 'nullable|string',
+            'specification' => 'nullable|string',
+            'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'remove_additional_images' => 'nullable|array',
+        ]);
+
+        $car->model_id = $validated['model_id'];
+        $car->engine_id = $validated['engine_id'];
+        $car->name = $validated['name'];
+        $car->description = $validated['description'] ?? null;
+        $car->base_price = $validated['base_price'];
+        $car->status = $validated['status'];
+        $car->features = $validated['features'] ?? null;
+        $car->specification = $validated['specification'] ?? null;
+
+        // Xử lý upload ảnh chính nếu có
+        if ($request->hasFile('main_image')) {
+            // Xóa ảnh cũ
+            if ($car->main_image) {
+                Storage::disk('public')->delete($car->main_image);
+            }
+
+            $mainImagePath = $request->file('main_image')->store('cars', 'public');
+            $car->main_image = $mainImagePath;
+        }
+
+        // Xử lý các ảnh bổ sung cần xóa
+        if ($request->has('remove_additional_images') && is_array($request->remove_additional_images)) {
+            $additionalImages = json_decode($car->additional_images ?? '[]', true);
+            $newAdditionalImages = [];
+
+            foreach ($additionalImages as $index => $imagePath) {
+                if (!in_array($index, $request->remove_additional_images)) {
+                    $newAdditionalImages[] = $imagePath;
+                } else {
+                    Storage::disk('public')->delete($imagePath);
+                }
+            }
+
+            $car->additional_images = json_encode($newAdditionalImages);
+        }
+
+        // Xử lý thêm ảnh bổ sung mới
+        if ($request->hasFile('additional_images')) {
+            $additionalImages = json_decode($car->additional_images ?? '[]', true);
+
+            foreach ($request->file('additional_images') as $image) {
+                $path = $image->store('cars', 'public');
+                $additionalImages[] = $path;
+            }
+
+            $car->additional_images = json_encode($additionalImages);
+        }
+
+        $car->save();
+
+        return redirect()->route('admin.cars.index')
+            ->with('success', 'Xe đã được cập nhật thành công.');
+    }
+
+    /**
+     * Remove the specified car from storage.
+     *
+     * @param  \App\Models\Car  $car
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Car $car)
+    {
+        // Kiểm tra xem có đơn hàng nào liên quan không
+        if ($car->invoices()->count() > 0) {
+            return redirect()->route('admin.cars.index')
+                ->with('error', 'Không thể xóa xe này vì đã có đơn hàng liên kết.');
+        }
+
+        // Xóa ảnh chính
+        if ($car->main_image) {
+            Storage::disk('public')->delete($car->main_image);
+        }
+
+        // Xóa các ảnh bổ sung
+        if ($car->additional_images) {
+            $additionalImages = json_decode($car->additional_images, true);
+            foreach ($additionalImages as $imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+        }
+
+        // Xóa các chi tiết xe liên quan
+        $car->carDetails()->delete();
+
+        $car->delete();
+
+        return redirect()->route('admin.cars.index')
+            ->with('success', 'Xe đã được xóa thành công.');
+    }
+}
