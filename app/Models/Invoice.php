@@ -17,10 +17,19 @@ class Invoice extends Model
         'total_price',
         'payment_method',
         'process_status',
+        'user_id',
     ];
 
     public function details()
     {
         return $this->hasMany(InvoiceDetail::class);
+    }
+
+    /**
+     * Get the user that owns the invoice.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
