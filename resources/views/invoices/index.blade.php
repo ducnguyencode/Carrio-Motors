@@ -1,160 +1,105 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1>Quản lý hóa đơn</h1>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ route('invoices.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus-circle"></i> Tạo hóa đơn mới
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Invoice List
+            </h2>
+            <a href="{{ route('invoices.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Create New Invoice
             </a>
         </div>
-    </div>
+    </x-slot>
 
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    @if(session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ session('success') }}</span>
+                        </div>
+                    @endif
 
-    @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
-
-    <div class="card shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="card-title mb-0">Danh sách hóa đơn</h5>
-        </div>
-        <div class="card-body">
-            @if(count($invoices) > 0)
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Khách hàng</th>
-                            <th>Ngày mua</th>
-                            <th>Tổng tiền</th>
-                            <th>Phương thức thanh toán</th>
-                            <th>Trạng thái</th>
-                            <th>Người tạo</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($invoices as $invoice)
-                        <tr>
-                            <td>{{ $invoice->id }}</td>
-                            <td>{{ $invoice->buyer_name }}</td>
-                            <td>{{ $invoice->purchase_date->format('d/m/Y H:i') }}</td>
-                            <td>{{ number_format($invoice->total_price, 0, ',', '.') }} VNĐ</td>
-                            <td>
-                                @if($invoice->payment_method == 'cash')
-                                    <span class="badge bg-success">Tiền mặt</span>
-                                @elseif($invoice->payment_method == 'credit')
-                                    <span class="badge bg-info">Thẻ tín dụng</span>
-                                @elseif($invoice->payment_method == 'installment')
-                                    <span class="badge bg-warning">Trả góp</span>
-                                @else
-                                    <span class="badge bg-secondary">{{ $invoice->payment_method }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge
-                                    @if($invoice->process_status == 'deposit') bg-warning
-                                    @elseif($invoice->process_status == 'payment' || $invoice->process_status == 'warehouse') bg-info
-                                    @elseif($invoice->process_status == 'success') bg-success
-                                    @elseif($invoice->process_status == 'cancel') bg-danger
-                                    @else bg-secondary
-                                    @endif">
-                                    @switch($invoice->process_status)
-                                        @case('deposit')
-                                            Đặt cọc
-                                            @break
-                                        @case('payment')
-                                            Đã thanh toán
-                                            @break
-                                        @case('warehouse')
-                                            Xuất kho
-                                            @break
-                                        @case('success')
-                                            Hoàn thành
-                                            @break
-                                        @case('cancel')
-                                            Hủy bỏ
-                                            @break
-                                        @default
-                                            {{ $invoice->process_status }}
-                                    @endswitch
-                                </span>
-                            </td>
-                            <td>{{ $invoice->user->username ?? 'N/A' }}</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{{ route('invoices.show', $invoice->id) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('invoices.edit', $invoice->id) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteInvoice{{ $invoice->id }}" data-bs-toggle="tooltip" title="Hủy bỏ">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-
-                                <!-- Modal xác nhận hủy -->
-                                <div class="modal fade" id="deleteInvoice{{ $invoice->id }}" tabindex="-1" aria-labelledby="deleteInvoiceLabel{{ $invoice->id }}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="deleteInvoiceLabel{{ $invoice->id }}">Xác nhận hủy hóa đơn</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                Bạn có chắc chắn muốn hủy hóa đơn #{{ $invoice->id }} không?
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                                <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($invoices as $invoice)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ $invoice->id }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ $invoice->customer_name }}</div>
+                                            <div class="text-sm text-gray-500">{{ $invoice->customer_email }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ number_format($invoice->final_price, 0, ',', '.') }} VND</div>
+                                            @if($invoice->discount_amount > 0)
+                                                <div class="text-sm text-green-600">Discount: {{ number_format($invoice->discount_amount, 0, ',', '.') }} VND</div>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                @if($invoice->status === 'completed') bg-green-100 text-green-800
+                                                @elseif($invoice->status === 'cancelled') bg-red-100 text-red-800
+                                                @else bg-yellow-100 text-yellow-800
+                                                @endif">
+                                                @switch($invoice->status)
+                                                    @case('deposit')
+                                                        Deposit
+                                                        @break
+                                                    @case('paid')
+                                                        Paid
+                                                        @break
+                                                    @case('processing')
+                                                        Processing
+                                                        @break
+                                                    @case('completed')
+                                                        Completed
+                                                        @break
+                                                    @case('cancelled')
+                                                        Cancelled
+                                                        @break
+                                                @endswitch
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $invoice->created_at->format('d/m/Y H:i') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <a href="{{ route('invoices.show', $invoice) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Details</a>
+                                            @if($invoice->status !== 'completed' && $invoice->status !== 'cancelled')
+                                                <a href="{{ route('invoices.edit', $invoice) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Edit</a>
+                                            @endif
+                                            @if($invoice->status === 'deposit')
+                                                <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this invoice?')">Delete</button>
                                                 </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        {{ $invoices->links() }}
+                    </div>
+                </div>
             </div>
-            <div class="d-flex justify-content-center mt-4">
-                {{ $invoices->links() }}
-            </div>
-            @else
-            <div class="alert alert-info">
-                Chưa có hóa đơn nào trong hệ thống.
-            </div>
-            @endif
         </div>
     </div>
-</div>
-@endsection
-
-@section('scripts')
-<script>
-    // Kích hoạt tooltip
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-</script>
-@endsection
+</x-app-layout>

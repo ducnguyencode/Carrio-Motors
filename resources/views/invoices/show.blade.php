@@ -1,196 +1,199 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container">
-    <div class="row mb-4">
-        <div class="col">
-            <h1>Chi tiết hóa đơn #{{ $invoice->id }}</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('invoices.index') }}">Quản lý hóa đơn</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Chi tiết #{{ $invoice->id }}</li>
-                </ol>
-            </nav>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Chi tiết hóa đơn #{{ $invoice->id }}
+            </h2>
+            <div class="flex space-x-2">
+                @if($invoice->status !== 'completed' && $invoice->status !== 'cancelled')
+                    <a href="{{ route('invoices.edit', $invoice) }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                        Chỉnh sửa
+                    </a>
+                @endif
+                <a href="{{ route('invoices.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    Quay lại
+                </a>
+            </div>
         </div>
-    </div>
+    </x-slot>
 
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Thông tin hóa đơn</h5>
-                    <div class="btn-group">
-                        <a href="{{ route('invoices.edit', $invoice->id) }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-edit"></i> Chỉnh sửa
-                        </a>
-                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#cancelInvoiceModal">
-                            <i class="fas fa-ban"></i> Hủy hóa đơn
-                        </button>
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ session('error') }}</span>
+                </div>
+            @endif
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Customer Information -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-gray-600">Customer Name:</span>
+                                    <span class="font-medium">{{ $invoice->customer_name }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Email:</span>
+                                    <span class="font-medium">{{ $invoice->customer_email }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Số điện thoại:</span>
+                                    <span class="font-medium">{{ $invoice->customer_phone }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Địa chỉ:</span>
+                                    <span class="font-medium">{{ $invoice->customer_address }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Information -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-gray-600">Phương thức thanh toán:</span>
+                                    <span class="font-medium">
+                                        @switch($invoice->payment_method)
+                                            @case('cash')
+                                                Tiền mặt
+                                                @break
+                                            @case('bank_transfer')
+                                                Chuyển khoản
+                                                @break
+                                            @case('credit_card')
+                                                Thẻ tín dụng
+                                                @break
+                                        @endswitch
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Trạng thái:</span>
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                        @if($invoice->status === 'completed') bg-green-100 text-green-800
+                                        @elseif($invoice->status === 'cancelled') bg-red-100 text-red-800
+                                        @else bg-yellow-100 text-yellow-800
+                                        @endif">
+                                        @switch($invoice->status)
+                                            @case('deposit')
+                                                Đặt cọc
+                                                @break
+                                            @case('paid')
+                                                Paid
+                                                @break
+                                            @case('processing')
+                                                Đang xử lý
+                                                @break
+                                            @case('completed')
+                                                Hoàn thành
+                                                @break
+                                            @case('cancelled')
+                                                Cancelled
+                                                @break
+                                        @endswitch
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Ngày tạo:</span>
+                                    <span class="font-medium">{{ $invoice->created_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h6 class="fw-bold">Thông tin cơ bản</h6>
-                            <p><strong>Ngày tạo:</strong> {{ $invoice->created_at->format('d/m/Y H:i') }}</p>
-                            <p><strong>Ngày mua:</strong> {{ $invoice->purchase_date->format('d/m/Y H:i') }}</p>
-                            <p>
-                                <strong>Trạng thái:</strong>
-                                <span class="badge
-                                    @if($invoice->process_status == 'deposit') bg-warning
-                                    @elseif($invoice->process_status == 'payment' || $invoice->process_status == 'warehouse') bg-info
-                                    @elseif($invoice->process_status == 'success') bg-success
-                                    @elseif($invoice->process_status == 'cancel') bg-danger
-                                    @else bg-secondary
-                                    @endif">
-                                    @switch($invoice->process_status)
-                                        @case('deposit')
-                                            Đặt cọc
-                                            @break
-                                        @case('payment')
-                                            Đã thanh toán
-                                            @break
-                                        @case('warehouse')
-                                            Xuất kho
-                                            @break
-                                        @case('success')
-                                            Hoàn thành
-                                            @break
-                                        @case('cancel')
-                                            Hủy bỏ
-                                            @break
-                                        @default
-                                            {{ $invoice->process_status }}
-                                    @endswitch
-                                </span>
-                            </p>
-                            <p>
-                                <strong>Phương thức thanh toán:</strong>
-                                @if($invoice->payment_method == 'cash')
-                                    <span class="badge bg-success">Tiền mặt</span>
-                                @elseif($invoice->payment_method == 'credit')
-                                    <span class="badge bg-info">Thẻ tín dụng</span>
-                                @elseif($invoice->payment_method == 'installment')
-                                    <span class="badge bg-warning">Trả góp</span>
-                                @else
-                                    <span class="badge bg-secondary">{{ $invoice->payment_method }}</span>
-                                @endif
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold">Thông tin khách hàng</h6>
-                            <p><strong>Tên:</strong> {{ $invoice->buyer_name }}</p>
-                            <p><strong>Email:</strong> {{ $invoice->buyer_email ?? 'N/A' }}</p>
-                            <p><strong>Số điện thoại:</strong> {{ $invoice->buyer_phone ?? 'N/A' }}</p>
-                        </div>
-                    </div>
+            </div>
 
-                    <h6 class="fw-bold">Chi tiết sản phẩm</h6>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-light">
+            <!-- Car Details -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Car Details</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th>Mẫu xe</th>
-                                    <th>Màu sắc</th>
-                                    <th>Đơn giá</th>
-                                    <th>Số lượng</th>
-                                    <th>Thành tiền</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($invoice->details as $detail)
-                                <tr>
-                                    <td>{{ $detail->carDetail->car->name ?? 'N/A' }}</td>
-                                    <td>
-                                        @if($detail->carDetail->carColor)
-                                            <span class="d-inline-block me-1" style="width: 15px; height: 15px; background-color: {{ $detail->carDetail->carColor->hex_code }}; border-radius: 3px;"></span>
-                                            {{ $detail->carDetail->carColor->name }}
-                                        @else
-                                            N/A
-                                        @endif
-                                    </td>
-                                    <td>{{ number_format($detail->price, 0, ',', '.') }} VNĐ</td>
-                                    <td>{{ $detail->quantity }}</td>
-                                    <td>{{ number_format($detail->price * $detail->quantity, 0, ',', '.') }} VNĐ</td>
-                                </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900">{{ $detail->car->name }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ number_format($detail->unit_price, 0, ',', '.') }} VNĐ</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ $detail->quantity }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ number_format($detail->subtotal, 0, ',', '.') }} VNĐ</div>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                             <tfoot>
-                                <tr>
-                                    <th colspan="4" class="text-end">Tổng cộng:</th>
-                                    <th>{{ number_format($invoice->total_price, 0, ',', '.') }} VNĐ</th>
+                                <tr class="bg-gray-50">
+                                    <td colspan="3" class="px-6 py-4 text-right font-medium">Total:</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ number_format($invoice->total_price, 0, ',', '.') }} VNĐ</div>
+                                    </td>
+                                </tr>
+                                @if($invoice->discount_amount > 0)
+                                    <tr class="bg-gray-50">
+                                        <td colspan="3" class="px-6 py-4 text-right font-medium">Discount:</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-green-600">-{{ number_format($invoice->discount_amount, 0, ',', '.') }} VNĐ</div>
+                                        </td>
+                                    </tr>
+                                @endif
+                                <tr class="bg-gray-50">
+                                    <td colspan="3" class="px-6 py-4 text-right font-medium">Final Price:</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-lg font-bold text-gray-900">{{ number_format($invoice->final_price, 0, ',', '.') }} VNĐ</div>
+                                    </td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Cập nhật trạng thái</h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('invoices.update-status', $invoice->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Trạng thái mới</label>
-                            <select name="status" id="status" class="form-select">
-                                <option value="deposit" {{ $invoice->process_status == 'deposit' ? 'selected' : '' }}>Đặt cọc</option>
-                                <option value="payment" {{ $invoice->process_status == 'payment' ? 'selected' : '' }}>Đã thanh toán</option>
-                                <option value="warehouse" {{ $invoice->process_status == 'warehouse' ? 'selected' : '' }}>Xuất kho</option>
-                                <option value="success" {{ $invoice->process_status == 'success' ? 'selected' : '' }}>Hoàn thành</option>
-                                <option value="cancel" {{ $invoice->process_status == 'cancel' ? 'selected' : '' }}>Hủy bỏ</option>
+            @if($invoice->status !== 'completed' && $invoice->status !== 'cancelled')
+                <!-- Update Status -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Update Status</h3>
+                        <form action="{{ route('invoices.update-status', $invoice) }}" method="POST" class="flex items-center space-x-4">
+                            @csrf
+                            @method('PUT')
+                            <select name="status" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="deposit" {{ $invoice->status === 'deposit' ? 'selected' : '' }}>Đặt cọc</option>
+                                <option value="paid" {{ $invoice->status === 'paid' ? 'selected' : '' }}>Paid</option>
+                                <option value="processing" {{ $invoice->status === 'processing' ? 'selected' : '' }}>Đang xử lý</option>
+                                <option value="completed" {{ $invoice->status === 'completed' ? 'selected' : '' }}>Hoàn thành</option>
+                                <option value="cancelled" {{ $invoice->status === 'cancelled' ? 'selected' : '' }}>Hủy</option>
                             </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Cập nhật trạng thái</button>
-                    </form>
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Update
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Thông tin bổ sung</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Người tạo:</strong> {{ $invoice->user->fullname ?? $invoice->user->username ?? 'N/A' }}</p>
-                    <p><strong>Cập nhật lần cuối:</strong> {{ $invoice->updated_at->format('d/m/Y H:i') }}</p>
-                </div>
-            </div>
+            @endif
         </div>
     </div>
-</div>
-
-<!-- Modal xác nhận hủy -->
-<div class="modal fade" id="cancelInvoiceModal" tabindex="-1" aria-labelledby="cancelInvoiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="cancelInvoiceModalLabel">Xác nhận hủy hóa đơn</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Bạn có chắc chắn muốn hủy hóa đơn #{{ $invoice->id }} không? Hành động này không thể hoàn tác.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
+</x-app-layout>

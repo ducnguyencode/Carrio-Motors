@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InvoiceDetail extends Model
 {
@@ -11,9 +12,15 @@ class InvoiceDetail extends Model
 
     protected $fillable = [
         'invoice_id',
-        'car_detail_id',
+        'car_id',
         'quantity',
-        'price',
+        'unit_price',
+        'subtotal'
+    ];
+
+    protected $casts = [
+        'unit_price' => 'decimal:2',
+        'subtotal' => 'decimal:2',
     ];
 
     public function invoice()
@@ -21,8 +28,25 @@ class InvoiceDetail extends Model
         return $this->belongsTo(Invoice::class);
     }
 
-    public function carDetail()
+    public function car()
     {
-        return $this->belongsTo(CarDetail::class);
+        return $this->belongsTo(Car::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($detail) {
+            $detail->subtotal = $detail->quantity * $detail->unit_price;
+        });
+
+        static::updating(function ($detail) {
+            $detail->subtotal = $detail->quantity * $detail->unit_price;
+        });
+
+        static::saved(function ($detail) {
+            $detail->invoice->calculateTotals();
+        });
     }
 }
