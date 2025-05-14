@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\CarController;
 use App\Http\Controllers\Admin\CarDetailController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\Car;
+use App\Http\Controllers\CarDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -61,6 +63,10 @@ Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')
         Route::resource('models', ModelController::class);
         Route::resource('engines', EngineController::class);
         Route::resource('car_colors', CarColorController::class);
+        Route::resource('invoices', AdminInvoiceController::class);
+        Route::resource('cars', CarController::class);
+        Route::resource('car_details', CarDetailController::class);
+
     });
 
     // Routes accessible by both Admin and Saler
