@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\CarController;
 use App\Http\Controllers\Admin\CarDetailController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\Car;
+use App\Http\Controllers\CarDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
