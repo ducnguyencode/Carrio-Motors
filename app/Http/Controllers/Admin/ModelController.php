@@ -17,12 +17,12 @@ class ModelController extends Controller
         // ensure user is logged in
         $this->middleware('auth');
 
-        // Log access attempt for debugging
-        Log::debug('ModelController accessed', [
-            'user' => Auth::user()->username,
-            'role' => Auth::user()->role,
-            'action' => 'constructor'
-        ]);
+        // // Log access attempt for debugging
+        // Log::debug('ModelController accessed', [
+        //     'user' => Auth::user()->username,
+        //     'role' => Auth::user()->role,
+        //     'action' => 'constructor'
+        // ]);
     }
 
     /**
