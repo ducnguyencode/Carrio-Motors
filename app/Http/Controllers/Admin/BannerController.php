@@ -22,7 +22,7 @@ class BannerController extends Controller
     public function __construct(FileUploadService $fileUploadService)
     {
         $this->middleware('auth');
-        $this->middleware('admin');
+        // $this->middleware('admin');
         $this->fileUploadService = $fileUploadService;
     }
 
