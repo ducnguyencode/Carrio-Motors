@@ -10,45 +10,36 @@ use App\Models\User;
 use App\Models\CarDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\PDF;
 
 class InvoiceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'role:admin']);
+    }
+
     /**
      * Display a listing of the invoices.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = Invoice::with(['user', 'saler', 'invoiceDetails.carDetail.car', 'invoiceDetails.carDetail.carColor']);
+        $invoices = Invoice::with(['details.carDetail', 'customer', 'saler'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
-        // Nếu là Saler, chỉ hiển thị các đơn hàng được gán hoặc của khách hàng quản lý
-        if (Auth::user()->role === 'saler') {
-            $query->where(function($q) {
-                $q->where('saler_id', Auth::id())
-                  ->orWhereHas('user', function($userQuery) {
-                      $userQuery->where('saler_id', Auth::id());
-                  });
-            });
-        }
+        // Get statistics
+        $statistics = [
+            'total_invoices' => Invoice::count(),
+            'total_revenue' => Invoice::where('status', 'completed')->sum('total_price'),
+            'pending_invoices' => Invoice::whereIn('status', ['deposit', 'paid'])->count(),
+            'cancelled_invoices' => Invoice::where('status', 'cancelled')->count()
+        ];
 
-        // Lọc theo trạng thái
-        if ($request->has('status') && $request->status) {
-            $query->where('status', $request->status);
-        }
-
-        // Lọc theo thời gian
-        if ($request->has('from_date') && $request->from_date) {
-            $query->whereDate('created_at', '>=', $request->from_date);
-        }
-
-        if ($request->has('to_date') && $request->to_date) {
-            $query->whereDate('created_at', '<=', $request->to_date);
-        }
-
-        $invoices = $query->orderBy('created_at', 'desc')->paginate(10);
-
-        return view('admin.invoices.index', compact('invoices'));
+        return view('admin.invoices.index', compact('invoices', 'statistics'));
     }
 
     /**
@@ -58,11 +49,11 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $users = User::where('role', 'user')->get();
+        $customers = User::where('role', 'customer')->get();
         $salers = User::where('role', 'saler')->get();
         $carDetails = CarDetail::with(['car', 'carColor'])->where('is_available', true)->get();
 
-        return view('admin.invoices.create', compact('users', 'salers', 'carDetails'));
+        return view('admin.invoices.create', compact('customers', 'salers', 'carDetails'));
     }
 
     /**
@@ -74,7 +65,7 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'customer_id' => 'required|exists:users,id',
             'saler_id' => 'nullable|exists:users,id',
             'status' => 'required|in:pending,processing,completed,canceled',
             'payment_method' => 'required|string|max:50',
@@ -90,21 +81,21 @@ class InvoiceController extends Controller
         try {
             $totalAmount = 0;
 
-            // Tính tổng tiền và kiểm tra tồn kho
+            // Calculate total amount and check inventory
             foreach ($validated['car_details'] as $item) {
                 $carDetail = CarDetail::findOrFail($item['id']);
 
                 if ($carDetail->quantity < $item['quantity']) {
                     return redirect()->back()->withInput()
-                        ->with('error', 'Số lượng xe ' . $carDetail->car->name . ' không đủ.');
+                        ->with('error', 'Insufficient quantity for ' . $carDetail->car->name);
                 }
 
                 $totalAmount += $carDetail->price * $item['quantity'];
             }
 
-            // Tạo hóa đơn
+            // Create invoice
             $invoice = new Invoice();
-            $invoice->user_id = $validated['user_id'];
+            $invoice->customer_id = $validated['customer_id'];
             $invoice->saler_id = $validated['saler_id'] ?? null;
             $invoice->status = $validated['status'];
             $invoice->payment_method = $validated['payment_method'];
@@ -113,7 +104,7 @@ class InvoiceController extends Controller
             $invoice->total_amount = $totalAmount;
             $invoice->save();
 
-            // Tạo chi tiết hóa đơn và cập nhật tồn kho
+            // Create invoice details and update inventory
             foreach ($validated['car_details'] as $item) {
                 $carDetail = CarDetail::findOrFail($item['id']);
 
@@ -125,7 +116,7 @@ class InvoiceController extends Controller
                 $invoiceDetail->subtotal = $carDetail->price * $item['quantity'];
                 $invoiceDetail->save();
 
-                // Cập nhật tồn kho
+                // Update inventory
                 $carDetail->quantity -= $item['quantity'];
                 $carDetail->save();
             }
@@ -133,12 +124,12 @@ class InvoiceController extends Controller
             DB::commit();
 
             return redirect()->route('admin.invoices.index')
-                ->with('success', 'Đơn hàng đã được tạo thành công.');
+                ->with('success', 'Invoice has been created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()->withInput()
-                ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+                ->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
 
@@ -150,12 +141,12 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        // Kiểm tra quyền truy cập nếu là saler
-        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->user->saler_id !== Auth::id()) {
-            abort(403, 'Không có quyền truy cập đơn hàng này.');
+        // Check access rights for saler
+        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->customer_id !== Auth::id()) {
+            abort(403, 'You do not have permission to access this invoice.');
         }
 
-        $invoice->load(['user', 'saler', 'invoiceDetails.carDetail.car', 'invoiceDetails.carDetail.carColor']);
+        $invoice->load(['customer', 'saler', 'details.carDetail.car', 'details.carDetail.carColor']);
 
         return view('admin.invoices.show', compact('invoice'));
     }
@@ -168,16 +159,16 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
-        // Kiểm tra quyền truy cập nếu là saler
-        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->user->saler_id !== Auth::id()) {
-            abort(403, 'Không có quyền truy cập đơn hàng này.');
+        // Check access rights for saler
+        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->customer_id !== Auth::id()) {
+            abort(403, 'You do not have permission to access this invoice.');
         }
 
-        $users = User::where('role', 'user')->get();
+        $customers = User::where('role', 'customer')->get();
         $salers = User::where('role', 'saler')->get();
-        $invoice->load(['invoiceDetails.carDetail.car', 'invoiceDetails.carDetail.carColor']);
+        $invoice->load(['details.carDetail.car', 'details.carDetail.carColor']);
 
-        return view('admin.invoices.edit', compact('invoice', 'users', 'salers'));
+        return view('admin.invoices.edit', compact('invoice', 'customers', 'salers'));
     }
 
     /**
@@ -189,9 +180,9 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, Invoice $invoice)
     {
-        // Kiểm tra quyền truy cập nếu là saler
-        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->user->saler_id !== Auth::id()) {
-            abort(403, 'Không có quyền truy cập đơn hàng này.');
+        // Check access rights for saler
+        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->customer_id !== Auth::id()) {
+            abort(403, 'You do not have permission to access this invoice.');
         }
 
         $validated = $request->validate([
@@ -202,12 +193,12 @@ class InvoiceController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Nếu là saler, chỉ cho phép cập nhật trạng thái và ghi chú
+        // If it's a saler, only allow updating status and notes
         if (Auth::user()->role === 'saler') {
             $invoice->status = $validated['status'];
             $invoice->notes = $validated['notes'] ?? null;
         } else {
-            // Nếu là admin, cho phép cập nhật tất cả
+            // If it's an admin, allow updating all
             $invoice->saler_id = $validated['saler_id'] ?? null;
             $invoice->status = $validated['status'];
             $invoice->payment_method = $validated['payment_method'];
@@ -218,7 +209,7 @@ class InvoiceController extends Controller
         $invoice->save();
 
         return redirect()->route('admin.invoices.show', $invoice)
-            ->with('success', 'Đơn hàng đã được cập nhật thành công.');
+            ->with('success', 'Invoice has been updated successfully.');
     }
 
     /**
@@ -229,21 +220,21 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        // Chỉ admin mới có thể xóa đơn hàng
+        // Only admin can delete invoices
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Không có quyền xóa đơn hàng.');
+            abort(403, 'You do not have permission to delete this invoice.');
         }
 
-        // Nếu đơn hàng đã hoàn thành, không cho phép xóa
+        // Cannot delete completed invoices
         if ($invoice->status === 'completed') {
             return redirect()->route('admin.invoices.index')
-                ->with('error', 'Không thể xóa đơn hàng đã hoàn thành.');
+                ->with('error', 'Cannot delete completed invoices.');
         }
 
         DB::beginTransaction();
 
         try {
-            // Hoàn trả số lượng sản phẩm nếu đơn hàng chưa bị hủy
+            // Return product quantities if the order was not cancelled
             if ($invoice->status !== 'canceled') {
                 foreach ($invoice->invoiceDetails as $detail) {
                     $carDetail = $detail->carDetail;
@@ -252,21 +243,21 @@ class InvoiceController extends Controller
                 }
             }
 
-            // Xóa chi tiết đơn hàng
+            // Delete invoice details
             $invoice->invoiceDetails()->delete();
 
-            // Xóa đơn hàng
+            // Delete invoice
             $invoice->delete();
 
             DB::commit();
 
             return redirect()->route('admin.invoices.index')
-                ->with('success', 'Đơn hàng đã được xóa thành công.');
+                ->with('success', 'Invoice has been deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->route('admin.invoices.index')
-                ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+                ->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
 
@@ -281,19 +272,140 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::findOrFail($id);
 
-        // Kiểm tra quyền truy cập nếu là saler
-        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->user->saler_id !== Auth::id()) {
-            abort(403, 'Không có quyền truy cập đơn hàng này.');
+        // Check access rights for saler
+        if (Auth::user()->role === 'saler' && $invoice->saler_id !== Auth::id() && $invoice->customer_id !== Auth::id()) {
+            abort(403, 'You do not have permission to access this invoice.');
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,processing,completed,canceled',
+            'status' => 'required|in:deposit,paid,processing,completed,cancelled',
         ]);
 
         $invoice->status = $validated['status'];
         $invoice->save();
 
         return redirect()->back()
-            ->with('success', 'Trạng thái đơn hàng đã được cập nhật thành công.');
+            ->with('success', 'Invoice status has been updated successfully.');
+    }
+
+    public function statistics(Request $request)
+    {
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
+        $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
+
+        $dailyRevenue = Invoice::where('status', 'completed')
+            ->whereBetween('purchase_date', [$startDate, $endDate])
+            ->select(
+                DB::raw('DATE(purchase_date) as date'),
+                DB::raw('COUNT(*) as total_invoices'),
+                DB::raw('SUM(total_price) as revenue'),
+                DB::raw('SUM(discount_amount) as total_discount')
+            )
+            ->groupBy('date')
+            ->get();
+
+        $paymentMethodStats = Invoice::where('status', 'completed')
+            ->whereBetween('purchase_date', [$startDate, $endDate])
+            ->select('payment_method', DB::raw('COUNT(*) as count'))
+            ->groupBy('payment_method')
+            ->get();
+
+        return view('admin.invoices.statistics', compact('dailyRevenue', 'paymentMethodStats', 'startDate', 'endDate'));
+    }
+
+    public function approve(Invoice $invoice)
+    {
+        if ($invoice->status === 'deposit') {
+            $invoice->status = 'payment';
+            $invoice->save();
+
+            // Log the approval
+            activity()
+                ->performedOn($invoice)
+                ->causedBy(auth()->user())
+                ->log('Invoice approved for payment');
+
+            return redirect()->back()->with('success', 'Invoice approved for payment.');
+        }
+
+        return redirect()->back()->with('error', 'Invoice cannot be approved in its current state.');
+    }
+
+    public function reject(Invoice $invoice, Request $request)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:255'
+        ]);
+
+        $invoice->status = 'cancel';
+        $invoice->rejection_reason = $request->reason;
+        $invoice->save();
+
+        // Log the rejection
+        activity()
+                ->performedOn($invoice)
+                ->causedBy(auth()->user())
+                ->withProperties(['reason' => $request->reason])
+                ->log('Invoice rejected');
+
+        return redirect()->back()->with('success', 'Invoice has been rejected.');
+    }
+
+    public function exportReport(Request $request)
+    {
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
+        $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
+
+        $invoices = Invoice::with(['details.carDetail', 'user'])
+            ->whereBetween('purchase_date', [$startDate, $endDate])
+            ->get();
+
+        // Generate PDF report
+        $pdf = PDF::loadView('admin.invoices.report', compact('invoices', 'startDate', 'endDate'));
+
+        return $pdf->download('invoice-report.pdf');
+    }
+
+    public function activityLog(Invoice $invoice)
+    {
+        $activities = $invoice->activities()->with('causer')->latest()->get();
+        return view('admin.invoices.activity-log', compact('invoice', 'activities'));
+    }
+
+    public function manageDiscounts()
+    {
+        $invoicesWithDiscount = Invoice::whereNotNull('discount_type')
+            ->with(['details.carDetail', 'user'])
+            ->latest()
+            ->paginate(15);
+
+        $statistics = [
+            'total_discount_amount' => Invoice::sum('discount_amount'),
+            'percentage_discounts' => Invoice::where('discount_type', 'percentage')->count(),
+            'fixed_discounts' => Invoice::where('discount_type', 'fixed')->count()
+        ];
+
+        return view('admin.invoices.discounts', compact('invoicesWithDiscount', 'statistics'));
+    }
+
+    public function updateDiscount(Invoice $invoice, Request $request)
+    {
+        $validated = $request->validate([
+            'discount_type' => 'required|in:percentage,fixed',
+            'discount_amount' => 'required|numeric|min:0',
+            'discount_reason' => 'required|string|max:255'
+        ]);
+
+        $invoice->update($validated);
+        $invoice->calculateTotal();
+        $invoice->save();
+
+        activity()
+            ->performedOn($invoice)
+            ->causedBy(auth()->user())
+            ->withProperties($validated)
+            ->log('Discount updated');
+
+        return redirect()->back()->with('success', 'Discount updated successfully.');
     }
 }
