@@ -19,8 +19,8 @@ class ModelController extends Controller
 
         // Log access attempt for debugging
         Log::debug('ModelController accessed', [
-            'user' => Auth::check() ? Auth::user()->username : 'Guest',
-            'role' => Auth::check() ? Auth::user()->role : 'None',
+            'user' => Auth::user()->username,
+            'role' => Auth::user()->role,
             'action' => 'constructor'
         ]);
     }
@@ -32,12 +32,12 @@ class ModelController extends Controller
     {
         // More detailed logging
         Log::debug('ModelController index method accessed', [
-            'user' => Auth::check() ? Auth::user()->username : 'Guest',
-            'role' => Auth::check() ? Auth::user()->role : 'None'
+            'user' => Auth::user()->username,
+            'role' => Auth::user()->role
         ]);
 
         // Check the role specifically (for debugging)
-        if (Auth::check() && Auth::user()->role === 'content') {
+        if (Auth::user()->role === 'content') {
             Log::debug('Content user has correct role for this method');
         }
 
