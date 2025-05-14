@@ -14,7 +14,7 @@ class ModelController extends Controller
 {
     public function __construct()
     {
-        // Đảm bảo người dùng đã đăng nhập
+        // ensure user is logged in
         $this->middleware('auth');
 
         // Log access attempt for debugging
