@@ -17,7 +17,7 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'content', 'saler'])) {
             return redirect('/')->with('error', 'Access denied. You must be an administrator to access this area.');
         }
 

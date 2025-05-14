@@ -14,16 +14,30 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin user
+        // Admin user (combining details from both seeders)
         User::create([
             'username' => 'admin',
-            'fullname' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'phone' => '0123456789',
-            'address' => '123 Admin St',
+            'fullname' => 'Duc Nguyen',
+            'email' => 'manhthai123456@gmail.com',
+            'password' => Hash::make('password123'),
+            'phone' => '0981826971',
+            'address' => 'Carrio Motors Headquarters',
             'is_active' => true,
             'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        // Content manager user (new role for content management)
+        User::create([
+            'username' => 'content',
+            'fullname' => 'Content Manager',
+            'email' => 'content@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '0123456789',
+            'address' => '123 Content St',
+            'is_active' => true,
+            'role' => 'content',
+            'email_verified_at' => now(),
         ]);
 
         // Saler user
@@ -36,6 +50,7 @@ class UsersTableSeeder extends Seeder
             'address' => '456 Sales Ave',
             'is_active' => true,
             'role' => 'saler',
+            'email_verified_at' => now(),
         ]);
 
         // Regular user
@@ -48,6 +63,11 @@ class UsersTableSeeder extends Seeder
             'address' => '789 User Blvd',
             'is_active' => true,
             'role' => 'user',
+            'email_verified_at' => now(),
         ]);
+
+        if (app()->runningInConsole()) {
+            $this->command->info('Users created successfully!');
+        }
     }
 }

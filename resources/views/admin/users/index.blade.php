@@ -14,6 +14,11 @@
                 <button type="submit" class="flex items-center gap-1 px-4 py-2 rounded-full border border-blue-500 text-blue-500 bg-white hover:bg-blue-50 transition-all text-sm font-medium">
                     <i class="fas fa-search"></i> Search
                 </button>
+                @if(request('search'))
+                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-1 px-4 py-2 rounded-full border border-gray-500 text-gray-500 bg-white hover:bg-gray-50 transition-all text-sm font-medium">
+                    <i class="fas fa-times"></i> Reset
+                </a>
+                @endif
             </form>
             <a href="{{ route('admin.users.create') }}" class="flex items-center gap-1 px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-all text-sm font-medium shadow">
                 <i class="fas fa-plus"></i> Add User
@@ -41,8 +46,9 @@
                         <td class="px-6 py-4 whitespace-nowrap">{{ $user->email }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                {{ $user->role == 'admin' ? 'bg-purple-100 text-purple-800' :
-                                   ($user->role == 'saler' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
+                                {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                                   ($user->role === 'content' ? 'bg-yellow-100 text-yellow-800' :
+                                      ($user->role === 'saler' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800')) }}">
                                 {{ ucfirst($user->role) }}
                             </span>
                         </td>
@@ -85,19 +91,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.querySelector('input[name="search"]');
-        const searchForm = searchInput.closest('form');
-        let lastValue = searchInput.value;
-        searchInput.addEventListener('input', function () {
-            if (this.value === '' && lastValue !== '') {
-                window.location.href = searchForm.action;
-            }
-            lastValue = this.value;
-        });
-    });
-</script>
-@endpush

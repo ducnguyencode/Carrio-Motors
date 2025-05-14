@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -24,15 +22,15 @@
                             <h2 class="fw-bold mb-1">Welcome back</h2>
                             <p class="text-muted mb-4">Sign in to your account</p>
 
-                            @if (session('error'))
+                            <?php if(session('error')): ?>
                                 <div class="alert alert-danger mb-4">
                                     <strong>Error!</strong>
-                                    <p class="mb-0">{{ session('error') }}</p>
+                                    <p class="mb-0"><?php echo e(session('error')); ?></p>
                                 </div>
-                            @endif
+                            <?php endif; ?>
 
-                            <form method="POST" action="{{ url('/login') }}">
-                                @csrf
+                            <form method="POST" action="<?php echo e(url('/login')); ?>">
+                                <?php echo csrf_field(); ?>
 
                                 <div class="mb-3">
                                     <label for="username" class="form-label">Username</label>
@@ -40,11 +38,25 @@
                                         <span class="input-group-text bg-white">
                                             <i class="fas fa-user text-muted"></i>
                                         </span>
-                                        <input id="username" name="username" type="text" class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}" required placeholder="Enter your username">
+                                        <input id="username" name="username" type="text" class="form-control <?php $__errorArgs = ['username'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('username')); ?>" required placeholder="Enter your username">
                                     </div>
-                                    @error('username')
-                                        <div class="text-danger mt-1 small">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['username'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="text-danger mt-1 small"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <div class="mb-3">
@@ -53,24 +65,38 @@
                                         <span class="input-group-text bg-white">
                                             <i class="fas fa-lock text-muted"></i>
                                         </span>
-                                        <input id="password" name="password" type="password" class="form-control @error('password') is-invalid @enderror" required placeholder="Enter your password">
+                                        <input id="password" name="password" type="password" class="form-control <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required placeholder="Enter your password">
                                         <span class="input-group-text bg-white" style="border-left: 0;" id="togglePassword">
                                             <i class="fas fa-eye-slash text-muted" id="toggleIcon"></i>
                                         </span>
                                     </div>
-                                    @error('password')
-                                        <div class="text-danger mt-1 small">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="text-danger mt-1 small"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <div class="d-flex justify-content-between mb-4">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                        <input class="form-check-input" type="checkbox" name="remember" id="remember" <?php echo e(old('remember') ? 'checked' : ''); ?>>
                                         <label class="form-check-label" for="remember">
                                             Remember me
                                         </label>
                                     </div>
-                                    <a href="{{ route('password.request') }}" class="text-decoration-none">Forgot password?</a>
+                                    <a href="<?php echo e(route('password.request')); ?>" class="text-decoration-none">Forgot password?</a>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary w-100 py-2 mb-4" style="background: linear-gradient(to right, #4f46e5, #0ea5e9); border: none;">
@@ -80,7 +106,7 @@
                                 <div class="text-center">
                                     <p class="mb-0">
                                         Don't have an account?
-                                        <a href="{{ url('/register') }}" class="text-decoration-none">Register now</a>
+                                        <a href="<?php echo e(url('/register')); ?>" class="text-decoration-none">Register now</a>
                                     </p>
                                 </div>
                             </form>
@@ -140,4 +166,6 @@
         });
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Applications/XAMPP/Carrio-Motors/resources/views/auth/login.blade.php ENDPATH**/ ?>
