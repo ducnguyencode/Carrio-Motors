@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 class CheckRole
 {
@@ -17,19 +19,43 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles)
     {
-        // Check if the user is authenticated
+        // Check if user is logged in
         if (!$request->user()) {
-            return redirect()->route('login');
+            return redirect('/login')->with('error', 'Please login to access this page');
         }
-
-        // Check if the user has an appropriate role
+        
+        // Get user's role
+        $userRole = $request->user()->role;
+        
+        // Process the input roles to handle both direct parameters and comma-separated strings
+        $allowedRoles = [];
+        
+        // Handle roles passed as multiple parameters or a single comma-separated string
         foreach ($roles as $role) {
-            if ($request->user()->role === $role) {
-                return $next($request);
+            if (str_contains($role, ',')) {
+                // Split comma-separated roles and add each to allowed roles
+                foreach (explode(',', $role) as $splitRole) {
+                    $allowedRoles[] = trim($splitRole);
+                }
+            } else {
+                $allowedRoles[] = trim($role);
             }
         }
-
-        // If the user doesn't have an appropriate role, return a 403 error
-        abort(403, 'You do not have permission to access this page.');
+        
+        // Log the check for debugging purposes
+        Log::debug('Role check', [
+            'user_role' => $userRole,
+            'allowed_roles' => $allowedRoles,
+            'url' => $request->url(),
+            'route_name' => $request->route() ? $request->route()->getName() : 'unknown'
+        ]);
+        
+        // If user's role is in the allowed roles, allow access
+        if (in_array($userRole, $allowedRoles)) {
+            return $next($request);
+        }
+        
+        // If using a menu item that's not allowed, redirect to dashboard with message
+        return redirect('/dashboard')->with('error', "Access denied. Your role '{$userRole}' does not have permission for this page.");
     }
 }

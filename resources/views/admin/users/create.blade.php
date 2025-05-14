@@ -67,7 +67,13 @@
                 <label for="role" class="block text-sm font-semibold text-gray-700 mb-1">Role <span class="text-red-500">*</span></label>
                 <select name="role" id="role" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('role') border-red-500 @enderror" required>
                     <option value="">Select Role</option>
+                    @php
+                        $adminExists = \App\Models\User::where('role', 'admin')->count() > 0;
+                    @endphp
+                    @if(!$adminExists)
                     <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    @endif
+                    <option value="content" {{ old('role') == 'content' ? 'selected' : '' }}>Content</option>
                     <option value="saler" {{ old('role') == 'saler' ? 'selected' : '' }}>Saler</option>
                     <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
                 </select>

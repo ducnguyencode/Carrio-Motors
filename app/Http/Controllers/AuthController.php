@@ -18,6 +18,10 @@ class AuthController extends Controller
     {
         // Redirect if user is already logged in
         if (Auth::check()) {
+            $role = Auth::user()->role;
+            if ($role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
             return redirect('/dashboard');
         }
 
@@ -34,10 +38,19 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
             $role = Auth::user()->role;
+
+            // Log the login activity
+            \App\Services\ActivityLogService::log(
+                'login',
+                'auth',
+                Auth::id(),
+                ['role' => $role]
+            );
+
             if ($role === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
             }
-            // For both 'saler' and 'user', redirect to /dashboard
+            // For 'content', 'saler' and 'user' roles, redirect to /dashboard
             return redirect()->intended('/dashboard')->with('success', 'Login successful!');
         }
 
@@ -108,6 +121,16 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        // Log the logout activity
+        if (Auth::check()) {
+            \App\Services\ActivityLogService::log(
+                'logout',
+                'auth',
+                Auth::id(),
+                ['role' => Auth::user()->role]
+            );
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();

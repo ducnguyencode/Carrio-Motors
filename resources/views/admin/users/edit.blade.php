@@ -52,8 +52,11 @@
             </div>
             <!-- Password -->
             <div class="relative">
-                <label for="password" class="absolute left-4 top-2 text-gray-400 pointer-events-none transition-all duration-200"> <i class="fas fa-lock mr-1"></i> Password <span class="text-gray-400">(leave blank to keep current)</span></label>
+                <label for="password" class="absolute left-4 top-2 text-gray-400 pointer-events-none transition-all duration-200"> <i class="fas fa-lock mr-1"></i> Password</label>
                 <input type="password" name="password" id="password" class="w-full pt-7 pb-2 px-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base bg-gray-50 shadow-sm @error('password') border-red-500 @enderror" autocomplete="off">
+                <div class="flex">
+                    <span class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Leave blank to keep current password</span>
+                </div>
                 @error('password')
                     <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror
@@ -66,12 +69,25 @@
             <!-- Role -->
             <div class="relative">
                 <label for="role" class="absolute left-4 top-2 text-gray-400 pointer-events-none transition-all duration-200"> <i class="fas fa-user-tag mr-1"></i> Role *</label>
-                <select name="role" id="role" class="w-full pt-7 pb-2 px-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base bg-gray-50 shadow-sm @error('role') border-red-500 @enderror" required>
-                    <option value="">Select Role</option>
-                    <option value="admin" {{ (old('role', $user->role) == 'admin') ? 'selected' : '' }}>Admin</option>
-                    <option value="saler" {{ (old('role', $user->role) == 'saler') ? 'selected' : '' }}>Saler</option>
-                    <option value="user" {{ (old('role', $user->role) == 'user') ? 'selected' : '' }}>User</option>
-                </select>
+                @php
+                    $adminExists = \App\Models\User::where('role', 'admin')->count() > 0;
+                    $isOnlyAdmin = $user->role === 'admin' && $adminExists;
+                @endphp
+                @if($isOnlyAdmin)
+                    <input type="hidden" name="role" value="admin">
+                    <input type="text" class="w-full pt-7 pb-2 px-4 rounded-xl border border-gray-300 bg-gray-100 text-base shadow-sm cursor-not-allowed" value="Admin" readonly disabled>
+                    <p class="mt-1 text-xs text-gray-500"><i class="fas fa-info-circle"></i> This is the only admin account and cannot be changed to another role.</p>
+                @else
+                    <select name="role" id="role" class="w-full pt-7 pb-2 px-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base bg-gray-50 shadow-sm @error('role') border-red-500 @enderror" required>
+                        <option value="">Select Role</option>
+                        @if($user->role == 'admin' || !$adminExists)
+                        <option value="admin" {{ (old('role', $user->role) == 'admin') ? 'selected' : '' }}>Admin</option>
+                        @endif
+                        <option value="content" {{ (old('role', $user->role) == 'content') ? 'selected' : '' }}>Content</option>
+                        <option value="saler" {{ (old('role', $user->role) == 'saler') ? 'selected' : '' }}>Saler</option>
+                        <option value="user" {{ (old('role', $user->role) == 'user') ? 'selected' : '' }}>User</option>
+                    </select>
+                @endif
                 @error('role')
                     <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror
