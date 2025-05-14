@@ -7,14 +7,40 @@ use Illuminate\Http\Request;
 use App\Models\CarModel;
 use App\Models\Make;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ModelController extends Controller
 {
+    public function __construct()
+    {
+        // Đảm bảo người dùng đã đăng nhập
+        $this->middleware('auth');
+
+        // Log access attempt for debugging
+        Log::debug('ModelController accessed', [
+            'user' => Auth::check() ? Auth::user()->username : 'Guest',
+            'role' => Auth::check() ? Auth::user()->role : 'None',
+            'action' => 'constructor'
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        // More detailed logging
+        Log::debug('ModelController index method accessed', [
+            'user' => Auth::check() ? Auth::user()->username : 'Guest',
+            'role' => Auth::check() ? Auth::user()->role : 'None'
+        ]);
+
+        // Check the role specifically (for debugging)
+        if (Auth::check() && Auth::user()->role === 'content') {
+            Log::debug('Content user has correct role for this method');
+        }
+
         $models = CarModel::with('make')->paginate(10);
         return view('admin.models.index', compact('models'));
     }

@@ -105,6 +105,16 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+    
+    /**
+     * Check if user has the content role
+     *
+     * @return bool
+     */
+    public function isContent(): bool
+    {
+        return $this->role === 'content';
+    }
 
     /**
      * Check if user has the specified role

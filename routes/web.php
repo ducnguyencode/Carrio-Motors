@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\ActivityLogController;
 
 // Public routes
 Route::get('/', function () {
@@ -50,31 +51,39 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 // Admin redirect route
 Route::redirect('/admin', '/admin/dashboard');
 
-// Admin routes
-Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+// Admin dashboard accessible to all admin roles
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'role:admin,content,saler'])
+    ->name('admin.dashboard');
 
-    // Admin only routes
-    Route::middleware(['role:admin'])->group(function () {
-        Route::resource('users', AdminUserController::class);
-        Route::resource('makes', MakeController::class);
-        Route::resource('models', ModelController::class);
-        Route::resource('engines', EngineController::class);
-        Route::resource('car_colors', CarColorController::class);
-    });
+// Admin only routes
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', AdminUserController::class);
+    Route::resource('invoices', AdminInvoiceController::class);
+    // Admin-only destroy actions
+    Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
+    Route::delete('/car_details/{car_detail}', [CarDetailController::class, 'destroy'])->name('car_details.destroy');
+});
 
-    // Routes accessible by both Admin and Saler
-    Route::resource('cars', CarController::class)->except(['destroy']);
-    Route::resource('car_details', CarDetailController::class)->except(['destroy']);
+// Admin and Content accessible routes (content management)
+Route::middleware(['auth', 'role:admin,content,saler'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('makes', MakeController::class);
+    Route::resource('models', ModelController::class);
+    Route::resource('engines', EngineController::class);
+    Route::resource('car_colors', CarColorController::class);
     Route::resource('banners', BannerController::class);
+    Route::resource('car_details', CarDetailController::class)->except(['destroy']);
+});
+
+// Saler & Admin accessible routes
+Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('invoices', AdminInvoiceController::class);
     Route::put('/invoices/{id}/status', [AdminInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
+});
 
-    // Admin-only destroy routes
-    Route::middleware(['role:admin'])->group(function () {
-        Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
-        Route::delete('/car_details/{car_detail}', [CarDetailController::class, 'destroy'])->name('car_details.destroy');
-    });
+// Cars routes accessible to all admin roles
+Route::middleware(['auth', 'role:admin,content,saler'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('cars', CarController::class)->except(['destroy']);
 });
 
 // Email Verification Routes
@@ -94,3 +103,9 @@ Route::post('/email/verification-notification', function (Request $request) {
 
 // User dashboard (for normal users)
 Route::get('/dashboard', [UserDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+
+// Activity Logs (Admin only)
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
+});
