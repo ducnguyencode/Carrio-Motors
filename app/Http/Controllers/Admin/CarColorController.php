@@ -107,7 +107,7 @@ class CarColorController extends Controller
         if ($request->hasFile('image')) {
             // Xóa ảnh cũ nếu có
             if ($carColor->image) {
-                \Storage::disk('public')->delete($carColor->image);
+                Storage::disk('public')->delete($carColor->image);
             }
 
             $imagePath = $request->file('image')->store('car_colors', 'public');
@@ -136,7 +136,7 @@ class CarColorController extends Controller
 
         // Xóa ảnh nếu có
         if ($carColor->image) {
-            \Storage::disk('public')->delete($carColor->image);
+            Storage::disk('public')->delete($carColor->image);
         }
 
         $carColor->delete();
