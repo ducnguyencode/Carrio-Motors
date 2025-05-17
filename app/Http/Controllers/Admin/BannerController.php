@@ -183,6 +183,16 @@ class BannerController extends Controller
             $banner = Banner::create($data);
             Log::info('Banner created successfully', ['banner_id' => $banner->id]);
 
+            // Log the activity
+            \App\Services\ActivityLogService::log(
+                'create',
+                'banners',
+                $banner->id,
+                [
+                    'title' => $banner->title
+                ]
+            );
+
             return redirect()->route('admin.banners.index')
                 ->with('success', 'Banner created successfully');
 
@@ -315,7 +325,21 @@ class BannerController extends Controller
         }
         // If video_type is 'keep', we don't update the video_url field
 
+        // Store original data for logging
+        $originalData = $banner->toArray();
+
         $banner->update($data);
+
+        // Log the activity
+        \App\Services\ActivityLogService::log(
+            'update',
+            'banners',
+            $banner->id,
+            [
+                'changed_fields' => array_keys(array_diff_assoc($data, array_intersect_key($originalData, $data))),
+                'title' => $banner->title
+            ]
+        );
 
         return redirect()->route('admin.banners.index')
             ->with('success', 'Banner updated successfully');
@@ -334,7 +358,22 @@ class BannerController extends Controller
             Storage::disk('public')->delete($banner->video_url);
         }
 
+        // Store banner info before deletion for logging
+        $bannerInfo = [
+            'id' => $banner->id,
+            'title' => $banner->title,
+            'position' => $banner->position
+        ];
+
         $banner->delete();
+
+        // Log the activity
+        \App\Services\ActivityLogService::log(
+            'delete',
+            'banners',
+            $bannerInfo['id'],
+            $bannerInfo
+        );
 
         return redirect()->route('admin.banners.index')
             ->with('success', 'Banner deleted successfully');

@@ -38,8 +38,8 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 
 // Admin login routes only (no public registration)
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/admin', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/admin', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Password reset routes (admin only)
@@ -47,9 +47,6 @@ Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->n
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-
-// Admin redirect route
-Route::redirect('/admin', '/admin/dashboard');
 
 // Admin dashboard accessible to all admin roles
 Route::get('/admin/dashboard', [DashboardController::class, 'index'])
@@ -109,38 +106,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 });
-
-// Test upload route
-Route::get('/test-upload', function () {
-    return view('test-upload');
-})->name('test.upload.form');
-
-Route::post('/test-upload', function (Request $request) {
-    if ($request->hasFile('video')) {
-        $file = $request->file('video');
-        $filename = time() . '.' . $file->getClientOriginalExtension();
-
-        $result = $file->storeAs('videos', $filename, 'public');
-
-        return response()->json([
-            'success' => !empty($result),
-            'message' => !empty($result) ? 'Tải lên thành công' : 'Tải lên thất bại',
-            'file_info' => [
-                'original_name' => $file->getClientOriginalName(),
-                'size' => $file->getSize(),
-                'mime_type' => $file->getMimeType(),
-                'is_valid' => $file->isValid(),
-                'upload_error' => $file->getError(),
-                'result_path' => $result
-            ]
-        ]);
-    }
-
-    return response()->json([
-        'success' => false,
-        'message' => 'Không có file được gửi lên'
-    ]);
-})->name('test.upload');
 
 // Test PHP config
 Route::get('/php-info', function () {

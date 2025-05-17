@@ -30,10 +30,17 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $request->validate([
             'username' => 'required',
             'password' => 'required',
         ]);
+
+        // Check if input is an email or username
+        $loginField = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $credentials = [
+            $loginField => $request->username,
+            'password' => $request->password
+        ];
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
@@ -75,13 +82,24 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'phone' => 'required|string|unique:users,phone|min:10|max:15',
             'address' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[a-z]/',      // at least one lowercase letter
+                'regex:/[A-Z]/',      // at least one uppercase letter
+                'regex:/[0-9]/',      // at least one number
+                'regex:/[^A-Za-z0-9]/'// at least one special character
+            ],
         ], [
             'username.required' => 'Please enter a username',
             'username.unique' => 'Username already exists',
             'email.unique' => 'Email already in use',
             'phone.unique' => 'Phone number already in use',
             'password.confirmed' => 'Password confirmation does not match',
+            'password.min' => 'Password must be at least 8 characters',
+            'password.regex' => 'Password must include uppercase and lowercase letters, numbers and special characters',
         ]);
 
         if ($validator->fails()) {
@@ -167,7 +185,19 @@ class AuthController extends Controller
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
+            'password' => [
+                'required',
+                'min:8',
+                'confirmed',
+                'regex:/[a-z]/',      // at least one lowercase letter
+                'regex:/[A-Z]/',      // at least one uppercase letter
+                'regex:/[0-9]/',      // at least one number
+                'regex:/[^A-Za-z0-9]/'// at least one special character
+            ],
+        ], [
+            'password.min' => 'Password must be at least 8 characters',
+            'password.confirmed' => 'Password confirmation does not match',
+            'password.regex' => 'Password must include uppercase and lowercase letters, numbers and special characters',
         ]);
 
         $status = Password::reset(
@@ -184,7 +214,7 @@ class AuthController extends Controller
         );
 
         return $status === Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
+                    ? redirect('/admin')->with('status', __($status))
                     : back()->withErrors(['email' => [__($status)]]);
     }
 }
