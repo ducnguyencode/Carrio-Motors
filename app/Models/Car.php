@@ -23,10 +23,15 @@ class Car extends Model
         'isActive'
     ];
 
-    public function model() {
-        return $this->belongsTo(Model::class);
+    public function carModel() {
+        return $this->belongsTo(CarModel::class, 'model_id');
     }
+
     public function engine(){
         return $this->belongsTo(Engine::class);
+    }
+
+    public function carDetails() {
+        return $this->hasMany(CarDetail::class);
     }
 }

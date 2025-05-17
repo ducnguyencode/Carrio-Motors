@@ -1,10 +1,8 @@
-@extends('admin.layouts.app')
+<?php $__env->startSection('title', 'Dashboard'); ?>
 
-@section('title', 'Dashboard')
+<?php $__env->startSection('page-heading', 'Dashboard'); ?>
 
-@section('page-heading', 'Dashboard')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <!-- Add Chart.js from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -25,14 +23,14 @@
         display: block;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
-@if(isset($error))
+<?php $__env->startSection('content'); ?>
+<?php if(isset($error)): ?>
 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-    <span class="block sm:inline">{{ $error }}</span>
+    <span class="block sm:inline"><?php echo e($error); ?></span>
 </div>
-@endif
+<?php endif; ?>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Card 1: Total Users -->
@@ -43,7 +41,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">Users</p>
-                <p class="text-2xl font-semibold">{{ number_format($totalUsers) }}</p>
+                <p class="text-2xl font-semibold"><?php echo e(number_format($totalUsers)); ?></p>
             </div>
         </div>
     </div>
@@ -56,7 +54,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">Total Cars</p>
-                <p class="text-2xl font-semibold">{{ number_format($totalCars) }}</p>
+                <p class="text-2xl font-semibold"><?php echo e(number_format($totalCars)); ?></p>
             </div>
         </div>
     </div>
@@ -69,7 +67,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">New Orders (Today)</p>
-                <p class="text-2xl font-semibold">{{ number_format($newOrdersToday) }}</p>
+                <p class="text-2xl font-semibold"><?php echo e(number_format($newOrdersToday)); ?></p>
             </div>
         </div>
     </div>
@@ -82,7 +80,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">Monthly Revenue</p>
-                <p class="text-2xl font-semibold">${{ number_format($revenueThisMonth, 2) }}</p>
+                <p class="text-2xl font-semibold">$<?php echo e(number_format($revenueThisMonth, 2)); ?></p>
             </div>
         </div>
     </div>
@@ -92,8 +90,8 @@
     <!-- Monthly Revenue Chart -->
     <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-bold mb-2">Monthly Revenue</h2>
-        <p class="text-gray-600 mb-4">Revenue statistics for {{ date('Y') }}</p>
-        <p class="text-lg font-semibold mb-4">Total Revenue This Month: ${{ number_format($revenueThisMonth, 2) }}</p>
+        <p class="text-gray-600 mb-4">Revenue statistics for <?php echo e(date('Y')); ?></p>
+        <p class="text-lg font-semibold mb-4">Total Revenue This Month: $<?php echo e(number_format($revenueThisMonth, 2)); ?></p>
         <div class="chart-container" style="height: 300px;">
             <canvas id="revenueChart"></canvas>
         </div>
@@ -103,7 +101,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold">Recent Orders</h2>
-            <a href="{{ route('admin.invoices.index') }}" class="text-blue-500 hover:text-blue-700">View All</a>
+            <a href="<?php echo e(route('admin.invoices.index')); ?>" class="text-blue-500 hover:text-blue-700">View All</a>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full">
@@ -117,13 +115,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($recentInvoices as $invoice)
+                    <?php $__currentLoopData = $recentInvoices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $invoice): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr class="border-t">
-                        <td class="py-2">#{{ $invoice->id }}</td>
-                        <td class="py-2">{{ $invoice->customer_name }}</td>
-                        <td class="py-2">{{ $invoice->created_at->format('d/m/Y') }}</td>
+                        <td class="py-2">#<?php echo e($invoice->id); ?></td>
+                        <td class="py-2"><?php echo e($invoice->customer_name); ?></td>
+                        <td class="py-2"><?php echo e($invoice->created_at->format('d/m/Y')); ?></td>
                         <td class="py-2">
-                            @php
+                            <?php
                                 $statusColors = [
                                     'pending' => 'yellow',
                                     'processing' => 'blue',
@@ -131,22 +129,23 @@
                                     'cancelled' => 'red'
                                 ];
                                 $color = $statusColors[$invoice->status] ?? 'gray';
-                            @endphp
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-{{ $color }}-100 text-{{ $color }}-800">
-                                {{ ucfirst($invoice->status) }}
+                            ?>
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-<?php echo e($color); ?>-100 text-<?php echo e($color); ?>-800">
+                                <?php echo e(ucfirst($invoice->status)); ?>
+
                             </span>
                         </td>
-                        <td class="py-2 text-right">${{ number_format($invoice->total_price, 2) }}</td>
+                        <td class="py-2 text-right">$<?php echo e(number_format($invoice->total_price, 2)); ?></td>
                     </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chartElement = document.getElementById('revenueChart');
@@ -158,8 +157,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     try {
         const chartData = {
-            labels: {!! json_encode($chartData['labels']) !!},
-            data: {!! json_encode($chartData['data']) !!}
+            labels: <?php echo json_encode($chartData['labels']); ?>,
+            data: <?php echo json_encode($chartData['data']); ?>
+
         };
 
         new Chart(chartElement, {
@@ -209,4 +209,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Tu5k\study\php\Carrio-Motors-clone\Carrio-Motors\resources\views/admin/dashboard.blade.php ENDPATH**/ ?>

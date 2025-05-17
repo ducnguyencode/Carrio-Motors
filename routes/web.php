@@ -58,13 +58,24 @@ Route::get('/admin/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'role:admin,content,saler'])
     ->name('admin.dashboard');
 
+// Admin and Saler routes
+Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')->group(function () {
+    // Regular invoice routes
+    Route::resource('invoices', AdminInvoiceController::class);
+    Route::put('/invoices/{id}/status', [AdminInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
+});
+
 // Admin only routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Invoice trash management
+    Route::get('/invoices/trash', [AdminInvoiceController::class, 'trash'])->name('invoices.trash');
+    Route::post('/invoices/{id}/restore', [AdminInvoiceController::class, 'restore'])->name('invoices.restore');
+    Route::delete('/invoices/{id}/force-delete', [AdminInvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
+
     Route::resource('users', AdminUserController::class);
-    Route::resource('invoices', AdminInvoiceController::class);
-    // Admin-only destroy actions
-    Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
-    Route::delete('/car_details/{car_detail}', [CarDetailController::class, 'destroy'])->name('car_details.destroy');
+    Route::resource('cars', CarController::class);
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 });
 
 // Admin and Content accessible routes (content management)
@@ -75,12 +86,6 @@ Route::middleware(['auth', 'role:admin,content,saler'])->prefix('admin')->name('
     Route::resource('car_colors', CarColorController::class);
     Route::resource('banners', BannerController::class);
     Route::resource('car_details', CarDetailController::class)->except(['destroy']);
-});
-
-// Saler & Admin accessible routes
-Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('invoices', AdminInvoiceController::class);
-    Route::put('/invoices/{id}/status', [AdminInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
 });
 
 // Cars routes accessible to all admin roles
@@ -103,11 +108,7 @@ Route::post('/email/verification-notification', function (Request $request) {
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
-// User dashboard (for normal users)
-Route::get('/dashboard', [UserDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-
-// Activity Logs (Admin only)
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
-    Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
+// Authentication routes
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });

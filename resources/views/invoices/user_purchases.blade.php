@@ -38,9 +38,9 @@
                                 <td>${{ number_format($invoice->total_price, 2) }}</td>
                                 <td>
                                     <span class="badge
-                                        @if($invoice->status == 'deposit') bg-warning
-                                        @elseif($invoice->status == 'payment' || $invoice->status == 'warehouse') bg-info
-                                        @elseif($invoice->status == 'success') bg-success
+                                        @if($invoice->status == 'pending') bg-warning
+                                        @elseif($invoice->status == 'recheck') bg-info
+                                        @elseif($invoice->status == 'done') bg-success
                                         @elseif($invoice->status == 'cancel') bg-danger
                                         @else bg-secondary
                                         @endif">
