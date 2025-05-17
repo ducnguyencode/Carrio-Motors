@@ -314,6 +314,13 @@ class InvoiceController extends Controller
     public function destroy(Invoice $invoice)
     {
         try {
+            // Check if user is saler and has permission to delete this invoice
+            if (Auth::user()->role === 'saler') {
+                if ($invoice->saler_id !== Auth::id() && $invoice->user->saler_id !== Auth::id()) {
+                    return back()->with('error', 'You do not have permission to delete this invoice.');
+                }
+            }
+
             DB::beginTransaction();
 
             // Soft delete the invoice
@@ -337,6 +344,12 @@ class InvoiceController extends Controller
      */
     public function trash()
     {
+        // Ensure only admin can access trash
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('admin.invoices.index')
+                ->with('error', 'Only administrators can access the trash.');
+        }
+
         $trashedInvoices = Invoice::onlyTrashed()->paginate(10);
         return view('admin.invoices.trash', compact('trashedInvoices'));
     }
@@ -349,6 +362,12 @@ class InvoiceController extends Controller
      */
     public function restore($id)
     {
+        // Ensure only admin can restore
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('admin.invoices.index')
+                ->with('error', 'Only administrators can restore invoices.');
+        }
+
         try {
             $invoice = Invoice::onlyTrashed()->findOrFail($id);
             $invoice->restore();
@@ -369,6 +388,12 @@ class InvoiceController extends Controller
      */
     public function forceDelete($id)
     {
+        // Ensure only admin can force delete
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('admin.invoices.index')
+                ->with('error', 'Only administrators can permanently delete invoices.');
+        }
+
         try {
             DB::beginTransaction();
 

@@ -58,24 +58,24 @@ Route::get('/admin/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'role:admin,content,saler'])
     ->name('admin.dashboard');
 
-// Admin and Saler routes
-Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')->group(function () {
-    // Regular invoice routes
-    Route::resource('invoices', AdminInvoiceController::class);
-    Route::put('/invoices/{id}/status', [AdminInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
-});
-
 // Admin only routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Invoice trash management
-    Route::get('/invoices/trash', [AdminInvoiceController::class, 'trash'])->name('invoices.trash');
-    Route::post('/invoices/{id}/restore', [AdminInvoiceController::class, 'restore'])->name('invoices.restore');
-    Route::delete('/invoices/{id}/force-delete', [AdminInvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
+    Route::get('invoices/trash', [AdminInvoiceController::class, 'trash'])->name('invoices.trash');
+    Route::post('invoices/{id}/restore', [AdminInvoiceController::class, 'restore'])->name('invoices.restore');
+    Route::delete('invoices/{id}/force-delete', [AdminInvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
 
     Route::resource('users', AdminUserController::class);
     Route::resource('cars', CarController::class);
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
+});
+
+// Admin and Saler routes
+Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')->group(function () {
+    // Regular invoice routes
+    Route::resource('invoices', AdminInvoiceController::class)->except(['trash', 'restore', 'forceDelete']);
+    Route::put('/invoices/{id}/status', [AdminInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
 });
 
 // Admin and Content accessible routes (content management)
