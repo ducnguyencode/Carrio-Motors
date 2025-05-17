@@ -25,9 +25,8 @@ use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\ActivityLogController;
 
 // Public routes
-Route::get('/', function () {
-    return view('home');
-});
+Route::get('/', [PageController::class, 'home'])->name('home');
+
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/cars', [PageController::class, 'cars'])->name('cars');
 Route::get('/cars/{id}', [PageController::class, 'carDetail']);
@@ -111,3 +110,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 });
+
+// Search Bar
+Route::get('/search/cars', [PageController::class, 'search'])->name('cars.search');
+
+// Featured Car
+Route::get('/featured-cars', [PageController::class, 'featuredCars'])->name('featured.cars');
+
+// Detail
+Route::get('/cars/{id}', [PageController::class, 'carDetail'])->name('car.detail');

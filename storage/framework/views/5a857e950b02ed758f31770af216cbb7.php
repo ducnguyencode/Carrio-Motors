@@ -1,11 +1,10 @@
-@extends('layouts.app')
-
-@section('content')
-@if(session('success'))
+<?php $__env->startSection('content'); ?>
+<?php if(session('success')): ?>
     <div class="alert alert-success mt-4" role="alert">
-        {{ session('success') }}
+        <?php echo e(session('success')); ?>
+
     </div>
-@endif
+<?php endif; ?>
 
 <div class="container mt-4 relative search-container">
     <input
@@ -21,7 +20,7 @@
 <div class="video-carousel">
     <div class="carousel-slide active">
         <video class="background-video" autoplay muted loop playsinline>
-            <source src="{{ asset('videos/video1.mp4') }}" type="video/mp4">
+            <source src="<?php echo e(asset('videos/video1.mp4')); ?>" type="video/mp4">
         </video>
         <div class="carousel-content">
             <h1>Car 1</h1>
@@ -30,7 +29,7 @@
     </div>
     <div class="carousel-slide">
         <video class="background-video" autoplay muted loop playsinline>
-            <source src="{{ asset('videos/video2.mp4') }}" type="video/mp4">
+            <source src="<?php echo e(asset('videos/video2.mp4')); ?>" type="video/mp4">
         </video>
         <div class="carousel-content">
             <h1>Car 2</h1>
@@ -39,7 +38,7 @@
     </div>
     <div class="carousel-slide">
         <video class="background-video" autoplay muted loop playsinline>
-            <source src="{{ asset('videos/video3.mp4') }}" type="video/mp4">
+            <source src="<?php echo e(asset('videos/video3.mp4')); ?>" type="video/mp4">
         </video>
         <div class="carousel-content">
             <h1>Car 3</h1>
@@ -61,27 +60,27 @@
 <h2 class="text-center fw-bold mb-4">Featured Cars</h2>
 
 <div class="row g-4" id="product-list">
-    @foreach($featuredCars as $index => $car)
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-card {{ $index >= 4 ? 'd-none' : '' }}">
+    <?php $__currentLoopData = $featuredCars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $car): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-card <?php echo e($index >= 4 ? 'd-none' : ''); ?>">
             <div
                 class="card h-100 shadow-sm cursor-pointer"
-                onclick="openCarPopup(@json($car))"
+                onclick="openCarPopup(<?php echo json_encode($car, 15, 512) ?>)"
             >
-                <img src="{{ $car['image_url'] }}" class="card-img-top" alt="{{ $car['name'] }}" style="height: 180px; object-fit: cover;">
+                <img src="<?php echo e($car['image_url']); ?>" class="card-img-top" alt="<?php echo e($car['name']); ?>" style="height: 180px; object-fit: cover;">
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ $car['name'] }}</h5>
+                    <h5 class="card-title"><?php echo e($car['name']); ?></h5>
                     <div class="mb-2">
-                        <span class="text-warning fw-bold">{{ number_format($car['rating'], 1) }}</span>
+                        <span class="text-warning fw-bold"><?php echo e(number_format($car['rating'], 1)); ?></span>
                         <span class="text-warning">⭐</span>
-                        <small class="text-muted">({{ $car['reviews'] }} reviews)</small>
+                        <small class="text-muted">(<?php echo e($car['reviews']); ?> reviews)</small>
                     </div>
-                    @if($car['is_best_seller'])
+                    <?php if($car['is_best_seller']): ?>
                         <span class="badge bg-success mb-2">Best Seller</span>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
 
 <div class="text-center mt-4">
@@ -97,7 +96,7 @@
     });
 </script>
 
-{{-- Modal popup --}}
+
 <div id="carModal" class="modal fade" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
@@ -123,9 +122,9 @@
   </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     function openCarPopup(car) {
         document.getElementById('carName').innerText = car.name;
@@ -147,4 +146,6 @@
         bootstrap.Modal.getInstance(document.getElementById('carModal')).hide();
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\521H0251_NguyenVanKhoa\Aptech\Project_T1\New folder\Carrio-Motors\resources\views/home.blade.php ENDPATH**/ ?>
