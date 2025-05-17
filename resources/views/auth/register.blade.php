@@ -106,6 +106,9 @@
                                                 <i class="fas fa-lock text-muted"></i>
                                             </span>
                                             <input id="password" name="password" type="password" class="form-control @error('password') is-invalid @enderror" required placeholder="Create a password">
+                                            <span class="input-group-text bg-white" style="border-left: 0;" id="togglePassword">
+                                                <i class="fas fa-eye-slash text-muted" id="toggleIcon"></i>
+                                            </span>
                                         </div>
                                         @error('password')
                                             <div class="text-danger mt-1 small">{{ $message }}</div>
@@ -123,7 +126,17 @@
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary w-100 py-2 mb-4" style="background: linear-gradient(to right, #4f46e5, #0ea5e9); border: none;">
+                                <div class="mb-4 p-3 bg-light rounded-3 border-start border-primary border-4">
+                                    <h6 class="mb-2 fw-bold"><i class="fas fa-shield-alt me-2"></i>Password Requirements</h6>
+                                    <ul class="password-requirements mb-0 ps-3 small" id="requirements">
+                                        <li id="length-check" class="text-muted"><i class="fas fa-times-circle me-1"></i> At least 8 characters long</li>
+                                        <li id="case-check" class="text-muted"><i class="fas fa-times-circle me-1"></i> Include uppercase and lowercase letters</li>
+                                        <li id="number-check" class="text-muted"><i class="fas fa-times-circle me-1"></i> Include at least one number</li>
+                                        <li id="special-check" class="text-muted"><i class="fas fa-times-circle me-1"></i> Include at least one special character</li>
+                                    </ul>
+                                </div>
+
+                                <button type="submit" id="registerButton" class="btn btn-primary w-100 py-2 mb-4" style="background: linear-gradient(to right, #4f46e5, #0ea5e9); border: none;" disabled>
                                     Create Account
                                 </button>
 
@@ -179,5 +192,116 @@
         box-shadow: none;
         border-color: #ced4da;
     }
+
+    .password-requirements li.valid {
+        color: #198754 !important;
+    }
+
+    .password-requirements li.valid i {
+        color: #198754 !important;
+    }
+
+    .password-requirements li.invalid {
+        color: #dc3545 !important;
+    }
+
+    .password-requirements li.invalid i {
+        color: #dc3545 !important;
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('password_confirmation');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const registerButton = document.getElementById('registerButton');
+        const lengthCheck = document.getElementById('length-check');
+        const caseCheck = document.getElementById('case-check');
+        const numberCheck = document.getElementById('number-check');
+        const specialCheck = document.getElementById('special-check');
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            if (type === 'password') {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+
+        // Password validation
+        function validatePassword() {
+            const password = passwordInput.value;
+
+            // Check length
+            const lengthValid = password.length >= 8;
+            updateRequirement(lengthCheck, lengthValid);
+
+            // Check for uppercase and lowercase
+            const caseValid = /[a-z]/.test(password) && /[A-Z]/.test(password);
+            updateRequirement(caseCheck, caseValid);
+
+            // Check for numbers
+            const numberValid = /[0-9]/.test(password);
+            updateRequirement(numberCheck, numberValid);
+
+            // Check for special characters
+            const specialValid = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            updateRequirement(specialCheck, specialValid);
+
+            // Enable/disable button based on all requirements and matching passwords
+            const allValid = lengthValid && caseValid && numberValid && specialValid;
+            const passwordsMatch = password === confirmPasswordInput.value && password !== '';
+
+            registerButton.disabled = !(allValid && passwordsMatch);
+        }
+
+        function updateRequirement(element, isValid) {
+            if (isValid) {
+                element.classList.remove('invalid', 'text-muted');
+                element.classList.add('valid');
+                element.querySelector('i').classList.remove('fa-times-circle');
+                element.querySelector('i').classList.add('fa-check-circle');
+            } else {
+                element.classList.remove('valid', 'text-muted');
+                element.classList.add('invalid');
+                element.querySelector('i').classList.remove('fa-check-circle');
+                element.querySelector('i').classList.add('fa-times-circle');
+            }
+        }
+
+        // Check password match
+        function checkPasswordMatch() {
+            if (confirmPasswordInput.value === '') {
+                return;
+            }
+
+            if (passwordInput.value === confirmPasswordInput.value) {
+                confirmPasswordInput.classList.remove('is-invalid');
+                confirmPasswordInput.classList.add('is-valid');
+            } else {
+                confirmPasswordInput.classList.remove('is-valid');
+                confirmPasswordInput.classList.add('is-invalid');
+            }
+
+            validatePassword();
+        }
+
+        // Add event listeners
+        passwordInput.addEventListener('keyup', validatePassword);
+        passwordInput.addEventListener('change', validatePassword);
+        confirmPasswordInput.addEventListener('keyup', checkPasswordMatch);
+        confirmPasswordInput.addEventListener('change', checkPasswordMatch);
+
+        // Initial validation
+        validatePassword();
+    });
+</script>
 @endsection

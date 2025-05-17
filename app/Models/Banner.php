@@ -16,8 +16,11 @@ class Banner extends Model
      */
     protected $fillable = [
         'video_url',
+        'title',
         'main_content',
         'car_id',
+        'click_url',
+        'position',
         'is_active',
     ];
 

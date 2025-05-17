@@ -3,6 +3,18 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
+/**
+ * Laravel - A PHP Framework For Web Artisans
+ *
+ * @package  Laravel
+ * @author   Taylor Otwell <taylor@laravel.com>
+ */
+
+// Display all PHP errors for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 define('LARAVEL_START', microtime(true));
 
 // Determine if the application is in maintenance mode...
