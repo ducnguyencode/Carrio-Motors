@@ -165,7 +165,7 @@
 
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/dashboard') ? 'active' : ''); ?>" href="<?php echo e(route('admin.dashboard')); ?>">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
             </li>
@@ -174,7 +174,7 @@
 
             <div class="nav-header">User Management</div>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/users*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.users.index')); ?>">
                     <i class="fas fa-users"></i> Users
                 </a>
             </li>
@@ -183,22 +183,22 @@
 
             <div class="nav-header">Vehicle Management</div>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/cars*') ? 'active' : '' }}" href="{{ route('admin.cars.index') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/cars*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.cars.index')); ?>">
                     <i class="fas fa-car"></i> Cars
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/models*') ? 'active' : '' }}" href="{{ route('admin.models.index') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/models*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.models.index')); ?>">
                     <i class="fas fa-tags"></i> Models
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/makes*') ? 'active' : '' }}" href="{{ route('admin.makes.index') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/makes*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.makes.index')); ?>">
                     <i class="fas fa-industry"></i> Manufacturers
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/engines*') ? 'active' : '' }}" href="{{ route('admin.engines.index') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/engines*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.engines.index')); ?>">
                     <i class="fas fa-cogs"></i> Engines
                 </a>
             </li>
@@ -207,7 +207,7 @@
 
             <div class="nav-header">Marketing</div>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/banners*') ? 'active' : '' }}" href="{{ route('admin.banners.index') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/banners*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.banners.index')); ?>">
                     <i class="fas fa-image"></i> Banners
                 </a>
             </li>
@@ -216,7 +216,7 @@
 
             <div class="nav-header">Sales</div>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin/invoices*') ? 'active' : '' }}" href="{{ route('admin.invoices.index') }}">
+                <a class="nav-link <?php echo e(request()->is('admin/invoices*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.invoices.index')); ?>">
                     <i class="fas fa-file-invoice-dollar"></i> Invoices
                 </a>
             </li>
@@ -229,13 +229,13 @@
             <div class="nav-divider"></div>
 
             <li class="nav-item mt-3">
-                <a class="nav-link" href="{{ url('/') }}" target="_blank">
+                <a class="nav-link" href="<?php echo e(url('/')); ?>" target="_blank">
                     <i class="fas fa-external-link-alt"></i> View Website
                 </a>
             </li>
             <li class="nav-item">
-                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                    @csrf
+                <form action="<?php echo e(route('logout')); ?>" method="POST" class="d-inline">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="nav-link btn btn-link text-left w-100" style="background: none; border: none;">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
@@ -257,19 +257,19 @@
             <div>
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <span class="mr-2 d-none d-lg-inline text-gray-600">{{ Auth::user()->fullname }}</span>
+                        <span class="mr-2 d-none d-lg-inline text-gray-600"><?php echo e(Auth::user()->fullname); ?></span>
                         <div class="d-inline-block bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                            <span class="text-white fw-bold">{{ substr(Auth::user()->fullname, 0, 1) }}</span>
+                            <span class="text-white fw-bold"><?php echo e(substr(Auth::user()->fullname, 0, 1)); ?></span>
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in">
-                        <a class="dropdown-item" href="{{ route('admin.users.show', Auth::id()) }}">
+                        <a class="dropdown-item" href="<?php echo e(route('admin.users.show', Auth::id())); ?>">
                             <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                             Profile
                         </a>
                         <div class="dropdown-divider"></div>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
+                        <form action="<?php echo e(route('logout')); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <button type="submit" class="dropdown-item">
                                 <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Logout
@@ -280,22 +280,24 @@
             </div>
         </div>
 
-        @if(session('success'))
+        <?php if(session('success')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+                <?php echo e(session('success')); ?>
 
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        @endif
+        <?php endif; ?>
+
+        <?php if(session('error')): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo e(session('error')); ?>
+
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
 
         <!-- Page Content -->
-        @yield('content')
+        <?php echo $__env->yieldContent('content'); ?>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -308,3 +310,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH C:\Users\Tu5k\study\php\Carrio-Motors-clone\Carrio-Motors\resources\views/layouts/admin.blade.php ENDPATH**/ ?>

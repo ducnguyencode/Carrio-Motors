@@ -40,8 +40,15 @@ class RoleMiddleware
             return $next($request);
         }
 
-        // Allow saler role to access invoices management routes
+        // Allow saler role to access basic invoice management routes only
         if ($user->role === 'saler' && strpos($currentUrl, 'admin/invoices') === 0) {
+            // Block access to trash, restore, and force-delete routes
+            if (strpos($currentUrl, 'admin/invoices/trash') === 0 ||
+                strpos($currentUrl, 'admin/invoices/restore') !== false ||
+                strpos($currentUrl, 'admin/invoices/force-delete') !== false) {
+                return redirect()->route('admin.invoices.index')
+                    ->with('error', 'Only administrators can access the trash.');
+            }
             return $next($request);
         }
 
@@ -71,7 +78,11 @@ class RoleMiddleware
 
         // Prevent redirect loops - check if we're already on a dashboard page
         if ($currentUrl === 'admin/dashboard' || $currentUrl === 'dashboard') {
-            // We're already on a dashboard, just display an error message
+            // Redirect non-admin users to their appropriate dashboard
+            if ($user->role === 'content' || $user->role === 'saler') {
+                return redirect('/dashboard')->with('error', "Access denied. Please use the regular dashboard.");
+            }
+            // For other roles or if redirect not applicable, show error
             abort(403, "Access denied. Your role '{$user->role}' does not have permission for this page. Required roles: " . implode(', ', $allowedRoles));
         }
 

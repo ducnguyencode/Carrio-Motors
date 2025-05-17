@@ -1,0 +1,124 @@
+/* General */
+body {
+    background-color: #f8f9fa;
+}
+
+/* Navbar */
+.navbar-brand i {
+    margin-right: 0.5rem;
+}
+
+.nav-link i {
+    margin-right: 0.5rem;
+}
+
+/* Cards */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Tables */
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Buttons */
+.btn-group > .btn {
+    margin-right: 0.25rem;
+}
+
+.btn i {
+    margin-right: 0.25rem;
+}
+
+/* Forms */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Alerts */
+.alert {
+    margin-bottom: 1rem;
+}
+
+/* Badges */
+.badge {
+    font-size: 85%;
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Pagination */
+.pagination {
+    margin-bottom: 0;
+}
+
+/* Dropdown menus */
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #007bff;
+}
+
+/* Custom styles for invoice status badges */
+.badge.bg-warning {
+    color: #000;
+}
+
+.badge.bg-info {
+    color: #fff;
+}
+
+.badge.bg-success {
+    color: #fff;
+}
+
+.badge.bg-danger {
+    color: #fff;
+}
+
+/* Search form */
+.search-form {
+    margin-bottom: 1rem;
+}
+
+/* Table responsive */
+.table-responsive {
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+/* Action buttons */
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+/* Customer info in table */
+td strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+td small {
+    display: block;
+    color: #6c757d;
+}
+
+td small i {
+    margin-right: 0.25rem;
+    width: 16px;
+}
