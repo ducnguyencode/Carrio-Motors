@@ -25,9 +25,7 @@ use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\ActivityLogController;
 
 // Public routes
-Route::get('/', function () {
-    return view('home');
-});
+Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/cars', [PageController::class, 'cars'])->name('cars');
 Route::get('/cars/{id}', [PageController::class, 'carDetail']);
@@ -111,3 +109,48 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 });
+
+// Test upload route
+Route::get('/test-upload', function () {
+    return view('test-upload');
+})->name('test.upload.form');
+
+Route::post('/test-upload', function (Request $request) {
+    if ($request->hasFile('video')) {
+        $file = $request->file('video');
+        $filename = time() . '.' . $file->getClientOriginalExtension();
+
+        $result = $file->storeAs('videos', $filename, 'public');
+
+        return response()->json([
+            'success' => !empty($result),
+            'message' => !empty($result) ? 'Tải lên thành công' : 'Tải lên thất bại',
+            'file_info' => [
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+                'is_valid' => $file->isValid(),
+                'upload_error' => $file->getError(),
+                'result_path' => $result
+            ]
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Không có file được gửi lên'
+    ]);
+})->name('test.upload');
+
+// Test PHP config
+Route::get('/php-info', function () {
+    return response()->json([
+        'upload_max_filesize' => ini_get('upload_max_filesize'),
+        'post_max_size' => ini_get('post_max_size'),
+        'memory_limit' => ini_get('memory_limit'),
+        'max_execution_time' => ini_get('max_execution_time'),
+        'max_input_time' => ini_get('max_input_time'),
+        'file_uploads' => ini_get('file_uploads'),
+        'max_file_uploads' => ini_get('max_file_uploads'),
+    ]);
+})->name('php.info');

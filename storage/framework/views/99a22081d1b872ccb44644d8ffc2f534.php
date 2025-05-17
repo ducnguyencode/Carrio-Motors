@@ -17,8 +17,11 @@
         <!-- Sidebar -->
         <div class="hidden md:flex md:flex-shrink-0">
             <div class="flex flex-col w-64 bg-gray-800">
-                <div class="flex items-center h-16 px-4 bg-gray-900">
+                <div class="flex items-center justify-between h-16 px-4 bg-gray-900">
                     <div class="text-xl font-bold text-white">Carrio Motors</div>
+                    <a href="<?php echo e(url('/')); ?>" class="text-white hover:text-blue-300" title="Visit Home Page" target="_blank">
+                        <i class="fas fa-home text-lg"></i>
+                    </a>
                 </div>
                 <div class="flex flex-col flex-grow overflow-y-auto">
                     <nav class="flex-1 px-2 py-4 space-y-1">

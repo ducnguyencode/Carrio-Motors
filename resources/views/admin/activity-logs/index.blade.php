@@ -7,11 +7,11 @@
 @section('content')
 <div class="bg-white rounded-lg shadow-md p-6">
     <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4">Filter Logs</h2>
+        <h2 class="text-lg font-semibold mb-4">Filter Logs</h2>
         <form action="{{ route('activity-logs.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label for="user_id" class="block text-sm font-medium text-gray-700 mb-1">User</label>
-                <select name="user_id" id="user_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <label for="user_id" class="block text-sm font-semibold text-gray-700 mb-1">User</label>
+                <select name="user_id" id="user_id" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
                     <option value="">All Users</option>
                     @foreach($users as $id => $name)
                         <option value="{{ $id }}" {{ request('user_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
@@ -20,8 +20,8 @@
             </div>
 
             <div>
-                <label for="action" class="block text-sm font-medium text-gray-700 mb-1">Action</label>
-                <select name="action" id="action" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <label for="action" class="block text-sm font-semibold text-gray-700 mb-1">Action</label>
+                <select name="action" id="action" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
                     <option value="">All Actions</option>
                     @foreach($actions as $action)
                         <option value="{{ $action }}" {{ request('action') == $action ? 'selected' : '' }}>{{ ucfirst($action) }}</option>
@@ -30,8 +30,8 @@
             </div>
 
             <div>
-                <label for="module" class="block text-sm font-medium text-gray-700 mb-1">Module</label>
-                <select name="module" id="module" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <label for="module" class="block text-sm font-semibold text-gray-700 mb-1">Module</label>
+                <select name="module" id="module" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
                     <option value="">All Modules</option>
                     @foreach($modules as $module)
                         <option value="{{ $module }}" {{ request('module') == $module ? 'selected' : '' }}>{{ ucfirst($module) }}</option>
@@ -40,20 +40,20 @@
             </div>
 
             <div>
-                <label for="date_range" class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                <label for="date_range" class="block text-sm font-semibold text-gray-700 mb-1">Date Range</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
+                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
                 </div>
             </div>
 
-            <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Filter
-                </button>
-                <a href="{{ route('activity-logs.index') }}" class="ml-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+            <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end space-x-2">
+                <a href="{{ route('activity-logs.index') }}" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition">
                     Reset
                 </a>
+                <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow transition">
+                    Apply Filters
+                </button>
             </div>
         </form>
     </div>
@@ -93,14 +93,14 @@
                             {{ ucfirst($log->module) }}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('activity-logs.show', $log) }}" class="text-indigo-600 hover:text-indigo-900">
-                                View Details
+                            <a href="{{ route('activity-logs.show', $log) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200" title="View Details">
+                                <i class="fas fa-eye"></i>
                             </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-center">No activity logs found</td>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">No activity logs found</td>
                     </tr>
                 @endforelse
             </tbody>

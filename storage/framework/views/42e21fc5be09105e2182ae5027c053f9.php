@@ -1,10 +1,8 @@
-@extends('admin.layouts.app')
+<?php $__env->startSection('title', 'Edit Banner'); ?>
 
-@section('title', 'Edit Banner')
+<?php $__env->startSection('page-heading', 'Edit Banner'); ?>
 
-@section('page-heading', 'Edit Banner')
-
-@section('styles')
+<?php $__env->startSection('styles'); ?>
 <style>
     :root {
         --primary-color: #4f46e5;
@@ -405,15 +403,15 @@
         padding: 0;
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="bg-white rounded-lg shadow-md p-8 max-w-5xl mx-auto">
-    <form action="{{ route('admin.banners.update', $banner->id) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
-        @csrf
-        @method('PUT')
+    <form action="<?php echo e(route('admin.banners.update', $banner->id)); ?>" method="POST" enctype="multipart/form-data" class="space-y-8">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
 
-        @if (session('error'))
+        <?php if(session('error')): ?>
         <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -422,13 +420,13 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm text-red-700">{{ session('error') }}</p>
+                    <p class="text-sm text-red-700"><?php echo e(session('error')); ?></p>
                 </div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
 
-        @if (session('success'))
+        <?php if(session('success')): ?>
         <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -437,13 +435,13 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm text-green-700">{{ session('success') }}</p>
+                    <p class="text-sm text-green-700"><?php echo e(session('success')); ?></p>
                 </div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
 
-        @if ($errors->any())
+        <?php if($errors->any()): ?>
         <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
             <div class="flex">
                 <div class="flex-shrink-0">
@@ -454,14 +452,14 @@
                 <div class="ml-3">
                     <h3 class="text-sm font-medium text-red-700">Please check the following errors:</h3>
                     <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
+                        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <li><?php echo e($error); ?></li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>
                 </div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Banner Content Section -->
         <div>
@@ -474,19 +472,47 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="title" class="block text-sm font-semibold text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
-                    <input type="text" id="title" name="title" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('title') border-red-500 @enderror" value="{{ old('title', $banner->title) }}" placeholder="e.g. Luxury Sports Car">
-                    @error('title')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <input type="text" id="title" name="title" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base <?php $__errorArgs = ['title'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('title', $banner->title)); ?>" placeholder="e.g. Luxury Sports Car">
+                    <?php $__errorArgs = ['title'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <div>
                     <label for="main_content" class="block text-sm font-semibold text-gray-700 mb-1">Main Content <span class="text-red-500">*</span></label>
-                    <textarea id="main_content" name="main_content" rows="2" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('main_content') border-red-500 @enderror" placeholder="e.g. Experience the thrill of driving perfection">{{ old('main_content', $banner->main_content) }}</textarea>
+                    <textarea id="main_content" name="main_content" rows="2" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base <?php $__errorArgs = ['main_content'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" placeholder="e.g. Experience the thrill of driving perfection"><?php echo e(old('main_content', $banner->main_content)); ?></textarea>
                     <p class="mt-1 text-sm text-gray-500">This text appears under the title in the banner slideshow</p>
-                    @error('main_content')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['main_content'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
             </div>
         </div>
@@ -502,36 +528,78 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="position" class="block text-sm font-semibold text-gray-700 mb-1">Display Position</label>
-                    <input type="number" id="position" name="position" min="0" step="1" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('position') border-red-500 @enderror" value="{{ old('position', $banner->position) }}">
+                    <input type="number" id="position" name="position" min="0" step="1" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base <?php $__errorArgs = ['position'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('position', $banner->position)); ?>">
                     <p class="mt-1 text-sm text-gray-500">Lower numbers appear first in the slideshow. Use 0 for default ordering.</p>
-                    @error('position')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['position'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <div>
                     <label for="car_id" class="block text-sm font-semibold text-gray-700 mb-1">Link to Car</label>
-                    <select id="car_id" name="car_id" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('car_id') border-red-500 @enderror">
+                    <select id="car_id" name="car_id" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base <?php $__errorArgs = ['car_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                         <option value="">Select a car</option>
-                        @foreach($cars as $car)
-                            <option value="{{ $car->id }}" {{ old('car_id', $banner->car_id) == $car->id ? 'selected' : '' }}>
-                                {{ $car->name }} ({{ $car->brand }})
+                        <?php $__currentLoopData = $cars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $car): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($car->id); ?>" <?php echo e(old('car_id', $banner->car_id) == $car->id ? 'selected' : ''); ?>>
+                                <?php echo e($car->name); ?> (<?php echo e($car->brand); ?>)
                             </option>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                     <p class="mt-1 text-sm text-gray-500">When selected, clicking the banner will go to this car's details page</p>
-                    @error('car_id')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['car_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <div>
                     <label for="click_url" class="block text-sm font-semibold text-gray-700 mb-1">Custom Click URL</label>
-                    <input type="text" id="click_url" name="click_url" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('click_url') border-red-500 @enderror" value="{{ old('click_url', $banner->click_url) }}" placeholder="https://example.com/special-promotion">
+                    <input type="text" id="click_url" name="click_url" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base <?php $__errorArgs = ['click_url'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('click_url', $banner->click_url)); ?>" placeholder="https://example.com/special-promotion">
                     <p class="mt-1 text-sm text-gray-500">If provided, clicking on the banner will redirect to this URL instead of the linked car page</p>
-                    @error('click_url')
-                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
+                    <?php $__errorArgs = ['click_url'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                 </div>
             </div>
         </div>
@@ -545,22 +613,22 @@
                 Current Video
             </h3>
 
-            @if($banner->video_url)
+            <?php if($banner->video_url): ?>
             <div class="rounded-lg overflow-hidden shadow-md bg-gray-100 aspect-video w-full max-w-2xl mx-auto">
                 <video controls class="w-full h-full object-contain">
-                    <source src="{{ Storage::url($banner->video_url) }}" type="video/mp4">
+                    <source src="<?php echo e(Storage::url($banner->video_url)); ?>" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
-            <p class="mt-2 text-sm text-gray-500 text-center">{{ basename($banner->video_url) }}</p>
-            @else
+            <p class="mt-2 text-sm text-gray-500 text-center"><?php echo e(basename($banner->video_url)); ?></p>
+            <?php else: ?>
             <div class="p-6 text-center bg-gray-100 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                 </svg>
                 <p class="text-gray-500">No video currently set for this banner</p>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
 
         <!-- Video Update Section -->
@@ -576,43 +644,71 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Video Source</label>
                 <div class="flex gap-4">
                     <div class="flex items-center">
-                        <input type="radio" id="video_type_keep" name="video_type" value="keep" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" {{ old('video_type', 'keep') === 'keep' ? 'checked' : '' }} onchange="toggleVideoSource()">
+                        <input type="radio" id="video_type_keep" name="video_type" value="keep" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" <?php echo e(old('video_type', 'keep') === 'keep' ? 'checked' : ''); ?> onchange="toggleVideoSource()">
                         <label for="video_type_keep" class="ml-2 block text-sm text-gray-700">Keep Current Video</label>
                     </div>
                     <div class="flex items-center">
-                        <input type="radio" id="video_type_upload" name="video_type" value="upload" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" {{ old('video_type') === 'upload' ? 'checked' : '' }} onchange="toggleVideoSource()">
+                        <input type="radio" id="video_type_upload" name="video_type" value="upload" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" <?php echo e(old('video_type') === 'upload' ? 'checked' : ''); ?> onchange="toggleVideoSource()">
                         <label for="video_type_upload" class="ml-2 block text-sm text-gray-700">Upload New Video</label>
                     </div>
                     <div class="flex items-center">
-                        <input type="radio" id="video_type_existing" name="video_type" value="existing" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" {{ old('video_type') === 'existing' ? 'checked' : '' }} onchange="toggleVideoSource()">
+                        <input type="radio" id="video_type_existing" name="video_type" value="existing" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" <?php echo e(old('video_type') === 'existing' ? 'checked' : ''); ?> onchange="toggleVideoSource()">
                         <label for="video_type_existing" class="ml-2 block text-sm text-gray-700">Use Existing Video</label>
                     </div>
                 </div>
             </div>
 
-            <div id="video_upload_section" class="{{ old('video_type', 'keep') !== 'upload' ? 'hidden' : '' }}">
+            <div id="video_upload_section" class="<?php echo e(old('video_type', 'keep') !== 'upload' ? 'hidden' : ''); ?>">
                 <label for="video" class="block text-sm font-semibold text-gray-700 mb-1">Upload Video File <span class="text-red-500">*</span></label>
-                <input type="file" id="video" name="video" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('video') border-red-500 @enderror" accept="video/mp4,video/avi,video/mov">
+                <input type="file" id="video" name="video" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base <?php $__errorArgs = ['video'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" accept="video/mp4,video/avi,video/mov">
                 <p class="mt-1 text-sm text-gray-500 flex justify-between">
                     <span>Supported: MP4, AVI, MOV</span>
                     <span>Max size: 1GB</span>
                 </p>
-                @error('video')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <?php $__errorArgs = ['video'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
-            <div id="existing_video_section" class="{{ old('video_type', 'keep') !== 'existing' ? 'hidden' : '' }}">
+            <div id="existing_video_section" class="<?php echo e(old('video_type', 'keep') !== 'existing' ? 'hidden' : ''); ?>">
                 <label for="existing_video" class="block text-sm font-semibold text-gray-700 mb-1">Select Existing Video <span class="text-red-500">*</span></label>
-                <select id="existing_video" name="existing_video" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('existing_video') border-red-500 @enderror">
+                <select id="existing_video" name="existing_video" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base <?php $__errorArgs = ['existing_video'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                     <option value="">Select a video</option>
-                    <option value="video1.mp4" {{ old('existing_video') === 'video1.mp4' ? 'selected' : '' }}>Video 1</option>
-                    <option value="video2.mp4" {{ old('existing_video') === 'video2.mp4' ? 'selected' : '' }}>Video 2</option>
-                    <option value="video3.mp4" {{ old('existing_video') === 'video3.mp4' ? 'selected' : '' }}>Video 3</option>
+                    <option value="video1.mp4" <?php echo e(old('existing_video') === 'video1.mp4' ? 'selected' : ''); ?>>Video 1</option>
+                    <option value="video2.mp4" <?php echo e(old('existing_video') === 'video2.mp4' ? 'selected' : ''); ?>>Video 2</option>
+                    <option value="video3.mp4" <?php echo e(old('existing_video') === 'video3.mp4' ? 'selected' : ''); ?>>Video 3</option>
                 </select>
-                @error('existing_video')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <?php $__errorArgs = ['existing_video'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
         </div>
 
@@ -627,17 +723,24 @@
 
             <div class="flex items-center">
                 <input type="hidden" name="is_active" value="0">
-                <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $banner->is_active) ? 'checked' : '' }} class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2">
+                <input type="checkbox" id="is_active" name="is_active" value="1" <?php echo e(old('is_active', $banner->is_active) ? 'checked' : ''); ?> class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2">
                 <label for="is_active" class="text-base text-gray-700">Make banner active</label>
                 <p class="mt-1 ml-7 text-sm text-gray-500">Only active banners will appear in the slideshow</p>
-                @error('is_active')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
+                <?php $__errorArgs = ['is_active'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                    <p class="mt-1 text-sm text-red-500"><?php echo e($message); ?></p>
+                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
         </div>
 
         <div class="flex justify-end gap-2 mt-8">
-            <a href="{{ route('admin.banners.index') }}" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition">Cancel</a>
+            <a href="<?php echo e(route('admin.banners.index')); ?>" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition">Cancel</a>
             <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow transition">
                 Update Banner
             </button>
@@ -669,4 +772,6 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleVideoSource();
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Applications/XAMPP/Carrio-Motors/resources/views/admin/banners/edit.blade.php ENDPATH**/ ?>

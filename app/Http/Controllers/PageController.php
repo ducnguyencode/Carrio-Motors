@@ -5,11 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Car;
 use App\Models\CarDetail;
+use App\Models\Banner;
 
 class PageController extends Controller
 {
     public function home() {
-        return view('home');
+        $banners = Banner::where('is_active', true)
+                        ->orderBy('position')
+                        ->with('car')
+                        ->get();
+        return view('home', compact('banners'));
     }
 
     public function about() {
