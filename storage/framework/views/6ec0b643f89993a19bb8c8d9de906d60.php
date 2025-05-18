@@ -6,7 +6,6 @@
     <title>Car Dealership</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    @yield('styles')
     <style>
         .ticker {
             position: fixed;
@@ -114,7 +113,7 @@
 <body>
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center">
-        <a href="{{ url('/') }}">
+        <a href="<?php echo e(url('/')); ?>">
             <img src="images/logo.svg" style="height: 40px;">
         </a>
         </div>
@@ -148,10 +147,10 @@
             </div>
         </nav>
     </div>
-    @yield('content')
+    <?php echo $__env->yieldContent('content'); ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {{-- Slide BannerBanner --}}
+    
     <script>
         function updateTicker() {
             const ticker = document.getElementById('ticker');
@@ -209,7 +208,7 @@
         });
     </script>
 
-    {{-- Search BarBar --}}
+    
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById('search-input');
@@ -252,7 +251,7 @@
     });
     </script>
 
-    {{-- Featured Cars Section --}}
+    
     <script>
     function toggleMoreCars() {
         const more = document.getElementById('more-cars');
@@ -261,3 +260,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH D:\521H0251_NguyenVanKhoa\Aptech\Project_T1\New folder\Carrio-Motors\resources\views/layouts/app.blade.php ENDPATH**/ ?>

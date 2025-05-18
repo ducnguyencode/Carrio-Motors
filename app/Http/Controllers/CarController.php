@@ -41,4 +41,9 @@ class CarController extends Controller
         return response()->json(null,204);
     }
 
+    public function detail($id) {
+        $car = Car::with(['engine', 'brand'])->findOrFail($id);
+        return view('car_detail', compact('car'));
+    }
+
 }

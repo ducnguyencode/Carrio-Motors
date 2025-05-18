@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container mt-4 position-relative">
     <input
         id="search-input"
@@ -14,18 +12,18 @@
 
 <h2 class="mt-4">Available Cars</h2>
 <div class="row">
-    @foreach ($cars as $car)
+    <?php $__currentLoopData = $cars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $car): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <div class="col-md-4 mb-4">
-        <div class="card car-card" data-id="{{ $car->id }}" data-name="{{ $car->name }}" data-brand="{{ $car->brand }}" data-image="{{ $car->image_url }}" data-seats="{{ $car->seat_number }}">
-            <img src="{{ $car->image_url }}" class="card-img-top" alt="{{ $car->name }}">
+        <div class="card car-card" data-id="<?php echo e($car->id); ?>" data-name="<?php echo e($car->name); ?>" data-brand="<?php echo e($car->brand); ?>" data-image="<?php echo e($car->image_url); ?>" data-seats="<?php echo e($car->seat_number); ?>">
+            <img src="<?php echo e($car->image_url); ?>" class="card-img-top" alt="<?php echo e($car->name); ?>">
             <div class="card-body">
-                <h5 class="card-title">{{ $car->name }}</h5>
-                <p class="card-text">Brand: {{ $car->brand }} | Seats: {{ $car->seat_number }}</p>
-                <a href="/cars/{{ $car->id }}" class="btn btn-primary">View Details</a>
+                <h5 class="card-title"><?php echo e($car->name); ?></h5>
+                <p class="card-text">Brand: <?php echo e($car->brand); ?> | Seats: <?php echo e($car->seat_number); ?></p>
+                <a href="/cars/<?php echo e($car->id); ?>" class="btn btn-primary">View Details</a>
             </div>
         </div>
     </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
 
 <!-- Modal -->
@@ -106,4 +104,6 @@ document.querySelectorAll('.car-card').forEach(card => {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\521H0251_NguyenVanKhoa\Aptech\Project_T1\New folder\Carrio-Motors\resources\views/cars.blade.php ENDPATH**/ ?>
