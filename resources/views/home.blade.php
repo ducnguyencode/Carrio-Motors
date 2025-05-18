@@ -146,5 +146,27 @@
     function closeCarPopup() {
         bootstrap.Modal.getInstance(document.getElementById('carModal')).hide();
     }
+        let lastClickedCard = null;
+    let clickTimer = null;
+
+    document.querySelectorAll('.car-card').forEach(card => {
+        card.addEventListener('click', function () {
+            const carId = this.dataset.carId;
+            const carData = JSON.parse(this.dataset.carJson);
+
+            if (lastClickedCard === this) {
+                clearTimeout(clickTimer);
+                lastClickedCard = null;
+                window.location.href = `/cars/${carId}`;
+            } else {
+                lastClickedCard = this;
+
+                clickTimer = setTimeout(() => {
+                    openCarPopup(carData);
+                    lastClickedCard = null;
+                }, 600);
+            }
+        });
+    });
 </script>
 @endpush
