@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('banners', function (Blueprint $table) {
             $table->id();
+            $table->string('video_url')->nullable();
+            $table->string('title')->nullable(); // For 'Car 1' text
+            $table->string('subtitle')->nullable(); // For 'Luxury meets performance' text
+            $table->text('main_content')->nullable(); // Optional now
+            $table->foreignId('car_id')->nullable()->constrained('cars'); // Optional now
+            $table->integer('position')->default(0); // For ordering banners
+            $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
     }
