@@ -17,18 +17,14 @@
             padding: 5px 15px;
             font-size: 14px;
         }
-        .visit-counter {
-            position: absolute;
-            right: 20px;
-            top: 10px;
-            font-size: 14px;
-            color: #666;
-        }
         .video-carousel {
             position: relative;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
             height: 90vh;
             overflow: hidden;
         }
+
         .carousel-slide {
             display: none;
             position: absolute;
@@ -45,7 +41,7 @@
         }
         .carousel-content {
             position: absolute;
-            top: 50%;
+            top: 90%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
@@ -62,7 +58,7 @@
         .carousel-indicators {
             position: absolute;
             bottom: 20px;
-            left: 50%;
+            left: 0%;
             transform: translateX(-50%);
             display: flex;
             gap: 8px;
@@ -100,13 +96,27 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(13, 110, 253, 0.35);
         }
+
+        .search-container {
+            margin-bottom: 30px;
+        }
+
+        #search-results {
+            background: white;
+            border: 1px solid #ccc;
+            border-top: none;
+            margin-top: -1px;
+            margin-bottom: 30px;
+        }
+
     </style>
 </head>
 <body>
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center">
-            <img src="/logo.png" alt="Logo" style="height: 60px;">
-            <div class="visit-counter">Visits: <?php echo e(session('visit_count', 1)); ?></div>
+        <a href="<?php echo e(url('/')); ?>">
+            <img src="images/logo.svg" style="height: 40px;">
+        </a>
         </div>
         <nav class="navbar navbar-expand-lg navbar-light bg-light mt-3 mb-3">
             <div class="container-fluid">
@@ -133,20 +143,15 @@
                     </ul>
 
                     <ul class="navbar-nav">
-                        <!-- Admin Login button removed as requested -->
                     </ul>
                 </div>
             </div>
         </nav>
-
-        <?php echo $__env->yieldContent('content'); ?>
     </div>
-
-    <div class="ticker" id="ticker">
-        Loading location and time...
-    </div>
+    <?php echo $__env->yieldContent('content'); ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         function updateTicker() {
             const ticker = document.getElementById('ticker');
@@ -202,6 +207,57 @@
                 });
             });
         });
+    </script>
+
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('search-input');
+        const resultBox = document.getElementById('search-results');
+        if (!input || !resultBox) return;
+
+        let timeout = null;
+
+        input.addEventListener('input', function () {
+            clearTimeout(timeout);
+            const query = input.value.trim();
+            if (!query) {
+                resultBox.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                fetch(`/search/cars?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        resultBox.innerHTML = '';
+                        if (data.length === 0) {
+                            resultBox.innerHTML = '<li class="list-group-item text-muted">No results found</li>';
+                            return;
+                        }
+                        data.forEach(car => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item';
+                            li.innerHTML = `
+                                <a href="/cars/${car.id}" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <img src="${car.image_url}" alt="${car.name}" style="width: 60px; height: 40px; object-fit: cover; margin-right: 10px;">
+                                    <span>${car.name} (${car.brand})</span>
+                                </a>
+                            `;
+                            resultBox.appendChild(li);
+                        });
+                    });
+            }, 300);
+        });
+    });
+    </script>
+
+    
+    <script>
+    function toggleMoreCars() {
+        const more = document.getElementById('more-cars');
+        more.classList.toggle('hidden');
+    }
     </script>
 </body>
 </html>
