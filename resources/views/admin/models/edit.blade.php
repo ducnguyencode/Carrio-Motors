@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow-md p-8 max-w-3xl mx-auto">
-    <form action="{{ route('makes.update', $make) }}" method="POST">
+    <form action="{{ route('admin.makes.update', $make) }}" method="POST">
         @csrf
         @method('PUT')
 
