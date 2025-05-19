@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CarDetail;
 use App\Models\Car;
+use App\Models\Engine;
+use App\Models\Models;
+use App\Models\Make;
+use Illuminate\Support\Facades\Storage;
 use App\Models\CarColor;
 
 class CarDetailController extends Controller
@@ -132,7 +136,7 @@ class CarDetailController extends Controller
                 if (!in_array($index, $request->remove_images)) {
                     $newImages[] = $imagePath;
                 } else {
-                    \Storage::disk('public')->delete($imagePath);
+                    Storage::disk('public')->delete($imagePath);
                 }
             }
 
@@ -175,7 +179,7 @@ class CarDetailController extends Controller
         if ($carDetail->images) {
             $images = json_decode($carDetail->images, true);
             foreach ($images as $imagePath) {
-                \Storage::disk('public')->delete($imagePath);
+                Storage::disk('public')->delete($imagePath);
             }
         }
 
