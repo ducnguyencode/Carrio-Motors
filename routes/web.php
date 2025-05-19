@@ -60,6 +60,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('invoices', AdminInvoiceController::class);
     // Admin-only destroy actions
     Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
+    Route::delete('/car_colors/{car_color}', [CarColorController::class, 'destroy'])->name('car_colors.destroy');
     Route::delete('/car_details/{car_detail}', [CarDetailController::class, 'destroy'])->name('car_details.destroy');
 });
 

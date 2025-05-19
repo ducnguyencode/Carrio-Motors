@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CarColor;
+use Illuminate\Support\Facades\Storage;
 
 class CarColorController extends Controller
 {
@@ -27,6 +28,7 @@ class CarColorController extends Controller
     public function create()
     {
         return view('admin.car_colors.create');
+
     }
 
     /**

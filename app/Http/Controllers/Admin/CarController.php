@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Car;
 use App\Models\Make;
-use App\Models\Model;
 use App\Models\Engine;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Models;
+use Illuminate\Database\Eloquent\Model;
 
 class CarController extends Controller
 {
