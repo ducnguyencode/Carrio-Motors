@@ -31,16 +31,16 @@
                                 </div>
                             @endif
 
-                            <form method="POST" action="{{ url('/login') }}">
+                            <form method="POST" action="{{ url('/admin') }}">
                                 @csrf
 
                                 <div class="mb-3">
-                                    <label for="username" class="form-label">Username</label>
+                                    <label for="username" class="form-label">Username or Email</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-white">
                                             <i class="fas fa-user text-muted"></i>
                                         </span>
-                                        <input id="username" name="username" type="text" class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}" required placeholder="Enter your username">
+                                        <input id="username" name="username" type="text" class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}" required placeholder="Enter your username or email">
                                     </div>
                                     @error('username')
                                         <div class="text-danger mt-1 small">{{ $message }}</div>
@@ -123,12 +123,12 @@
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
         const toggleIcon = document.getElementById('toggleIcon');
-        
+
         togglePassword.addEventListener('click', function() {
             // Thay đổi kiểu input giữa password và text
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
-            
+
             // Thay đổi biểu tượng dựa trên trạng thái hiện tại
             if (type === 'password') {
                 toggleIcon.classList.remove('fa-eye');

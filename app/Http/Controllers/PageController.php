@@ -5,11 +5,158 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Car;
 use App\Models\CarDetail;
+use App\Models\Banner;
+
+use Illuminate\Support\Collection;
 
 class PageController extends Controller
 {
     public function home() {
-        return view('home');
+        $useMockData = true;
+
+        if ($useMockData) {
+            $featuredCars = [[
+                    'id' => 1,
+                    'name' => 'Toyota Supra',
+                    'image_url' => asset('images/cars/supra.jpg'),
+                    'rating' => 4.8,
+                    'reviews' => 120,
+                    'is_best_seller' => true,
+                    'price' => 45000,
+                    'engine' => '3.0L Turbo',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Automatic',
+                    'seats' => 2,
+                    'color' => 'Red',
+                ],[
+                    'id' => 2,
+                    'name' => 'Honda Civic Type R',
+                    'image_url' => asset('images/cars/civic.jpg'),
+                    'rating' => 4.7,
+                    'reviews' => 98,
+                    'is_best_seller' => true,
+                    'price' => 38000,
+                    'engine' => '2.0L Turbo',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Manual',
+                    'seats' => 4,
+                    'color' => 'Blue',
+                ],[
+                    'id' => 3,
+                    'name' => 'BMW 320i',
+                    'image_url' => asset('images/cars/bmw-320i.jpg'),
+                    'rating' => 4.9,
+                    'reviews' => 99,
+                    'is_best_seller' => true,
+                    'price' => 55000,
+                    'engine' => '2.0L TwinPower Turbo',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Automatic',
+                    'seats' => 5,
+                    'color' => 'Black',
+                ],[
+                    'id' => 4,
+                    'name' => 'VinFast Lux A2.0',
+                    'image_url' => asset('images/cars/vinfast-lux-a20.jpg'),
+                    'rating' => 4.6,
+                    'reviews' => 85,
+                    'is_best_seller' => true,
+                    'price' => 39000,
+                    'engine' => '2.0L Turbo',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Automatic',
+                    'seats' => 5,
+                    'color' => 'Gray',
+                ],[
+                    'id' => 5,
+                    'name' => 'Hyundai Tucson',
+                    'image_url' => asset('images/cars/tucson.jpg'),
+                    'rating' => 4.8,
+                    'reviews' => 90,
+                    'is_best_seller' => false,
+                    'price' => 34000,
+                    'engine' => '2.0L MPI',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Automatic',
+                    'seats' => 5,
+                    'color' => 'White',
+                ],[
+                    'id' => 6,
+                    'name' => 'Ford Ranger',
+                    'image_url' => asset('images/cars/ranger.jpg'),
+                    'rating' => 4.9,
+                    'reviews' => 134,
+                    'is_best_seller' => true,
+                    'price' => 42000,
+                    'engine' => '2.2L Diesel',
+                    'fuel_type' => 'Diesel',
+                    'transmission' => 'Manual',
+                    'seats' => 5,
+                    'color' => 'Silver',
+                ],[
+                    'id' => 7,
+                    'name' => 'Mazda CX-5',
+                    'image_url' => asset('images/cars/cx5.jpg'),
+                    'rating' => 4.7,
+                    'reviews' => 95,
+                    'is_best_seller' => false,
+                    'price' => 37000,
+                    'engine' => '2.5L SkyActiv',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Automatic',
+                    'seats' => 5,
+                    'color' => 'Brown',
+                ],[
+                    'id' => 8,
+                    'name' => 'Mercedes C-Class',
+                    'image_url' => asset('images/cars/mercedes-c.jpg'),
+                    'rating' => 4.9,
+                    'reviews' => 88,
+                    'is_best_seller' => false,
+                    'price' => 60000,
+                    'engine' => '2.0L Turbo',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Automatic',
+                    'seats' => 5,
+                    'color' => 'Black',
+                ],[
+                    'id' => 9,
+                    'name' => 'Kia Seltos',
+                    'image_url' => asset('images/cars/seltos.jpg'),
+                    'rating' => 4.7,
+                    'reviews' => 75,
+                    'is_best_seller' => false,
+                    'price' => 30000,
+                    'engine' => '1.6L Turbo',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'CVT',
+                    'seats' => 5,
+                    'color' => 'Orange',
+                ],[
+                    'id' => 10,
+                    'name' => 'Mitsubishi Xpander',
+                    'image_url' => asset('images/cars/xpander.jpg'),
+                    'rating' => 4.8,
+                    'reviews' => 110,
+                    'is_best_seller' => false,
+                    'price' => 32000,
+                    'engine' => '1.5L MIVEC',
+                    'fuel_type' => 'Petrol',
+                    'transmission' => 'Automatic',
+                    'seats' => 7,
+                    'color' => 'Silver',
+                ],];}else {
+                    $featuredCars = Car::where('is_featured', true)
+                        ->with('engine')
+                        ->take(4)
+                        ->get();
+                }
+        return view('home', ['featuredCars' => $featuredCars]);
+        $banners = Banner::where('is_active', true)
+                        ->orderBy('position')
+                        ->with('car')
+                        ->get();
+        return view('home', compact('banners'));
     }
 
     public function about() {
@@ -22,8 +169,8 @@ class PageController extends Controller
     }
 
     public function carDetail($id) {
-        $car = Car::with('engine')->findOrFail($id);
-        return view('car_detail', compact('car'));
+        $car = Car::findOrFail($id);
+        return view('car-detail', compact('car'));
     }
 
     public function buyForm($id = null) {
@@ -33,5 +180,18 @@ class PageController extends Controller
 
     public function contact() {
         return view('contact');
+    }
+
+    public function search(Request $request) {
+    $query = $request->get('q');
+    $cars = Car::where('name', 'LIKE', "%$query%")
+                ->orWhere('brand', 'LIKE', "%$query%")
+                ->get(['id', 'name', 'brand', 'image_url']);
+    return response()->json($cars);
+    }
+
+    public function featuredCars() {
+        $cars = Car::where('is_featured', 1)->paginate(10);
+        return view('featured-cars', compact('cars'));
     }
 }

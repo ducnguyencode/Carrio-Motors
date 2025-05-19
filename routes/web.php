@@ -25,9 +25,8 @@ use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\ActivityLogController;
 
 // Public routes
-Route::get('/', function () {
-    return view('home');
-});
+Route::get('/', [PageController::class, 'home'])->name('home');
+
 Route::get('/about', [PageController::class, 'about']);
 Route::get('/cars', [PageController::class, 'cars'])->name('cars');
 Route::get('/cars/{id}', [PageController::class, 'carDetail']);
@@ -40,8 +39,8 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 
 // Admin login routes only (no public registration)
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/admin', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/admin', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Password reset routes (admin only)
@@ -49,9 +48,6 @@ Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->n
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-
-// Admin redirect route
-Route::redirect('/admin', '/admin/dashboard');
 
 // Admin dashboard accessible to all admin roles
 Route::get('/admin/dashboard', [DashboardController::class, 'index'])
@@ -112,3 +108,24 @@ Route::post('/email/verification-notification', function (Request $request) {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
+
+// Search Bar
+Route::get('/search/cars', [PageController::class, 'search'])->name('cars.search');
+
+// Featured Car
+Route::get('/featured-cars', [PageController::class, 'featuredCars'])->name('featured.cars');
+
+// Detail
+Route::get('/cars/{id}', [PageController::class, 'carDetail'])->name('car.detail');
+// Test PHP config
+Route::get('/php-info', function () {
+    return response()->json([
+        'upload_max_filesize' => ini_get('upload_max_filesize'),
+        'post_max_size' => ini_get('post_max_size'),
+        'memory_limit' => ini_get('memory_limit'),
+        'max_execution_time' => ini_get('max_execution_time'),
+        'max_input_time' => ini_get('max_input_time'),
+        'file_uploads' => ini_get('file_uploads'),
+        'max_file_uploads' => ini_get('max_file_uploads'),
+    ]);
+})->name('php.info');

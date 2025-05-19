@@ -47,7 +47,7 @@
                     </form>
 
                     <div class="text-center mt-3">
-                        <a href="{{ route('login') }}" class="text-decoration-none d-inline-flex align-items-center">
+                        <a href="{{ url('/admin') }}" class="text-decoration-none d-inline-flex align-items-center">
                             <i class="fas fa-arrow-left me-1 small"></i>
                             Back to Login
                         </a>
@@ -58,6 +58,10 @@
                         <p class="text-muted small mb-0">
                             If you're still having trouble resetting your password, please contact customer support at
                             <a href="mailto:support@carriomotors.com" class="text-decoration-none">support@carriomotors.com</a>
+                        </p>
+                        <hr class="my-2">
+                        <p class="text-muted small mb-0">
+                            <i class="fas fa-info-circle me-1"></i> Remember: You can always log in using your email address instead of your username.
                         </p>
                     </div>
                 </div>

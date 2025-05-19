@@ -21,7 +21,7 @@ class FileUploadService
         // Generate a unique filename if not provided
         $filename = $filename ?? Str::random(20) . '.' . $file->getClientOriginalExtension();
 
-        // Store the file in the public disk
+        // Store the file in the storage/app/public folder
         $path = $file->storeAs($folder, $filename, 'public');
 
         return $path ? $path : false;
