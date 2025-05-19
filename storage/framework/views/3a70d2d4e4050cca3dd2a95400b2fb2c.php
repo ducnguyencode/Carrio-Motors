@@ -22,7 +22,7 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <?php $__empty_1 = true; $__currentLoopData = $carcolors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $color): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php $__empty_1 = true; $__currentLoopData = $carcolors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $color): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
                         <td class="px-4 py-2 text-center"><?php echo e(($colors->currentPage() - 1) * $colors->perPage() + $index + 1); ?></td>
                         <td class="px-6 py-4"><?php echo e($color->color_name); ?></td>
@@ -52,7 +52,7 @@
     </div>
 
     <div class="mt-4">
-        <?php echo e($colors->links()); ?>
+        <?php echo e($carcolors->links()); ?>
 
     </div>
 </div>
