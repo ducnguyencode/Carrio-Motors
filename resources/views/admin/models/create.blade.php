@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow-md p-8 max-w-3xl mx-auto">
-    <form action="{{ route('models.store') }}" method="POST">
+    <form action="{{ route('admin.models.store') }}" method="POST">
         @csrf
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Model Name -->
@@ -49,7 +49,7 @@
         </div>
 
         <div class="flex justify-end gap-2 mt-8">
-            <a href="{{ route('models.index') }}" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Cancel</a>
+            <a href="{{ route('admin.models.index') }}" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Cancel</a>
             <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">Create Model</button>
         </div>
     </form>

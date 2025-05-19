@@ -4,7 +4,7 @@
 
 <?php $__env->startSection('content'); ?>
 <div class="bg-white rounded-lg shadow-md p-8 max-w-3xl mx-auto">
-    <form action="<?php echo e(route('makes.store')); ?>" method="POST">
+    <form action="<?php echo e(route('admin.makes.store')); ?>" method="POST">
         <?php echo csrf_field(); ?>
         <div class="grid grid-cols-1 gap-6">
             <div>
@@ -36,7 +36,7 @@ unset($__errorArgs, $__bag); ?>
         </div>
 
         <div class="flex justify-end gap-2 mt-8">
-            <a href="<?php echo e(route('makes.index')); ?>" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Cancel</a>
+            <a href="<?php echo e(route('admin.makes.index')); ?>" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition">Cancel</a>
             <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">Create Make</button>
         </div>
     </form>

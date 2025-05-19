@@ -16,7 +16,7 @@
                             <label for="car_id" class="form-label">Car</label>
                             <select id="car_id" name="car_id" class="form-select @error('car_id') is-invalid @enderror" required>
                                 <option value="">Select a car</option>
-                                @foreach($cars as $car)
+                                @foreach($cars as $index => $car)
                                     <option value="{{ $car->id }}" {{ old('car_id') == $car->id ? 'selected' : '' }}>
                                         {{ $car->name }} ({{ $car->brand }})
                                     </option>
@@ -31,7 +31,7 @@
                             <label for="color_id" class="form-label">Color</label>
                             <select id="color_id" name="color_id" class="form-select @error('color_id') is-invalid @enderror" required>
                                 <option value="">Select a color</option>
-                                @foreach($car_colors as $color)
+                                @foreach($carcolors as $index => $color)
                                     <option value="{{ $color->id }}" {{ old('color_id') == $color->id ? 'selected' : '' }}>
                                         {{ $color->color_name }}
                                     </option>

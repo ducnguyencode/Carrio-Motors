@@ -33,8 +33,8 @@ class CarDetailController extends Controller
     public function create()
     {
         $cars = Car::all();
-        $carColors = CarColor::all();
-        return view('admin.car_details.create', compact('cars', 'carColors'));
+        $carcolors = CarColor::all();
+        return view('admin.car_details.create', compact('cars', 'carcolors'));
     }
 
     /**
