@@ -16,8 +16,8 @@ class CarColorController extends Controller
      */
     public function index()
     {
-        $carColors = CarColor::paginate(10);
-        return view('admin.car_colors.index', compact('carColors'));
+        $carcolors = CarColor::paginate(10);
+        return view('admin.car_colors.index', compact('carcolors'));
     }
 
     /**
@@ -27,7 +27,7 @@ class CarColorController extends Controller
      */
     public function create()
     {
-        return view('admin.car_colors.create');
+        return view('admin.car_colors.create', compact('carColors'));
 
     }
 
@@ -61,6 +61,7 @@ class CarColorController extends Controller
 
         return redirect()->route('admin.car_colors.index')
             ->with('success', 'Màu xe đã được tạo thành công.');
+
     }
 
     /**

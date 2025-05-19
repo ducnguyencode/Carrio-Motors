@@ -24,7 +24,7 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($carcolors as $index => $color)
+                @forelse($carcolors as $color)
                     <tr>
                         <td class="px-4 py-2 text-center">{{ ($colors->currentPage() - 1) * $colors->perPage() + $index + 1 }}</td>
                         <td class="px-6 py-4">{{ $color->color_name }}</td>
@@ -54,7 +54,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $colors->links() }}
+        {{ $carcolors->links() }}
     </div>
 </div>
 @endsection
