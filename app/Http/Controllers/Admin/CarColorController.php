@@ -27,7 +27,7 @@ class CarColorController extends Controller
      */
     public function create()
     {
-        return view('admin.car_colors.create', compact('carColors'));
+        return view('admin.car_colors.create');
 
     }
 
