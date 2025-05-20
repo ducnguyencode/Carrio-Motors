@@ -151,12 +151,11 @@ class PageController extends Controller
                         ->take(4)
                         ->get();
                 }
-        // return view('home', ['featuredCars' => $featuredCars]);
         $banners = Banner::where('is_active', true)
-                        ->orderBy('position')
-                        ->with('car')
-                        ->get();
-
+            ->orderBy('position')
+            ->with('car')
+            ->get();
+       
         // Log banner information for debugging
         \Illuminate\Support\Facades\Log::info('Banners retrieved for home page', [
             'count' => $banners->count(),

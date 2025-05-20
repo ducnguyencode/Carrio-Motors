@@ -8,6 +8,13 @@ class CarColor extends Model
 {
     use HasFactory;
 
+    protected $table = 'car_colors';
+
+    protected $fillable = [
+        'name',
+        'hex_code'
+    ];
+
     protected $fillable = ['name', 'hex_code', 'is_active'];
 
     public function carDetails()

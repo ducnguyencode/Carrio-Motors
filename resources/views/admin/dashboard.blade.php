@@ -106,19 +106,40 @@
                                         #{{ $invoice->id }}
                                     </a>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap">{{ $invoice->buyer_name }}</td>
-                                <td class="px-4 py-3 whitespace-nowrap">{{ $invoice->created_at->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if($invoice->process_status == 'deposit')
-                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Deposit</span>
-                                    @elseif($invoice->process_status == 'payment')
-                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Payment</span>
-                                    @elseif($invoice->process_status == 'warehouse')
-                                        <span class="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">Warehouse</span>
-                                    @elseif($invoice->process_status == 'success')
-                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Success</span>
-                                    @elseif($invoice->process_status == 'cancel')
-                                        <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Cancel</span>
+                                    <div class="font-semibold">{{ $invoice->customer_name ?? $invoice->buyer_name ?? '-' }}</div>
+                                    @if(!empty($invoice->customer_email) || !empty($invoice->customer_phone))
+                                        <div class="text-xs text-gray-500">
+                                            @if(!empty($invoice->customer_email))
+                                                <i class="fas fa-envelope"></i> {{ $invoice->customer_email }}<br>
+                                            @endif
+                                            @if(!empty($invoice->customer_phone))
+                                                <i class="fas fa-phone"></i> {{ $invoice->customer_phone }}
+                                            @endif
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">{{ $invoice->purchase_date ? \Carbon\Carbon::parse($invoice->purchase_date)->format('d/m/Y') : ($invoice->created_at ? $invoice->created_at->format('d/m/Y') : '-') }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    @php
+                                        $status = $invoice->status ?? $invoice->process_status ?? null;
+                                        $statusClass = match($status) {
+                                            'pending' => 'bg-yellow-100 text-yellow-800',
+                                            'recheck' => 'bg-blue-100 text-blue-800',
+                                            'done', 'success' => 'bg-green-100 text-green-800',
+                                            'cancel' => 'bg-red-100 text-red-800',
+                                            'deposit' => 'bg-yellow-100 text-yellow-800',
+                                            'payment' => 'bg-blue-100 text-blue-800',
+                                            'warehouse' => 'bg-indigo-100 text-indigo-800',
+                                            default => 'bg-gray-200 text-gray-800'
+                                        };
+                                    @endphp
+                                    @if($status)
+                                        <span class="px-2 py-1 rounded text-xs font-semibold {{ $statusClass }}">
+                                            {{ ucfirst($status) }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-xs">-</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">{{ number_format($invoice->total_price, 0, ',', '.') }} $</td>

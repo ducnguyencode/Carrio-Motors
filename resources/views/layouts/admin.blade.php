@@ -165,7 +165,7 @@
 
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('admin') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
             </li>
@@ -183,22 +183,22 @@
 
             <div class="nav-header">Vehicle Management</div>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {{ request()->is('admin/cars*') ? 'active' : '' }}" href="{{ route('admin.cars.index') }}">
                     <i class="fas fa-car"></i> Cars
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {{ request()->is('admin/models*') ? 'active' : '' }}" href="{{ route('admin.models.index') }}">
                     <i class="fas fa-tags"></i> Models
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {{ request()->is('admin/makes*') ? 'active' : '' }}" href="{{ route('admin.makes.index') }}">
                     <i class="fas fa-industry"></i> Manufacturers
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {{ request()->is('admin/engines*') ? 'active' : '' }}" href="{{ route('admin.engines.index') }}">
                     <i class="fas fa-cogs"></i> Engines
                 </a>
             </li>

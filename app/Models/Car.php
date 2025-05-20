@@ -25,6 +25,10 @@ class Car extends Model
         'is_featured'
     ];
 
+    public function carModel() {
+        return $this->belongsTo(CarModel::class, 'model_id');
+    }
+
     protected $casts = [
         'additional_images' => 'array',
         'isActive' => 'boolean',
@@ -56,6 +60,7 @@ class Car extends Model
 
     public function engine() {
         return $this->belongsTo(\App\Models\Engine::class);
+
     }
 
     public function carDetails() {
