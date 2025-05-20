@@ -212,5 +212,4 @@
     <?php echo $__env->yieldContent('scripts'); ?>
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html>
-<?php /**PATH /Applications/XAMPP/Carrio-Motors/resources/views/admin/layouts/app.blade.php ENDPATH**/ ?>
+</html><?php /**PATH /Applications/XAMPP/Carrio-Motors/resources/views/admin/layouts/app.blade.php ENDPATH**/ ?>

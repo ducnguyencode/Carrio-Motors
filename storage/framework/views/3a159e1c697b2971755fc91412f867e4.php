@@ -105,19 +105,42 @@
 
                                     </a>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap"><?php echo e($invoice->buyer_name); ?></td>
-                                <td class="px-4 py-3 whitespace-nowrap"><?php echo e($invoice->created_at->format('d/m/Y')); ?></td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    <?php if($invoice->process_status == 'deposit'): ?>
-                                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Deposit</span>
-                                    <?php elseif($invoice->process_status == 'payment'): ?>
-                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Payment</span>
-                                    <?php elseif($invoice->process_status == 'warehouse'): ?>
-                                        <span class="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-800">Warehouse</span>
-                                    <?php elseif($invoice->process_status == 'success'): ?>
-                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Success</span>
-                                    <?php elseif($invoice->process_status == 'cancel'): ?>
-                                        <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Cancel</span>
+                                    <div class="font-semibold"><?php echo e($invoice->customer_name ?? $invoice->buyer_name ?? '-'); ?></div>
+                                    <?php if(!empty($invoice->customer_email) || !empty($invoice->customer_phone)): ?>
+                                        <div class="text-xs text-gray-500">
+                                            <?php if(!empty($invoice->customer_email)): ?>
+                                                <i class="fas fa-envelope"></i> <?php echo e($invoice->customer_email); ?><br>
+                                            <?php endif; ?>
+                                            <?php if(!empty($invoice->customer_phone)): ?>
+                                                <i class="fas fa-phone"></i> <?php echo e($invoice->customer_phone); ?>
+
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap"><?php echo e($invoice->purchase_date ? \Carbon\Carbon::parse($invoice->purchase_date)->format('d/m/Y') : ($invoice->created_at ? $invoice->created_at->format('d/m/Y') : '-')); ?></td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <?php
+                                        $status = $invoice->status ?? $invoice->process_status ?? null;
+                                        $statusClass = match($status) {
+                                            'pending' => 'bg-yellow-100 text-yellow-800',
+                                            'recheck' => 'bg-blue-100 text-blue-800',
+                                            'done', 'success' => 'bg-green-100 text-green-800',
+                                            'cancel' => 'bg-red-100 text-red-800',
+                                            'deposit' => 'bg-yellow-100 text-yellow-800',
+                                            'payment' => 'bg-blue-100 text-blue-800',
+                                            'warehouse' => 'bg-indigo-100 text-indigo-800',
+                                            default => 'bg-gray-200 text-gray-800'
+                                        };
+                                    ?>
+                                    <?php if($status): ?>
+                                        <span class="px-2 py-1 rounded text-xs font-semibold <?php echo e($statusClass); ?>">
+                                            <?php echo e(ucfirst($status)); ?>
+
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-gray-400 text-xs">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap"><?php echo e(number_format($invoice->total_price, 0, ',', '.')); ?> $</td>
