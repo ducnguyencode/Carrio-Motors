@@ -372,7 +372,8 @@ class InvoiceController extends Controller
             $invoice = Invoice::onlyTrashed()->findOrFail($id);
             $invoice->restore();
 
-            return redirect()->route('admin.invoices.index')
+            // Redirect về trang trash thay vì index
+            return redirect()->route('admin.invoices.trash')
                 ->with('success', 'Invoice has been restored successfully.');
 
         } catch (\Exception $e) {

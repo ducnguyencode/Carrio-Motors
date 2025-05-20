@@ -129,3 +129,6 @@ Route::get('/php-info', function () {
         'max_file_uploads' => ini_get('max_file_uploads'),
     ]);
 })->name('php.info');
+
+// Route cho activity-logs
+Route::get('/admin/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');

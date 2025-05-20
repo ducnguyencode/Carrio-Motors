@@ -1,10 +1,8 @@
-@extends('admin.layouts.app')
+<?php $__env->startSection('title', 'Dashboard'); ?>
 
-@section('title', 'Dashboard')
+<?php $__env->startSection('page-heading', 'Dashboard'); ?>
 
-@section('page-heading', 'Dashboard')
-
-@section('styles')
+<?php $__env->startSection('styles'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     .chart-container {
@@ -13,9 +11,9 @@
         width: 100%;
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Card 1: Total Users -->
     <div class="bg-white rounded-lg shadow-md p-6">
@@ -25,7 +23,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">Users</p>
-                <p class="text-2xl font-semibold">{{ number_format($totalUsers) }}</p>
+                <p class="text-2xl font-semibold"><?php echo e(number_format($totalUsers)); ?></p>
             </div>
         </div>
     </div>
@@ -38,7 +36,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">Total Cars</p>
-                <p class="text-2xl font-semibold">{{ number_format($totalCars) }}</p>
+                <p class="text-2xl font-semibold"><?php echo e(number_format($totalCars)); ?></p>
             </div>
         </div>
     </div>
@@ -51,7 +49,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">New Orders (Today)</p>
-                <p class="text-2xl font-semibold">{{ number_format($newOrdersToday) }}</p>
+                <p class="text-2xl font-semibold"><?php echo e(number_format($newOrdersToday)); ?></p>
             </div>
         </div>
     </div>
@@ -64,7 +62,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-gray-500 text-sm">Monthly Revenue</p>
-                <p class="text-2xl font-semibold">{{ number_format($revenueThisMonth, 0, ',', '.') }} $</p>
+                <p class="text-2xl font-semibold"><?php echo e(number_format($revenueThisMonth, 0, ',', '.')); ?> $</p>
             </div>
         </div>
     </div>
@@ -83,10 +81,10 @@
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold">Recent Orders</h2>
-            <a href="{{ route('admin.invoices.index') }}" class="text-blue-500 hover:text-blue-700">View All</a>
+            <a href="<?php echo e(route('admin.invoices.index')); ?>" class="text-blue-500 hover:text-blue-700">View All</a>
         </div>
 
-        @if(isset($recentInvoices) && $recentInvoices->count() > 0)
+        <?php if(isset($recentInvoices) && $recentInvoices->count() > 0): ?>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
@@ -99,29 +97,31 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($recentInvoices as $invoice)
+                        <?php $__currentLoopData = $recentInvoices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $invoice): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    <a href="{{ route('admin.invoices.show', $invoice) }}" class="text-blue-500 hover:text-blue-700">
-                                        #{{ $invoice->id }}
+                                    <a href="<?php echo e(route('admin.invoices.show', $invoice)); ?>" class="text-blue-500 hover:text-blue-700">
+                                        #<?php echo e($invoice->id); ?>
+
                                     </a>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="font-semibold">{{ $invoice->customer_name ?? $invoice->buyer_name ?? '-' }}</div>
-                                    @if(!empty($invoice->customer_email) || !empty($invoice->customer_phone))
+                                    <div class="font-semibold"><?php echo e($invoice->customer_name ?? $invoice->buyer_name ?? '-'); ?></div>
+                                    <?php if(!empty($invoice->customer_email) || !empty($invoice->customer_phone)): ?>
                                         <div class="text-xs text-gray-500">
-                                            @if(!empty($invoice->customer_email))
-                                                <i class="fas fa-envelope"></i> {{ $invoice->customer_email }}<br>
-                                            @endif
-                                            @if(!empty($invoice->customer_phone))
-                                                <i class="fas fa-phone"></i> {{ $invoice->customer_phone }}
-                                            @endif
+                                            <?php if(!empty($invoice->customer_email)): ?>
+                                                <i class="fas fa-envelope"></i> <?php echo e($invoice->customer_email); ?><br>
+                                            <?php endif; ?>
+                                            <?php if(!empty($invoice->customer_phone)): ?>
+                                                <i class="fas fa-phone"></i> <?php echo e($invoice->customer_phone); ?>
+
+                                            <?php endif; ?>
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap">{{ $invoice->purchase_date ? \Carbon\Carbon::parse($invoice->purchase_date)->format('d/m/Y') : ($invoice->created_at ? $invoice->created_at->format('d/m/Y') : '-') }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><?php echo e($invoice->purchase_date ? \Carbon\Carbon::parse($invoice->purchase_date)->format('d/m/Y') : ($invoice->created_at ? $invoice->created_at->format('d/m/Y') : '-')); ?></td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @php
+                                    <?php
                                         $status = $invoice->status ?? $invoice->process_status ?? null;
                                         $statusClass = match($status) {
                                             'pending' => 'bg-yellow-100 text-yellow-800',
@@ -133,39 +133,40 @@
                                             'warehouse' => 'bg-indigo-100 text-indigo-800',
                                             default => 'bg-gray-200 text-gray-800'
                                         };
-                                    @endphp
-                                    @if($status)
-                                        <span class="px-2 py-1 rounded text-xs font-semibold {{ $statusClass }}">
-                                            {{ ucfirst($status) }}
+                                    ?>
+                                    <?php if($status): ?>
+                                        <span class="px-2 py-1 rounded text-xs font-semibold <?php echo e($statusClass); ?>">
+                                            <?php echo e(ucfirst($status)); ?>
+
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-gray-400 text-xs">-</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap">{{ number_format($invoice->total_price, 0, ',', '.') }} $</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><?php echo e(number_format($invoice->total_price, 0, ',', '.')); ?> $</td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
-        @else
+        <?php else: ?>
             <p class="text-gray-500">No recent orders found.</p>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 <script>
     // Monthly Revenue Chart
     const ctx = document.getElementById('revenueChart').getContext('2d');
     const revenueChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: {!! json_encode($chartData['labels']) !!},
+            labels: <?php echo json_encode($chartData['labels']); ?>,
             datasets: [{
                 label: 'Revenue ($)',
-                data: {!! json_encode($chartData['data']) !!},
+                data: <?php echo json_encode($chartData['data']); ?>,
                 backgroundColor: 'rgba(99, 102, 241, 0.6)',
                 borderColor: 'rgba(99, 102, 241, 1)',
                 borderWidth: 1
@@ -196,4 +197,6 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Tu5k\study\php\Carrio-Motors\Carrio-Motors\resources\views/admin/dashboard.blade.php ENDPATH**/ ?>

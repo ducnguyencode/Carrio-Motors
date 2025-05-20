@@ -151,12 +151,14 @@ class PageController extends Controller
                         ->take(4)
                         ->get();
                 }
-        return view('home', ['featuredCars' => $featuredCars]);
         $banners = Banner::where('is_active', true)
-                        ->orderBy('position')
-                        ->with('car')
-                        ->get();
-        return view('home', compact('banners'));
+            ->orderBy('position')
+            ->with('car')
+            ->get();
+        return view('home', [
+            'featuredCars' => $featuredCars,
+            'banners' => $banners
+        ]);
     }
 
     public function about() {
