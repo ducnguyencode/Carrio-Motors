@@ -93,7 +93,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $makes->links() }}
+        {{ $makes->withQueryString()->links() }}
     </div>
 </div>
 @endsection

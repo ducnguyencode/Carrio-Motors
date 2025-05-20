@@ -123,6 +123,3 @@ Route::get('/featured-cars', [PageController::class, 'featuredCars'])->name('fea
 
 // Detail
 Route::get('/cars/{id}', [PageController::class, 'carDetail'])->name('car.detail');
-
-
-Route::get('/admin/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');

@@ -11,10 +11,15 @@
         <div class="flex items-center gap-2">
             <form action="{{ route('admin.engines.index') }}" method="GET" class="flex flex-wrap items-center gap-2">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search engines..." class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+                <select name="status" class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+                    <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
                 <button type="submit" class="flex items-center gap-1 px-4 py-2 rounded-full border border-blue-500 text-blue-500 bg-white hover:bg-blue-50 transition-all text-sm font-medium">
                     <i class="fas fa-search"></i> Search
                 </button>
-                @if(request('search'))
+                @if(request('search') || request('status'))
                 <a href="{{ route('admin.engines.index') }}" class="flex items-center gap-1 px-4 py-2 rounded-full border border-gray-500 text-gray-500 bg-white hover:bg-gray-50 transition-all text-sm font-medium">
                     <i class="fas fa-times"></i> Reset
                 </a>
@@ -84,7 +89,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $engines->links() }}
+        {{ $engines->withQueryString()->links() }}
     </div>
 </div>
 @endsection

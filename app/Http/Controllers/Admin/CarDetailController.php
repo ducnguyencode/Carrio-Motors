@@ -33,17 +33,18 @@ class CarDetailController extends Controller
             });
         }
 
-        // Filter by car
-        if (request()->has('car') && !empty(request('car'))) {
-            $query->where('car_id', request('car'));
+        // Filter by status
+        if (request()->has('status') && !empty(request('status'))) {
+            if (request('status') == 'active') {
+                $query->where('is_available', true);
+            } elseif (request('status') == 'inactive') {
+                $query->where('is_available', false);
+            }
         }
 
         $carDetails = $query->paginate(10);
 
-        // Get all cars for filter dropdown
-        $cars = Car::with('model.make')->select('id', 'name', 'model_id')->orderBy('name')->get();
-
-        return view('admin.car_details.index', compact('carDetails', 'cars'));
+        return view('admin.car_details.index', compact('carDetails'));
     }
 
     /**
@@ -147,14 +148,13 @@ class CarDetailController extends Controller
             'car_color_id' => 'required|exists:car_colors,id',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
-            'is_available' => 'sometimes|boolean',
         ]);
 
         $carDetail->car_id = $validated['car_id'];
         $carDetail->color_id = $validated['car_color_id']; // Map from car_color_id to color_id
         $carDetail->quantity = $validated['quantity'];
         $carDetail->price = $validated['price'];
-        $carDetail->is_available = $request->has('is_available');
+        $carDetail->is_available = $request->has('is_available') ? 1 : 0;
 
         $carDetail->save();
 
@@ -175,8 +175,6 @@ class CarDetailController extends Controller
             return redirect()->route('admin.car_details.index')
                 ->with('error', 'Cannot delete this car detail because it has associated orders.');
         }
-
-
 
         $carDetail->delete();
 

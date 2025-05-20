@@ -20,9 +20,32 @@ class CarController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $cars = Car::with(['model.make', 'engine'])->paginate(10);
+        $query = Car::with(['model.make', 'engine']);
+
+        // Apply search if provided
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhereHas('model', function($q) use ($search) {
+                      $q->where('name', 'LIKE', "%{$search}%")
+                        ->orWhereHas('make', function($q) use ($search) {
+                            $q->where('name', 'LIKE', "%{$search}%");
+                        });
+                  });
+            });
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status !== 'all' && !empty($request->status)) {
+            $status = $request->status === 'active' ? 1 : 0;
+            $query->where('isActive', $status);
+        }
+
+        $cars = $query->paginate(10);
+
         return view('admin.cars.index', compact('cars'));
     }
 

@@ -9,7 +9,7 @@
     <div class="flex flex-wrap justify-between items-center mb-4">
         <h2 class="text-lg font-semibold">Activity History</h2>
         <div class="flex items-center gap-2">
-            <form action="{{ route('activity-logs.index') }}" method="GET" class="flex flex-wrap items-center gap-2">
+            <form action="{{ route('admin.activity-logs.index') }}" method="GET" class="flex flex-wrap items-center gap-2">
                 <!-- User Filter -->
                 <select name="user_id" class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
                     <option value="">All Users</option>
@@ -47,7 +47,7 @@
                 </button>
 
                 @if(request('user_id') || request('action') || request('module') || request('date_from') || request('date_to'))
-                <a href="{{ route('activity-logs.index') }}" class="flex items-center gap-1 px-4 py-2 rounded-full border border-gray-500 text-gray-500 bg-white hover:bg-gray-50 transition-all text-sm font-medium">
+                <a href="{{ route('admin.activity-logs.index') }}" class="flex items-center gap-1 px-4 py-2 rounded-full border border-gray-500 text-gray-500 bg-white hover:bg-gray-50 transition-all text-sm font-medium">
                     <i class="fas fa-times"></i> Reset
                 </a>
                 @endif
@@ -90,7 +90,7 @@
                             {{ ucfirst($log->module) }}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('activity-logs.show', $log) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200" title="View Details">
+                            <a href="{{ route('admin.activity-logs.show', $log) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </td>
