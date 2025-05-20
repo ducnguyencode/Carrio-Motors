@@ -1,6 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title', 'My Dashboard')
+
 @section('page-heading', 'My Dashboard')
 
 @section('content')

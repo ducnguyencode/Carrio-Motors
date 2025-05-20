@@ -174,7 +174,7 @@
 
             <div class="nav-header">User Management</div>
             <li class="nav-item">
-                <a class="nav-link <?php echo e(request()->is('users*') ? 'active' : ''); ?>" href="<?php echo e(route('users.index')); ?>">
+                <a class="nav-link <?php echo e(request()->is('admin/users*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.users.index')); ?>">
                     <i class="fas fa-users"></i> Users
                 </a>
             </li>
@@ -216,7 +216,7 @@
 
             <div class="nav-header">Sales</div>
             <li class="nav-item">
-                <a class="nav-link <?php echo e(request()->is('invoices*') ? 'active' : ''); ?>" href="<?php echo e(route('invoices.index')); ?>">
+                <a class="nav-link <?php echo e(request()->is('admin/invoices*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.invoices.index')); ?>">
                     <i class="fas fa-file-invoice-dollar"></i> Invoices
                 </a>
             </li>
@@ -263,7 +263,7 @@
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in">
-                        <a class="dropdown-item" href="<?php echo e(route('users.show', Auth::id())); ?>">
+                        <a class="dropdown-item" href="<?php echo e(route('admin.users.show', Auth::id())); ?>">
                             <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                             Profile
                         </a>

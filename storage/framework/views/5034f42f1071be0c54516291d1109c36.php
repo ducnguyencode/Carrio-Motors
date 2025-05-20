@@ -29,11 +29,11 @@
                                 </div>
                             <?php endif; ?>
 
-                            <form method="POST" action="<?php echo e(url('/login')); ?>">
+                            <form method="POST" action="<?php echo e(url('/admin')); ?>">
                                 <?php echo csrf_field(); ?>
 
                                 <div class="mb-3">
-                                    <label for="username" class="form-label">Username</label>
+                                    <label for="username" class="form-label">Username or Email</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-white">
                                             <i class="fas fa-user text-muted"></i>
@@ -45,7 +45,7 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('username')); ?>" required placeholder="Enter your username">
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('username')); ?>" required placeholder="Enter your username or email">
                                     </div>
                                     <?php $__errorArgs = ['username'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -149,12 +149,12 @@ unset($__errorArgs, $__bag); ?>
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
         const toggleIcon = document.getElementById('toggleIcon');
-        
+
         togglePassword.addEventListener('click', function() {
             // Thay đổi kiểu input giữa password và text
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
-            
+
             // Thay đổi biểu tượng dựa trên trạng thái hiện tại
             if (type === 'password') {
                 toggleIcon.classList.remove('fa-eye');
