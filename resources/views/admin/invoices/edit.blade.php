@@ -159,16 +159,16 @@
             input.addEventListener('input', updateTotals);
         });
 
-        const form = document.querySelector('form[action*="invoices/update"]') || document.querySelector('form[action*="invoices.update"]');
+        const form = document.querySelector('form');
         if(form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'Do you really want to change the invoice status?',
+                    text: 'Do you really want to update this invoice?',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, change it!',
+                    confirmButtonText: 'Yes, update it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
