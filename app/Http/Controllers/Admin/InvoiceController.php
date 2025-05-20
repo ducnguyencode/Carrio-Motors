@@ -68,7 +68,7 @@ class InvoiceController extends Controller
             ->join('models', 'cars.model_id', '=', 'models.id')
             ->join('engines', 'cars.engine_id', '=', 'engines.id')
             ->join('car_colors', 'cars_details.color_id', '=', 'car_colors.id')
-            ->where('cars.status', true)
+            ->where('cars.isActive', true)
             ->where('cars_details.quantity', '>', 0)
             ->select(
                 'cars_details.*',
