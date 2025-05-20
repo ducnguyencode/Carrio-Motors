@@ -73,7 +73,7 @@
                             <i class="mr-3 text-lg fas fa-users"></i>
                             Users
                         </a>
-                        <a href="<?php echo e(route('activity-logs.index')); ?>" class="flex items-center px-2 py-2 text-sm font-medium text-white rounded-md hover:bg-gray-700 <?php echo e(request()->routeIs('activity-logs*') ? 'bg-gray-700' : ''); ?>">
+                        <a href="<?php echo e(route('admin.activity-logs.index')); ?>" class="flex items-center px-2 py-2 text-sm font-medium text-white rounded-md hover:bg-gray-700 <?php echo e(request()->routeIs('admin.activity-logs*') ? 'bg-gray-700' : ''); ?>">
                             <i class="mr-3 text-lg fas fa-history"></i>
                             Activity Logs
                         </a>
@@ -212,4 +212,5 @@
     <?php echo $__env->yieldContent('scripts'); ?>
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html><?php /**PATH /Applications/XAMPP/Carrio-Motors/resources/views/admin/layouts/app.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH /Applications/XAMPP/Carrio-Motors/resources/views/admin/layouts/app.blade.php ENDPATH**/ ?>

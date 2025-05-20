@@ -14,9 +14,23 @@ class CarColorController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $carcolors = CarColor::paginate(10);
+        $query = CarColor::query();
+
+        // Handle search
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('hex_code', 'like', '%' . $request->search . '%');
+        }
+
+        // Handle status filter
+        if ($request->has('status') && $request->status !== 'all' && !empty($request->status)) {
+            $status = $request->status === 'active' ? 1 : 0;
+            $query->where('is_active', $status);
+        }
+
+        $carcolors = $query->paginate(10);
         return view('admin.car_colors.index', compact('carcolors'));
     }
 

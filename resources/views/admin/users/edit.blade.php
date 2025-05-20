@@ -93,10 +93,14 @@
                 @enderror
             </div>
             <!-- Is Active -->
-            <div class="flex items-center mt-8">
-                <input type="checkbox" name="is_active" id="is_active" class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2" {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
-                <label for="is_active" class="block text-base text-gray-700">Active Account</label>
-            </div>
+            @if($user->role === 'admin')
+                <input type="hidden" name="is_active" value="1">
+            @else
+                <div class="flex items-center mt-8">
+                    <input type="checkbox" name="is_active" id="is_active" class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2" {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
+                    <label for="is_active" class="block text-base text-gray-700">Active Account</label>
+                </div>
+            @endif
         </div>
         <div class="flex justify-end gap-2 mt-8">
             <a href="{{ route('admin.users.index') }}" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition">Cancel</a>

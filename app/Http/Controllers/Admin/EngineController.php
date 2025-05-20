@@ -22,6 +22,12 @@ class EngineController extends Controller
                   ->orWhere('engine_type', 'like', '%' . $request->search . '%');
         }
 
+        // Handle status filter
+        if ($request->has('status') && $request->status !== 'all' && !empty($request->status)) {
+            $status = $request->status === 'active' ? 1 : 0;
+            $query->where('isActive', $status);
+        }
+
         $engines = $query->paginate(10);
         return view('admin.engines.index', compact('engines'));
     }

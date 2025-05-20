@@ -97,7 +97,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $models->links() }}
+        {{ $models->withQueryString()->links() }}
     </div>
 </div>
 @endsection

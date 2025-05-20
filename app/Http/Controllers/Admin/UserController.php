@@ -178,7 +178,7 @@ class UserController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'role' => $request->role,
-            'is_active' => $request->has('is_active'),
+            'is_active' => $request->role === 'admin' ? true : $request->has('is_active'),
         ];
 
         // Only update password if provided

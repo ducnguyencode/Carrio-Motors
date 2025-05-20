@@ -73,7 +73,7 @@
                             <i class="mr-3 text-lg fas fa-users"></i>
                             Users
                         </a>
-                        <a href="{{ route('activity-logs.index') }}" class="flex items-center px-2 py-2 text-sm font-medium text-white rounded-md hover:bg-gray-700 {{ request()->routeIs('activity-logs*') ? 'bg-gray-700' : '' }}">
+                        <a href="{{ route('admin.activity-logs.index') }}" class="flex items-center px-2 py-2 text-sm font-medium text-white rounded-md hover:bg-gray-700 {{ request()->routeIs('admin.activity-logs*') ? 'bg-gray-700' : '' }}">
                             <i class="mr-3 text-lg fas fa-history"></i>
                             Activity Logs
                         </a>
