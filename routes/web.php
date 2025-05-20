@@ -61,7 +61,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('invoices/{id}/restore', [AdminInvoiceController::class, 'restore'])->name('invoices.restore');
     Route::delete('invoices/{id}/force-delete', [AdminInvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
 
-    Route::resource('users', Admihttps://github.com/ducnguyencode/Carrio-Motors/pull/32/conflict?name=routes%252Fweb.php&ancestor_oid=bf7ec1c6b59eb1373b41609eebb6907f45ae59fe&base_oid=993ed87cfb019719989e4ed25009e6beacd7d648&head_oid=7a5f0b5918cb67c92cb5399a4187966eaef370danUserController::class);
+    Route::resource('users', AdminUserController::class);
     Route::resource('cars', CarController::class);
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
@@ -124,5 +124,5 @@ Route::get('/featured-cars', [PageController::class, 'featuredCars'])->name('fea
 // Detail
 Route::get('/cars/{id}', [PageController::class, 'carDetail'])->name('car.detail');
 
-  
+
 Route::get('/admin/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
