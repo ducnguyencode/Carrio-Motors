@@ -66,7 +66,7 @@ class BannerController extends Controller
      */
     public function create()
     {
-        $cars = Car::where('status', true)->get();
+        $cars = Car::where('isActive', true)->get();
         return view('admin.banners.create', compact('cars'));
     }
 
@@ -222,7 +222,7 @@ class BannerController extends Controller
      */
     public function edit(Banner $banner)
     {
-        $cars = Car::where('status', true)->get();
+        $cars = Car::where('isActive', true)->get();
         return view('admin.banners.edit', compact('banner', 'cars'));
     }
 
