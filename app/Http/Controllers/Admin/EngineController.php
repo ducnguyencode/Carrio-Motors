@@ -12,9 +12,17 @@ class EngineController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $engines = Engine::paginate(10);
+        $query = Engine::query();
+
+        // Handle search
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('engine_type', 'like', '%' . $request->search . '%');
+        }
+
+        $engines = $query->paginate(10);
         return view('admin.engines.index', compact('engines'));
     }
 
@@ -33,11 +41,11 @@ class EngineController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'displacement' => 'nullable|numeric|min:0.1|max:20',
-            'cylinders' => 'nullable|integer|min:1|max:16',
-            'power' => 'nullable|integer|min:1',
-            'torque' => 'nullable|integer|min:1',
-            'fuel_type' => 'required|in:gasoline,diesel,electric,hybrid,plug-in hybrid',
+            'horsepower' => 'nullable|integer|min:1',
+            'level' => 'nullable|string|max:255',
+            'max_speed' => 'nullable|integer|min:1',
+            'drive_type' => 'nullable|string|max:255',
+            'engine_type' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -46,9 +54,14 @@ class EngineController extends Controller
                 ->withInput();
         }
 
-        Engine::create($request->only([
-            'name', 'displacement', 'cylinders', 'power', 'torque', 'fuel_type'
-        ]));
+        $data = $request->only([
+            'name', 'horsepower', 'level', 'max_speed', 'drive_type', 'engine_type'
+        ]);
+
+        // Set isActive field
+        $data['isActive'] = $request->has('isActive') ? 1 : 0;
+
+        Engine::create($data);
 
         return redirect()->route('admin.engines.index')
             ->with('success', 'Engine created successfully.');
@@ -77,11 +90,11 @@ class EngineController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'displacement' => 'nullable|numeric|min:0.1|max:20',
-            'cylinders' => 'nullable|integer|min:1|max:16',
-            'power' => 'nullable|integer|min:1',
-            'torque' => 'nullable|integer|min:1',
-            'fuel_type' => 'required|in:gasoline,diesel,electric,hybrid,plug-in hybrid',
+            'horsepower' => 'nullable|integer|min:1',
+            'level' => 'nullable|string|max:255',
+            'max_speed' => 'nullable|integer|min:1',
+            'drive_type' => 'nullable|string|max:255',
+            'engine_type' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -90,9 +103,14 @@ class EngineController extends Controller
                 ->withInput();
         }
 
-        $engine->update($request->only([
-            'name', 'displacement', 'cylinders', 'power', 'torque', 'fuel_type'
-        ]));
+        $data = $request->only([
+            'name', 'horsepower', 'level', 'max_speed', 'drive_type', 'engine_type'
+        ]);
+
+        // Set isActive field
+        $data['isActive'] = $request->has('isActive') ? 1 : 0;
+
+        $engine->update($data);
 
         return redirect()->route('admin.engines.index')
             ->with('success', 'Engine updated successfully.');

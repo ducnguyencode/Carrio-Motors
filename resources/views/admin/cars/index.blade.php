@@ -38,10 +38,10 @@
                     <tr>
                         <td class="px-4 py-2 text-center">{{ ($cars->currentPage() - 1) * $cars->perPage() + $index + 1 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $car->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $car->brand }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $car->model->make->name ?? 'N/A' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $car->model->name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($car->is_active)
+                            @if($car->isActive)
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
                             @else
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>

@@ -13,6 +13,7 @@ class CreateMakesTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('logo')->nullable();
+            $table->boolean('isActive')->default(true);
             $table->timestamps();
         });
     }

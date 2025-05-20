@@ -57,7 +57,7 @@
             <div class="mb-4">
                 <h3 class="text-sm font-medium text-gray-500">Status</h3>
                 <p class="mt-1">
-                    @if($car->is_active)
+                    @if($car->isActive)
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
                     @else
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>

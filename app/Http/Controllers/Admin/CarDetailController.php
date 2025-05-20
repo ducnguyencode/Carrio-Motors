@@ -21,8 +21,29 @@ class CarDetailController extends Controller
      */
     public function index()
     {
-        $carDetails = CarDetail::with(['car', 'carColor'])->paginate(10);
-        return view('admin.car_details.index', compact('carDetails'));
+        $query = CarDetail::with(['car', 'carColor']);
+
+        // Handle search
+        if (request()->has('search') && !empty(request('search'))) {
+            $search = request('search');
+            $query->whereHas('car', function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            })->orWhereHas('carColor', function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter by car
+        if (request()->has('car') && !empty(request('car'))) {
+            $query->where('car_id', request('car'));
+        }
+
+        $carDetails = $query->paginate(10);
+
+        // Get all cars for filter dropdown
+        $cars = Car::with('model.make')->select('id', 'name', 'model_id')->orderBy('name')->get();
+
+        return view('admin.car_details.index', compact('carDetails', 'cars'));
     }
 
     /**
@@ -45,36 +66,46 @@ class CarDetailController extends Controller
      */
     public function store(Request $request)
     {
+        \Log::info('Form data received:', $request->all());
+
         $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
             'car_color_id' => 'required|exists:car_colors,id',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
-            'is_available' => 'sometimes|boolean',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_available' => 'nullable|boolean',
         ]);
 
-        $carDetail = new CarDetail();
-        $carDetail->car_id = $validated['car_id'];
-        $carDetail->car_color_id = $validated['car_color_id'];
-        $carDetail->quantity = $validated['quantity'];
-        $carDetail->price = $validated['price'];
-        $carDetail->is_available = $request->has('is_available');
+        try {
+            $carDetail = new CarDetail();
+            $carDetail->car_id = $validated['car_id'];
+            $carDetail->color_id = $validated['car_color_id'];
+            $carDetail->quantity = $validated['quantity'];
+            $carDetail->price = $validated['price'];
+            $carDetail->is_available = $request->has('is_available') ? 1 : 0;
 
-        // Xử lý upload các ảnh nếu có
-        if ($request->hasFile('images')) {
-            $images = [];
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('car_details', 'public');
-                $images[] = $path;
-            }
-            $carDetail->images = json_encode($images);
+            \Log::info('Attempting to save car detail:', [
+                'car_id' => $carDetail->car_id,
+                'color_id' => $carDetail->color_id,
+                'quantity' => $carDetail->quantity,
+                'price' => $carDetail->price,
+                'is_available' => $carDetail->is_available
+            ]);
+
+            $carDetail->save();
+
+            \Log::info('Car detail saved successfully');
+
+            return redirect()->route('admin.car_details.index')
+                ->with('success', 'Car detail created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Error creating car detail: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to create car detail. Error: ' . $e->getMessage());
         }
-
-        $carDetail->save();
-
-        return redirect()->route('admin.car_details.index')
-            ->with('success', 'Chi tiết xe đã được tạo thành công.');
     }
 
     /**
@@ -117,48 +148,18 @@ class CarDetailController extends Controller
             'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
             'is_available' => 'sometimes|boolean',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'remove_images' => 'nullable|array',
         ]);
 
         $carDetail->car_id = $validated['car_id'];
-        $carDetail->car_color_id = $validated['car_color_id'];
+        $carDetail->color_id = $validated['car_color_id']; // Map from car_color_id to color_id
         $carDetail->quantity = $validated['quantity'];
         $carDetail->price = $validated['price'];
         $carDetail->is_available = $request->has('is_available');
 
-        // Xử lý các ảnh cần xóa
-        if ($request->has('remove_images') && is_array($request->remove_images)) {
-            $images = json_decode($carDetail->images ?? '[]', true);
-            $newImages = [];
-
-            foreach ($images as $index => $imagePath) {
-                if (!in_array($index, $request->remove_images)) {
-                    $newImages[] = $imagePath;
-                } else {
-                    Storage::disk('public')->delete($imagePath);
-                }
-            }
-
-            $carDetail->images = json_encode($newImages);
-        }
-
-        // Xử lý thêm ảnh mới
-        if ($request->hasFile('images')) {
-            $images = json_decode($carDetail->images ?? '[]', true);
-
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('car_details', 'public');
-                $images[] = $path;
-            }
-
-            $carDetail->images = json_encode($images);
-        }
-
         $carDetail->save();
 
         return redirect()->route('admin.car_details.index')
-            ->with('success', 'Chi tiết xe đã được cập nhật thành công.');
+            ->with('success', 'Car detail updated successfully.');
     }
 
     /**
@@ -172,20 +173,14 @@ class CarDetailController extends Controller
         // Kiểm tra xem có đơn hàng nào liên quan không
         if ($carDetail->invoiceDetails()->count() > 0) {
             return redirect()->route('admin.car_details.index')
-                ->with('error', 'Không thể xóa chi tiết xe này vì đã có đơn hàng liên kết.');
+                ->with('error', 'Cannot delete this car detail because it has associated orders.');
         }
 
-        // Xóa các ảnh nếu có
-        if ($carDetail->images) {
-            $images = json_decode($carDetail->images, true);
-            foreach ($images as $imagePath) {
-                Storage::disk('public')->delete($imagePath);
-            }
-        }
+
 
         $carDetail->delete();
 
         return redirect()->route('admin.car_details.index')
-            ->with('success', 'Chi tiết xe đã được xóa thành công.');
+            ->with('success', 'Car detail deleted successfully.');
     }
 }

@@ -9,7 +9,7 @@ class Engine extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'displacement', 'cylinders', 'power', 'torque', 'fuel_type'];
+    protected $fillable = ['name', 'horsepower', 'level', 'max_speed', 'drive_type', 'engine_type', 'isActive'];
 
     // Relationship with Car
     public function cars()

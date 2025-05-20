@@ -39,7 +39,8 @@
     <div class="carousel-slide <?php echo e($index === 0 ? 'active' : ''); ?>">
         <a href="<?php echo e($banner->click_url ?? ($banner->car_id ? route('cars', ['id' => $banner->car_id]) : '#')); ?>" class="video-link">
             <video class="background-video" autoplay muted loop playsinline>
-                <source src="<?php echo e(Storage::url($banner->video_url)); ?>" type="video/mp4">
+                <source src="<?php echo e(url('storage/' . $banner->video_url)); ?>" type="video/mp4">
+                Your browser does not support the video tag.
             </video>
             <div class="carousel-content">
                 <h1><?php echo e($banner->title); ?></h1>
