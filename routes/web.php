@@ -123,3 +123,17 @@ Route::get('/featured-cars', [PageController::class, 'featuredCars'])->name('fea
 
 // Detail
 Route::get('/cars/{id}', [PageController::class, 'carDetail'])->name('car.detail');
+
+// Brand Catalog
+Route::get('/brands', [PageController::class, 'brandCatalog'])->name('brands');
+Route::get('/brands/{slug}', [PageController::class, 'brandDetail'])->name('brand.detail');
+
+// Car Comparison
+Route::get('/compare', [PageController::class, 'carComparison'])->name('car.compare');
+
+// Wishlist
+Route::get('/wishlist', [PageController::class, 'wishlist'])->name('wishlist');
+
+// Blog
+Route::get('/blog', [PageController::class, 'blog'])->name('blog');
+Route::get('/blog/{slug}', [PageController::class, 'blogPost'])->name('blog.post');

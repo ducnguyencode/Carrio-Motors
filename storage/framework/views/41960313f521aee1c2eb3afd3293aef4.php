@@ -7,10 +7,15 @@
         text-decoration: none;
         color: inherit;
         cursor: pointer;
+        position: relative;
     }
 
     .video-link:hover .carousel-content {
         text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    .carousel-slide {
+        position: relative;
     }
 </style>
 <?php $__env->stopSection(); ?>
@@ -23,123 +28,86 @@
     </div>
 <?php endif; ?>
 
-<div class="container mt-4 relative search-container">
-    <input
-        id="search-input"
-        type="text"
-        class="form-control"
-        placeholder="Search cars by name or brand..."
-        onfocus="this.select();"
-    >
-    <ul id="search-results" class="list-group position-absolute w-100 z-10" style="max-height: 200px; overflow-y: auto;"></ul>
-</div>
-
+<?php if(count($banners) > 0): ?>
 <div class="video-carousel">
-    <?php $__empty_1 = true; $__currentLoopData = $banners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $banner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-    <div class="carousel-slide <?php echo e($index === 0 ? 'active' : ''); ?>">
-        <a href="<?php echo e($banner->click_url ?? ($banner->car_id ? route('cars', ['id' => $banner->car_id]) : '#')); ?>" class="video-link">
-            <video class="background-video" autoplay muted loop playsinline>
-                <source src="<?php echo e(url('storage/' . $banner->video_url)); ?>" type="video/mp4">
+    <?php $__currentLoopData = $banners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $banner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <div class="carousel-slide <?php echo e($index == 0 ? 'active' : ''); ?>">
+        <a href="<?php echo e($banner->click_url ?? '#'); ?>" class="video-link">
+            <video class="background-video" autoplay muted loop>
+                <source src="<?php echo e(asset('storage/'.$banner->video_url)); ?>" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
             <div class="carousel-content">
+                <h4><?php echo e($banner->subtitle); ?></h4>
                 <h1><?php echo e($banner->title); ?></h1>
-                <h4><?php echo e($banner->main_content); ?></h4>
             </div>
         </a>
     </div>
-    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-    <!-- Fallback to default videos if no banners in database -->
-    <div class="carousel-slide active">
-        <a href="#" class="video-link">
-            <video class="background-video" autoplay muted loop playsinline>
-                <source src="<?php echo e(asset('videos/video1.mp4')); ?>" type="video/mp4">
-            </video>
-            <div class="carousel-content">
-                <h1>Car 1</h1>
-                <h4>Luxury meets performance</h4>
-            </div>
-        </a>
-    </div>
-    <div class="carousel-slide">
-        <a href="#" class="video-link">
-            <video class="background-video" autoplay muted loop playsinline>
-                <source src="<?php echo e(asset('videos/video2.mp4')); ?>" type="video/mp4">
-            </video>
-            <div class="carousel-content">
-                <h1>Car 2</h1>
-                <h4>Style and speed combined</h4>
-            </div>
-        </a>
-    </div>
-    <div class="carousel-slide">
-        <a href="#" class="video-link">
-            <video class="background-video" autoplay muted loop playsinline>
-                <source src="<?php echo e(asset('videos/video3.mp4')); ?>" type="video/mp4">
-            </video>
-            <div class="carousel-content">
-                <h1>Car 3</h1>
-                <h4>Innovation on wheels</h4>
-            </div>
-        </a>
-    </div>
-    <?php endif; ?>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
     <div class="carousel-indicators">
-        <?php if($banners->count() > 0): ?>
-            <?php $__currentLoopData = $banners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $banner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <div class="dot <?php echo e($index === 0 ? 'active' : ''); ?>"></div>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        <?php else: ?>
-            <div class="dot active"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-        <?php endif; ?>
+        <?php $__currentLoopData = $banners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $banner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="dot <?php echo e($index == 0 ? 'active' : ''); ?>"></div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 </div>
+<?php endif; ?>
 
-<h1 class="mt-5">Welcome to Carrio Motors</h1>
-<p>Explore top brands like BMW, Audi, Hyundai, JEEP, Suzuki, and more!</p>
-<img src="/images/banner.jpg" alt="Car Banner" class="img-fluid">
+<div class="container main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="display-4 mb-4">Welcome to Carrio Motors</h1>
+            <p class="lead">Explore top brands like BMW, Audi, Hyundai, JEEP, Suzuki, and more!</p>
+        </div>
+    </div>
 
-<h2 class="text-center fw-bold mb-4">Featured Cars</h2>
+    <div class="row mb-5">
+        <div class="col-12">
+            <img src="<?php echo e(asset('images/car-banner.jpg')); ?>" class="img-fluid rounded shadow-sm" alt="Car Banner">
+        </div>
+    </div>
 
-<div class="row g-4" id="product-list">
-    <?php $__currentLoopData = $featuredCars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $car): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-card <?php echo e($index >= 4 ? 'd-none' : ''); ?>">
-            <div
-                class="card h-100 shadow-sm cursor-pointer"
-                onclick="openCarPopup(<?php echo json_encode($car, 15, 512) ?>)"
-            >
-                <img src="<?php echo e($car['image_url']); ?>" class="card-img-top" alt="<?php echo e($car['name']); ?>" style="height: 180px; object-fit: cover;">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title"><?php echo e($car['name']); ?></h5>
-                    <div class="mb-2">
-                        <span class="text-warning fw-bold"><?php echo e(number_format($car['rating'], 1)); ?></span>
-                        <span class="text-warning">⭐</span>
-                        <small class="text-muted">(<?php echo e($car['reviews']); ?> reviews)</small>
+    <section class="featured-cars">
+        <h2 class="text-center mb-5">Featured Cars</h2>
+        <div class="row g-4">
+            <?php $__currentLoopData = $featuredCars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $car): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <img src="<?php echo e($car['image_url']); ?>" class="card-img-top" alt="<?php echo e($car['name']); ?>" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title"><?php echo e($car['name']); ?></h5>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="text-warning me-1"><?php echo e($car['rating']); ?></span>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-muted ms-1">(<?php echo e($car['reviews']); ?> reviews)</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="fw-bold">$<?php echo e(number_format($car['price'])); ?></span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge bg-success"><?php echo e($car['engine']); ?></span>
+                            <span class="badge bg-secondary"><?php echo e($car['fuel_type']); ?></span>
+                            <span class="badge bg-info"><?php echo e($car['transmission']); ?></span>
+                        </div>
+                        <?php if($car['is_best_seller']): ?>
+                        <div class="text-center mb-3">
+                            <span class="bg-success text-white py-1 px-3 rounded">Best Seller</span>
+                        </div>
+                        <?php endif; ?>
+                        <a href="/cars/<?php echo e($car['id']); ?>" class="btn btn-outline-primary w-100">View Details</a>
                     </div>
-                    <?php if($car['is_best_seller']): ?>
-                        <span class="badge bg-success mb-2">Best Seller</span>
-                    <?php endif; ?>
                 </div>
             </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
-    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-</div>
 
-<div class="text-center mt-4">
-    <button id="show-more-btn" class="btn btn-primary">Show more products</button>
+        <div class="text-center mt-5">
+            <a href="<?php echo e(route('cars')); ?>" class="btn btn-primary">Show more products</a>
+        </div>
+    </section>
 </div>
-
-<script>
-    document.getElementById('show-more-btn').addEventListener('click', function () {
-        document.querySelectorAll('.product-card.d-none').forEach(function (card) {
-            card.classList.remove('d-none');
-        });
-        this.style.display = 'none';
-    });
-</script>
 
 
 <div id="carModal" class="modal fade" tabindex="-1" aria-hidden="true">
