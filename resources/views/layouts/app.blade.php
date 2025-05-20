@@ -6,8 +6,25 @@
     <title>Car Dealership</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     @yield('styles')
     <style>
+        :root {
+            --primary-color: #1e88e5;
+            --primary-dark: #1565c0;
+            --secondary-color: #f5f5f5;
+            --accent-color: #ff6d00;
+            --text-dark: #212121;
+            --text-light: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
         .ticker {
             position: fixed;
             bottom: 0;
@@ -16,13 +33,142 @@
             width: 100%;
             padding: 5px 15px;
             font-size: 14px;
+            z-index: 1000;
         }
+
+        /* Modern Navigation */
+        .navbar-modern {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.8rem 0;
+            transition: all 0.3s ease;
+            z-index: 1030;
+        }
+
+        .navbar-modern.sticky-top {
+            top: -100px;
+            transition: top 0.3s ease;
+        }
+
+        .navbar-modern.sticky-top.visible {
+            top: 0;
+        }
+
+        .navbar-brand img {
+            height: 45px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+            background-color: rgba(30, 136, 229, 0.05);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--primary-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 70%;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 1rem 0;
+            min-width: 14rem;
+            margin-top: 1rem;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(30, 136, 229, 0.05);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+        }
+
+        .wishlist-icon {
+            position: relative;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .wishlist-icon:hover {
+            color: var(--accent-color) !important;
+            transform: scale(1.1);
+        }
+
+        .wishlist-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+            transform: rotate(90deg);
+        }
+
+        /* Video Carousel Styles */
         .video-carousel {
             position: relative;
             width: 100vw;
-            margin-left: calc(-50vw + 50%);
             height: 90vh;
             overflow: hidden;
+            margin-top: -2px; /* Remove gap between navbar and video */
         }
 
         .carousel-slide {
@@ -74,11 +220,10 @@
         .carousel-indicators .dot.active {
             opacity: 1;
         }
-        .dropdown-menu {
-            min-width: 12rem;
-        }
+
+        /* Other existing styles */
         .bg-gradient-primary {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         }
         .btn {
             border-radius: 0.5rem;
@@ -87,74 +232,152 @@
             transition: all 0.3s ease;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             border: none;
             box-shadow: 0 4px 6px rgba(13, 110, 253, 0.25);
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #084298 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(13, 110, 253, 0.35);
         }
 
-        .search-container {
-            margin-bottom: 30px;
+        /* Search overlay */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        #search-results {
-            background: white;
-            border: 1px solid #ccc;
-            border-top: none;
-            margin-top: -1px;
-            margin-bottom: 30px;
+        .search-overlay.active {
+            display: flex;
+            opacity: 1;
         }
 
+        .search-overlay-content {
+            width: 70%;
+            max-width: 800px;
+        }
+
+        .search-overlay-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid white;
+            color: white;
+            outline: none;
+        }
+
+        .search-overlay-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-overlay-close:hover {
+            color: var(--accent-color);
+            transform: rotate(90deg);
+        }
+
+        /* Main content container */
+        .main-content {
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center">
-        <a href="{{ url('/') }}">
-            <img src="images/logo.svg" style="height: 40px;">
-        </a>
-        </div>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mt-3 mb-3">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/cars"><i class="fas fa-car me-1"></i> Cars</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/buy"><i class="fas fa-shopping-cart me-1"></i> Buy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/contact"><i class="fas fa-envelope me-1"></i> Contact</a>
-                        </li>
-                    </ul>
+    <!-- Modern Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-modern">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url('/') }}">
+                <img src="{{ asset('images/logo.svg') }}" alt="Carrio Motors">
+            </a>
 
-                    <ul class="navbar-nav">
-                    </ul>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> About</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="carsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-car me-1"></i> Cars
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="carsDropdown">
+                            <li><a class="dropdown-item" href="{{ route('cars') }}">All Cars</a></li>
+                            <li><a class="dropdown-item" href="{{ route('featured.cars') }}">Featured Cars</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('brands') }}">Browse by Brand</a></li>
+                            <li><a class="dropdown-item" href="{{ route('car.compare') }}">Compare Cars</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/buy"><i class="fas fa-shopping-cart me-1"></i> Buy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact"><i class="fas fa-envelope me-1"></i> Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('blog') }}"><i class="bi bi-newspaper me-1"></i> Blog</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center">
+                    <button class="search-btn" id="searchToggleBtn" aria-label="Toggle search">
+                        <i class="bi bi-search"></i>
+                    </button>
+
+                    <a class="nav-link p-0" href="{{ route('wishlist') }}">
+                        <div class="wishlist-icon text-dark">
+                            <i class="bi bi-heart-fill"></i>
+                            <span class="wishlist-count" id="wishlist-count">0</span>
+                        </div>
+                    </a>
                 </div>
             </div>
-        </nav>
+        </div>
+    </nav>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-overlay-close" id="searchCloseBtn">
+            <i class="bi bi-x-lg"></i>
+        </div>
+        <div class="search-overlay-content">
+            <input type="text" class="search-overlay-input" id="search-input" placeholder="Search for cars...">
+            <div id="search-results" class="mt-4 bg-dark text-white"></div>
+        </div>
     </div>
+
     @yield('content')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {{-- Slide BannerBanner --}}
     <script>
         function updateTicker() {
             const ticker = document.getElementById('ticker');
+            if (!ticker) return;
+
             navigator.geolocation.getCurrentPosition(pos => {
                 const lat = pos.coords.latitude.toFixed(2);
                 const lon = pos.coords.longitude.toFixed(2);
@@ -165,51 +388,117 @@
                 ticker.innerText = `Date: ${date.toLocaleDateString()} | Time: ${date.toLocaleTimeString()} | Location: Not available`;
             });
         }
-        updateTicker();
-        setInterval(updateTicker, 10000);
+
+        if (document.getElementById('ticker')) {
+            updateTicker();
+            setInterval(updateTicker, 10000);
+        }
 
         document.addEventListener("DOMContentLoaded", function () {
+            // Slide Banner functionality
             const slides = document.querySelectorAll('.carousel-slide');
             const dots = document.querySelectorAll('.carousel-indicators .dot');
-            let currentIndex = 0;
-            const interval = 10000;
-
-            function showSlide(index) {
-                slides.forEach((slide, i) => {
-                    slide.classList.toggle('active', i === index);
-                    const video = slide.querySelector('video');
-                    if (video) {
-                        if (i === index) {
-                            video.play();
-                        } else {
-                            video.pause();
-                            video.currentTime = 0;
-                        }
-                    }
-                    if (dots[i]) dots[i].classList.toggle('active', i === index);
-                });
-            }
-
-            function nextSlide() {
-                currentIndex = (currentIndex + 1) % slides.length;
-                showSlide(currentIndex);
-            }
 
             if (slides.length > 0) {
+                let currentIndex = 0;
+                const interval = 10000;
+
+                function showSlide(index) {
+                    slides.forEach((slide, i) => {
+                        slide.classList.toggle('active', i === index);
+                        const video = slide.querySelector('video');
+                        if (video) {
+                            if (i === index) {
+                                video.play();
+                            } else {
+                                video.pause();
+                                video.currentTime = 0;
+                            }
+                        }
+                        if (dots[i]) dots[i].classList.toggle('active', i === index);
+                    });
+                }
+
+                function nextSlide() {
+                    currentIndex = (currentIndex + 1) % slides.length;
+                    showSlide(currentIndex);
+                }
+
                 showSlide(currentIndex);
                 setInterval(nextSlide, interval);
+
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', () => {
+                        currentIndex = i;
+                        showSlide(currentIndex);
+                    });
+                });
             }
 
-            dots.forEach((dot, i) => {
-                dot.addEventListener('click', () => {
-                    currentIndex = i;
-                    showSlide(currentIndex);
-                });
+            // Update wishlist count
+            updateWishlistCount();
+
+            // Sticky navbar behavior
+            const navbar = document.querySelector('.navbar-modern');
+            let lastScrollTop = 0;
+
+            window.addEventListener('scroll', function() {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                if (scrollTop > 100) {
+                    navbar.classList.add('sticky-top');
+
+                    if (scrollTop > lastScrollTop) {
+                        // Scrolling down
+                        navbar.classList.remove('visible');
+                    } else {
+                        // Scrolling up
+                        navbar.classList.add('visible');
+                    }
+                } else {
+                    navbar.classList.remove('sticky-top');
+                }
+
+                lastScrollTop = scrollTop;
             });
+
+            // Search overlay functionality
+            const searchToggleBtn = document.getElementById('searchToggleBtn');
+            const searchOverlay = document.getElementById('searchOverlay');
+            const searchCloseBtn = document.getElementById('searchCloseBtn');
+            const searchInput = document.getElementById('search-input');
+
+            if (searchToggleBtn && searchOverlay && searchCloseBtn && searchInput) {
+                searchToggleBtn.addEventListener('click', function() {
+                    searchOverlay.classList.add('active');
+                    setTimeout(() => {
+                        searchInput.focus();
+                    }, 100);
+                });
+
+                searchCloseBtn.addEventListener('click', function() {
+                    searchOverlay.classList.remove('active');
+                });
+
+                // Close search overlay on ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        searchOverlay.classList.remove('active');
+                    }
+                });
+            }
         });
+
+        // Wishlist functionality
+        function updateWishlistCount() {
+            const wishlistCount = document.getElementById('wishlist-count');
+            if (!wishlistCount) return;
+
+            const wishlist = JSON.parse(localStorage.getItem('carWishlist')) || [];
+            wishlistCount.textContent = wishlist.length;
+        }
     </script>
 
-    {{-- Search BarBar --}}
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById('search-input');
@@ -232,32 +521,24 @@
                     .then(data => {
                         resultBox.innerHTML = '';
                         if (data.length === 0) {
-                            resultBox.innerHTML = '<li class="list-group-item text-muted">No results found</li>';
+                            resultBox.innerHTML = '<div class="p-3 text-center">No results found</div>';
                             return;
                         }
                         data.forEach(car => {
-                            const li = document.createElement('li');
-                            li.className = 'list-group-item';
-                            li.innerHTML = `
-                                <a href="/cars/${car.id}" class="d-flex align-items-center text-decoration-none text-dark">
+                            const item = document.createElement('div');
+                            item.className = 'p-3 border-bottom border-secondary';
+                            item.innerHTML = `
+                                <a href="/cars/${car.id}" class="d-flex align-items-center text-decoration-none text-white">
                                     <img src="${car.image_url}" alt="${car.name}" style="width: 60px; height: 40px; object-fit: cover; margin-right: 10px;">
                                     <span>${car.name} (${car.brand})</span>
                                 </a>
                             `;
-                            resultBox.appendChild(li);
+                            resultBox.appendChild(item);
                         });
                     });
             }, 300);
         });
     });
-    </script>
-
-    {{-- Featured Cars Section --}}
-    <script>
-    function toggleMoreCars() {
-        const more = document.getElementById('more-cars');
-        more.classList.toggle('hidden');
-    }
     </script>
 </body>
 </html>
