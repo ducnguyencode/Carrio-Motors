@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('models', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->text('description')->nullable();
+            $table->boolean('isActive')->default(true);
             $table->integer('year')->nullable();
             $table->foreignId('make_id')->constrained()->onDelete('cascade');
             $table->timestamps();

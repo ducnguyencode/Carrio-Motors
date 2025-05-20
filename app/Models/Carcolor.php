@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,8 +15,10 @@ class CarColor extends Model
         'hex_code'
     ];
 
-    public function car_details()
+    protected $fillable = ['name', 'hex_code', 'is_active'];
+
+    public function carDetails()
     {
-        return $this->belongsTo(CarDetail::class, 'color_id');
+        return $this->hasMany(CarDetail::class, 'color_id');
     }
 }

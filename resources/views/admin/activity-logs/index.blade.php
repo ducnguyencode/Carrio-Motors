@@ -6,56 +6,53 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow-md p-6">
-    <div class="mb-6">
-        <h2 class="text-lg font-semibold mb-4">Filter Logs</h2>
-        <form action="{{ route('activity-logs.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-                <label for="user_id" class="block text-sm font-semibold text-gray-700 mb-1">User</label>
-                <select name="user_id" id="user_id" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
+    <div class="flex flex-wrap justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold">Activity History</h2>
+        <div class="flex items-center gap-2">
+            <form action="{{ route('activity-logs.index') }}" method="GET" class="flex flex-wrap items-center gap-2">
+                <!-- User Filter -->
+                <select name="user_id" class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
                     <option value="">All Users</option>
                     @foreach($users as $id => $name)
                         <option value="{{ $id }}" {{ request('user_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
                     @endforeach
                 </select>
-            </div>
 
-            <div>
-                <label for="action" class="block text-sm font-semibold text-gray-700 mb-1">Action</label>
-                <select name="action" id="action" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
+                <!-- Action Filter -->
+                <select name="action" class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
                     <option value="">All Actions</option>
                     @foreach($actions as $action)
                         <option value="{{ $action }}" {{ request('action') == $action ? 'selected' : '' }}>{{ ucfirst($action) }}</option>
                     @endforeach
                 </select>
-            </div>
 
-            <div>
-                <label for="module" class="block text-sm font-semibold text-gray-700 mb-1">Module</label>
-                <select name="module" id="module" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
+                <!-- Module Filter -->
+                <select name="module" class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
                     <option value="">All Modules</option>
                     @foreach($modules as $module)
                         <option value="{{ $module }}" {{ request('module') == $module ? 'selected' : '' }}>{{ ucfirst($module) }}</option>
                     @endforeach
                 </select>
-            </div>
 
-            <div>
-                <label for="date_range" class="block text-sm font-semibold text-gray-700 mb-1">Date Range</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base">
-                </div>
-            </div>
+                <!-- Date From -->
+                <input type="date" name="date_from" value="{{ request('date_from') }}" placeholder="From Date"
+                       class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
 
-            <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end space-x-2">
-                <a href="{{ route('activity-logs.index') }}" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition">
-                    Reset
-                </a>
-                <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow transition">
-                    Apply Filters
+                <!-- Date To -->
+                <input type="date" name="date_to" value="{{ request('date_to') }}" placeholder="To Date"
+                       class="border border-gray-300 rounded-full px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+
+                <button type="submit" class="flex items-center gap-1 px-4 py-2 rounded-full border border-blue-500 text-blue-500 bg-white hover:bg-blue-50 transition-all text-sm font-medium">
+                    <i class="fas fa-filter"></i> Filter
                 </button>
-            </div>
-        </form>
+
+                @if(request('user_id') || request('action') || request('module') || request('date_from') || request('date_to'))
+                <a href="{{ route('activity-logs.index') }}" class="flex items-center gap-1 px-4 py-2 rounded-full border border-gray-500 text-gray-500 bg-white hover:bg-gray-50 transition-all text-sm font-medium">
+                    <i class="fas fa-times"></i> Reset
+                </a>
+                @endif
+            </form>
+        </div>
     </div>
 
     <div class="overflow-x-auto">

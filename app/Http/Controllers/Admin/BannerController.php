@@ -52,7 +52,7 @@ class BannerController extends Controller
         }
 
         $banners = $query->orderBy('position', 'asc')
-                         ->orderBy('created_at', 'desc')
+                         ->orderBy('id', 'asc')
                          ->paginate(10)
                          ->withQueryString();
 

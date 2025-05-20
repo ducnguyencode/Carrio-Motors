@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CarModel;
 use App\Models\Make;
+use App\Services\ActivityLogService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -28,21 +29,34 @@ class ModelController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // More detailed logging
-        Log::debug('ModelController index method accessed', [
-            'user' => Auth::user()->username,
-            'role' => Auth::user()->role
-        ]);
+        $query = CarModel::with('make');
 
-        // Check the role specifically (for debugging)
-        if (Auth::user()->role === 'content') {
-            Log::debug('Content user has correct role for this method');
+        // Handle search
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('make', function($q) use ($request) {
+                      $q->where('name', 'like', '%' . $request->search . '%');
+                  });
         }
 
-        $models = CarModel::with('make')->paginate(10);
-        return view('admin.models.index', compact('models'));
+        // Handle status filter
+        if ($request->has('status') && $request->status !== 'all') {
+            $status = $request->status === 'active' ? 1 : 0;
+            $query->where('isActive', $status);
+        }
+
+        // Handle make filter
+        if ($request->has('make_id') && !empty($request->make_id)) {
+            $query->where('make_id', $request->make_id);
+        }
+
+        $models = $query->orderBy('created_at', 'desc')->paginate(10);
+        $makes = Make::all();
+
+        return view('admin.models.index', compact('models', 'makes'));
     }
 
     /**
@@ -50,7 +64,7 @@ class ModelController extends Controller
      */
     public function create()
     {
-        $makes = Make::all();
+        $makes = Make::active()->get();
         return view('admin.models.create', compact('makes'));
     }
 
@@ -61,6 +75,7 @@ class ModelController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'year' => 'nullable|integer|min:1886|max:' . (date('Y') + 1),
             'make_id' => 'required|exists:makes,id',
         ]);
@@ -71,7 +86,22 @@ class ModelController extends Controller
                 ->withInput();
         }
 
-        CarModel::create($request->only(['name', 'year', 'make_id']));
+        $data = $request->only(['name', 'description', 'year', 'make_id']);
+
+        // Set isActive field
+        $data['isActive'] = $request->has('isActive') ? 1 : 0;
+
+        $model = CarModel::create($data);
+
+        // Log activity
+        if (class_exists('App\Services\ActivityLogService')) {
+            ActivityLogService::log(
+                'create',
+                'models',
+                $model->id,
+                ['name' => $model->name, 'make' => $model->make->name]
+            );
+        }
 
         return redirect()->route('admin.models.index')
             ->with('success', 'Model created successfully.');
@@ -82,6 +112,7 @@ class ModelController extends Controller
      */
     public function show(CarModel $model)
     {
+        $model->load('make');
         return view('admin.models.show', compact('model'));
     }
 
@@ -90,7 +121,7 @@ class ModelController extends Controller
      */
     public function edit(CarModel $model)
     {
-        $makes = Make::all();
+        $makes = Make::active()->get();
         return view('admin.models.edit', compact('model', 'makes'));
     }
 
@@ -101,6 +132,7 @@ class ModelController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'year' => 'nullable|integer|min:1886|max:' . (date('Y') + 1),
             'make_id' => 'required|exists:makes,id',
         ]);
@@ -111,7 +143,29 @@ class ModelController extends Controller
                 ->withInput();
         }
 
-        $model->update($request->only(['name', 'year', 'make_id']));
+        $data = $request->only(['name', 'description', 'year', 'make_id']);
+
+        // Set isActive field
+        $data['isActive'] = $request->has('isActive') ? 1 : 0;
+
+        // Store original data for logging
+        $originalData = $model->toArray();
+
+        $model->update($data);
+
+        // Log activity
+        if (class_exists('App\Services\ActivityLogService')) {
+            ActivityLogService::log(
+                'update',
+                'models',
+                $model->id,
+                [
+                    'changed_fields' => array_keys(array_diff_assoc($data, array_intersect_key($originalData, $data))),
+                    'name' => $model->name,
+                    'make' => $model->make->name
+                ]
+            );
+        }
 
         return redirect()->route('admin.models.index')
             ->with('success', 'Model updated successfully.');
@@ -122,7 +176,31 @@ class ModelController extends Controller
      */
     public function destroy(CarModel $model)
     {
+        // Check if has related cars
+        if ($model->cars()->count() > 0) {
+            return redirect()->route('admin.models.index')
+                ->with('error', 'Cannot delete model with related cars. Please delete all cars first.');
+        }
+
+        // Store model info before deletion for logging
+        $modelInfo = [
+            'id' => $model->id,
+            'name' => $model->name,
+            'make' => $model->make->name
+        ];
+
         $model->delete();
+
+        // Log activity
+        if (class_exists('App\Services\ActivityLogService')) {
+            ActivityLogService::log(
+                'delete',
+                'models',
+                $modelInfo['id'],
+                $modelInfo
+            );
+        }
+
         return redirect()->route('admin.models.index')
             ->with('success', 'Model deleted successfully.');
     }

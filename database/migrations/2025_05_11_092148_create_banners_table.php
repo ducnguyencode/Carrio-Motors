@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('subtitle')->nullable(); // For 'Luxury meets performance' text
             $table->text('main_content')->nullable(); // Optional now
             $table->foreignId('car_id')->nullable()->constrained('cars'); // Optional now
+            $table->string('click_url')->nullable();
             $table->integer('position')->default(0); // For ordering banners
             $table->boolean('is_active')->default(false);
             $table->timestamps();

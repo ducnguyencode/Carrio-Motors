@@ -12,10 +12,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UsersTableSeeder::class,     // Create users including admin
-            CarSeeder::class,            // Create cars and car details
-            InvoicesTableSeeder::class,  // Create main invoices
-            InvoiceTestSeeder::class,    // Create test invoices for search testing
+            UsersTableSeeder::class,
+            CarColorSeeder::class,
+            // First we need Makes, Models and Engines before we can create Cars
+            MakeSeeder::class,
+            EngineSeeder::class,
+            ModelSeeder::class,
+            // Then we can create Cars
+            CarSeeder::class,
+            // Finally we can create Car Details
+            CarDetailSeeder::class
         ]);
     }
 }

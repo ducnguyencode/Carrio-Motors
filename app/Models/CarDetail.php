@@ -15,7 +15,8 @@ class CarDetail extends Model
         'car_id',
         'color_id',
         'quantity',
-        'price'
+        'price',
+        'is_available'
     ];
 
     public function car() {
@@ -24,5 +25,9 @@ class CarDetail extends Model
 
     public function carColor() {
         return $this->belongsTo(CarColor::class, 'color_id');
+    }
+
+    public function invoiceDetails() {
+        return $this->hasMany(InvoiceDetail::class);
     }
 }

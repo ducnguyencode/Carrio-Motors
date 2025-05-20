@@ -12,12 +12,11 @@ class CarDetailController extends Controller
     }
     public function store(Request $request) {
         $validatedData = $request->validate([
-            'model_id' => 'required|exists:model,id',
-            'engine_id' => 'required|exists:engine,id',
-            'car_id' => 'required|exists:car,id',
-            'color_id' => 'required|exists:car_color,id',
-            'transmission_id' => 'required|exists:transmission,id',
-            'mileage' => 'required|exists:mileage,id'
+            'car_id' => 'required|exists:cars,id',
+            'color_id' => 'required|exists:car_colors,id',
+            'quantity' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0',
+            'is_available' => 'sometimes|boolean'
         ]);
         $carDetail = CarDetail::create($validatedData);
         return response()->json($carDetail);
@@ -29,12 +28,11 @@ class CarDetailController extends Controller
     public function update(Request $request, CarDetail $carDetail) {
 
     $validatedData = $request->validate([
-        'model_id' => 'required|exists:model,id',
-        'engine_id' => 'required|exists:engine,id',
-        'car_id' => 'required|exists:car,id',
-        'color_id' => 'required|exists:car_color,id',
-        'transmission_id' => 'required|exists:transmission,id',
-        'mileage' => 'required|exists:mileage,id'.$carDetail->id.',id',
+        'car_id' => 'required|exists:cars,id',
+        'color_id' => 'required|exists:car_colors,id',
+        'quantity' => 'required|integer|min:0',
+        'price' => 'required|numeric|min:0',
+        'is_available' => 'sometimes|boolean'
     ]);
 
     $carDetail = $carDetail->update($validatedData);

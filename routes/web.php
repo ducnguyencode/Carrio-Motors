@@ -61,7 +61,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('invoices/{id}/restore', [AdminInvoiceController::class, 'restore'])->name('invoices.restore');
     Route::delete('invoices/{id}/force-delete', [AdminInvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
 
-    Route::resource('users', AdminUserController::class);
+    Route::resource('users', Admihttps://github.com/ducnguyencode/Carrio-Motors/pull/32/conflict?name=routes%252Fweb.php&ancestor_oid=bf7ec1c6b59eb1373b41609eebb6907f45ae59fe&base_oid=993ed87cfb019719989e4ed25009e6beacd7d648&head_oid=7a5f0b5918cb67c92cb5399a4187966eaef370danUserController::class);
     Route::resource('cars', CarController::class);
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
@@ -72,6 +72,11 @@ Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')
     // Regular invoice routes
     Route::resource('invoices', AdminInvoiceController::class)->except(['trash', 'restore', 'forceDelete']);
     Route::put('/invoices/{id}/status', [AdminInvoiceController::class, 'updateStatus'])->name('invoices.update-status');
+    Route::resource('invoices', AdminInvoiceController::class);
+    // Admin-only destroy actions
+    Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
+    Route::delete('/car_colors/{car_color}', [CarColorController::class, 'destroy'])->name('car_colors.destroy');
+    Route::delete('/car_details/{car_detail}', [CarDetailController::class, 'destroy'])->name('car_details.destroy');
 });
 
 // Admin and Content accessible routes (content management)
@@ -87,6 +92,7 @@ Route::middleware(['auth', 'role:admin,content,saler'])->prefix('admin')->name('
 // Cars routes accessible to all admin roles
 Route::middleware(['auth', 'role:admin,content,saler'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('cars', CarController::class)->except(['destroy']);
+    Route::get('get-models-by-make', [CarController::class, 'getModelsByMake'])->name('get-models-by-make');
 });
 
 // Email Verification Routes
@@ -117,18 +123,6 @@ Route::get('/featured-cars', [PageController::class, 'featuredCars'])->name('fea
 
 // Detail
 Route::get('/cars/{id}', [PageController::class, 'carDetail'])->name('car.detail');
-// Test PHP config
-Route::get('/php-info', function () {
-    return response()->json([
-        'upload_max_filesize' => ini_get('upload_max_filesize'),
-        'post_max_size' => ini_get('post_max_size'),
-        'memory_limit' => ini_get('memory_limit'),
-        'max_execution_time' => ini_get('max_execution_time'),
-        'max_input_time' => ini_get('max_input_time'),
-        'file_uploads' => ini_get('file_uploads'),
-        'max_file_uploads' => ini_get('max_file_uploads'),
-    ]);
-})->name('php.info');
 
-// Route cho activity-logs
+  
 Route::get('/admin/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');

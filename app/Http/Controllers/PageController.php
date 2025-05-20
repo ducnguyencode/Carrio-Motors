@@ -155,10 +155,52 @@ class PageController extends Controller
             ->orderBy('position')
             ->with('car')
             ->get();
-        return view('home', [
-            'featuredCars' => $featuredCars,
-            'banners' => $banners
+       
+        // Log banner information for debugging
+        \Illuminate\Support\Facades\Log::info('Banners retrieved for home page', [
+            'count' => $banners->count(),
+            'banner_data' => $banners->map(function($banner) {
+                return [
+                    'id' => $banner->id,
+                    'title' => $banner->title,
+                    'video_url' => $banner->video_url
+                ];
+            })
         ]);
+
+        // Ensure banners have correct video URLs and log verification process
+        foreach ($banners as $banner) {
+            if (!$banner->video_url) {
+                \Illuminate\Support\Facades\Log::warning('Banner has no video URL', ['banner_id' => $banner->id]);
+                // If video URL is empty, set default
+                $banner->video_url = 'videos/video1.mp4';
+            } else {
+                // Check if the file exists in storage
+                $storagePath = storage_path('app/public/' . $banner->video_url);
+                $publicPath = public_path('storage/' . $banner->video_url);
+
+                \Illuminate\Support\Facades\Log::info('Checking banner video paths', [
+                    'banner_id' => $banner->id,
+                    'video_url' => $banner->video_url,
+                    'storage_path' => $storagePath,
+                    'public_path' => $publicPath,
+                    'storage_exists' => file_exists($storagePath),
+                    'public_exists' => file_exists($publicPath)
+                ]);
+
+                if (!file_exists($storagePath) && !file_exists($publicPath)) {
+                    \Illuminate\Support\Facades\Log::warning('Banner video file not found', [
+                        'banner_id' => $banner->id,
+                        'video_url' => $banner->video_url
+                    ]);
+
+                    // If file doesn't exist in storage, set default
+                    $banner->video_url = 'videos/video1.mp4';
+                }
+            }
+        }
+
+        return view('home', compact('banners', 'featuredCars'));
     }
 
     public function about() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CarColor;
+use Illuminate\Support\Facades\Storage;
 
 class CarColorController extends Controller
 {
@@ -15,8 +16,8 @@ class CarColorController extends Controller
      */
     public function index()
     {
-        $carColors = CarColor::paginate(10);
-        return view('admin.car_colors.index', compact('carColors'));
+        $carcolors = CarColor::paginate(10);
+        return view('admin.car_colors.index', compact('carcolors'));
     }
 
     /**
@@ -40,25 +41,16 @@ class CarColorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:50',
             'hex_code' => 'required|string|max:7|regex:/^#[0-9A-F]{6}$/i',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $carColor = new CarColor();
         $carColor->name = $validated['name'];
-        $carColor->hex_code = $validated['hex_code'];
-        $carColor->description = $validated['description'] ?? null;
-
-        // Xử lý upload ảnh nếu có
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('car_colors', 'public');
-            $carColor->image = $imagePath;
-        }
-
+        $carColor->hex_code = strtoupper($validated['hex_code']);
+        $carColor->is_active = $request->has('is_active');
         $carColor->save();
 
         return redirect()->route('admin.car_colors.index')
-            ->with('success', 'Màu xe đã được tạo thành công.');
+            ->with('success', 'Car color created successfully.');
     }
 
     /**
@@ -95,29 +87,15 @@ class CarColorController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:50',
             'hex_code' => 'required|string|max:7|regex:/^#[0-9A-F]{6}$/i',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $carColor->name = $validated['name'];
-        $carColor->hex_code = $validated['hex_code'];
-        $carColor->description = $validated['description'] ?? null;
-
-        // Xử lý upload ảnh nếu có
-        if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
-            if ($carColor->image) {
-                Storage::disk('public')->delete($carColor->image);
-            }
-
-            $imagePath = $request->file('image')->store('car_colors', 'public');
-            $carColor->image = $imagePath;
-        }
-
+        $carColor->hex_code = strtoupper($validated['hex_code']);
+        $carColor->is_active = $request->has('is_active');
         $carColor->save();
 
         return redirect()->route('admin.car_colors.index')
-            ->with('success', 'Màu xe đã được cập nhật thành công.');
+            ->with('success', 'Car color updated successfully.');
     }
 
     /**
@@ -128,20 +106,15 @@ class CarColorController extends Controller
      */
     public function destroy(CarColor $carColor)
     {
-        // Kiểm tra xem có chi tiết xe nào sử dụng màu này không trước khi xóa
+        // Check if there are any car details using this color before deleting
         if ($carColor->carDetails()->count() > 0) {
             return redirect()->route('admin.car_colors.index')
-                ->with('error', 'Không thể xóa màu xe này vì đã có xe liên kết.');
-        }
-
-        // Xóa ảnh nếu có
-        if ($carColor->image) {
-            Storage::disk('public')->delete($carColor->image);
+                ->with('error', 'Cannot delete this color as it is being used by one or more cars.');
         }
 
         $carColor->delete();
 
         return redirect()->route('admin.car_colors.index')
-            ->with('success', 'Màu xe đã được xóa thành công.');
+            ->with('success', 'Car color deleted successfully.');
     }
 }

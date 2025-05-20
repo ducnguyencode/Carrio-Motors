@@ -10,6 +10,37 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+    <style>
+        /* Custom styles */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Better form input styles */
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Improve color picker */
+        .color-picker-wrapper input[type="color"] {
+            height: 48px;
+            border-radius: 6px 0 0 6px;
+        }
+
+        /* Animated transitions */
+        .transition-all {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+
     @yield('styles')
 </head>
 <body class="bg-gray-100">
@@ -179,5 +210,6 @@
     </script>
 
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>
