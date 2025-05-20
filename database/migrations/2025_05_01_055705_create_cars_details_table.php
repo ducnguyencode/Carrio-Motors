@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('color_id')->constrained('car_colors')->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('price');
+            $table->boolean('is_available')->default(true);
             $table->timestamps();
         });
     }

@@ -40,7 +40,8 @@
     <div class="carousel-slide {{ $index === 0 ? 'active' : '' }}">
         <a href="{{ $banner->click_url ?? ($banner->car_id ? route('cars', ['id' => $banner->car_id]) : '#') }}" class="video-link">
             <video class="background-video" autoplay muted loop playsinline>
-                <source src="{{ Storage::url($banner->video_url) }}" type="video/mp4">
+                <source src="{{ url('storage/' . $banner->video_url) }}" type="video/mp4">
+                Your browser does not support the video tag.
             </video>
             <div class="carousel-content">
                 <h1>{{ $banner->title }}</h1>

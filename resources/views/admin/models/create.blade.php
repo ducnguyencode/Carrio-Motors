@@ -10,7 +10,7 @@
         @csrf
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Model Name -->
-            <div>
+            <div class="md:col-span-1">
                 <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">
                     Model Name <span class="text-red-500">*</span>
                 </label>
@@ -24,15 +24,18 @@
             </div>
 
             <!-- Make -->
-            <div>
+            <div class="md:col-span-1">
                 <label for="make_id" class="block text-sm font-semibold text-gray-700 mb-1">
                     Make <span class="text-red-500">*</span>
                 </label>
                 <select name="make_id" id="make_id"
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400">
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 @error('make_id') border-red-500 @enderror"
+                        required>
                     <option value="">Select Make</option>
                     @foreach ($makes as $make)
-                        <option value="{{ $make->id }}">{{ $make->name }}</option>
+                        <option value="{{ $make->id }}" {{ old('make_id') == $make->id ? 'selected' : '' }}>
+                            {{ $make->name }}
+                        </option>
                     @endforeach
                 </select>
                 @error('make_id')
@@ -40,11 +43,41 @@
                 @enderror
             </div>
 
+            <!-- Year -->
+            <div class="md:col-span-1">
+                <label for="year" class="block text-sm font-semibold text-gray-700 mb-1">
+                    Year
+                </label>
+                <input type="number" name="year" id="year"
+                       value="{{ old('year') }}"
+                       placeholder="YYYY"
+                       min="1886" max="{{ date('Y') + 1 }}"
+                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none @error('year') border-red-500 @enderror">
+                @error('year')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Description -->
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">
+                    Description
+                </label>
+                <textarea name="description" id="description" rows="4"
+                          class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none @error('description') border-red-500 @enderror">{{ old('description') }}</textarea>
+                @error('description')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Active Status -->
-            <div class="flex items-center mt-8">
+            <div class="md:col-span-2">
+                <div class="flex items-center">
                 <input type="checkbox" name="isActive" id="isActive"
-                       class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {{ old('isActive') ? 'checked' : '' }}>
+                           class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                           {{ old('isActive', true) ? 'checked' : '' }}>
                 <label for="isActive" class="ml-2 text-gray-700">Active Model</label>
+                </div>
             </div>
         </div>
 

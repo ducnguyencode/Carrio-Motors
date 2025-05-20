@@ -5,16 +5,33 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Make;
+use App\Services\ActivityLogService;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MakeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $makes = Make::paginate(10);
+        $query = Make::query();
+
+        // Handle search
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+        }
+
+        // Handle status filter
+        if ($request->has('status') && $request->status !== 'all') {
+            $status = $request->status === 'active' ? 1 : 0;
+            $query->where('isActive', $status);
+        }
+
+        $makes = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('admin.makes.index', compact('makes'));
     }
 
@@ -45,14 +62,27 @@ class MakeController extends Controller
 
         $data = $request->only(['name', 'description']);
 
+        // Set isActive field
+        $data['isActive'] = $request->has('isActive') ? 1 : 0;
+
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/makes'), $filename);
-            $data['logo'] = 'uploads/makes/' . $filename;
+            $filename = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('makes', $filename, 'public');
+            $data['logo'] = $path;
         }
 
-        Make::create($data);
+        $make = Make::create($data);
+
+        // Log activity
+        if (class_exists('App\Services\ActivityLogService')) {
+            ActivityLogService::log(
+                'create',
+                'makes',
+                $make->id,
+                ['name' => $make->name]
+            );
+        }
 
         return redirect()->route('admin.makes.index')
             ->with('success', 'Make created successfully.');
@@ -93,14 +123,38 @@ class MakeController extends Controller
 
         $data = $request->only(['name', 'description']);
 
+        // Set isActive field
+        $data['isActive'] = $request->has('isActive') ? 1 : 0;
+
         if ($request->hasFile('logo')) {
+            // Remove old logo if exists
+            if ($make->logo) {
+                Storage::disk('public')->delete($make->logo);
+            }
+
             $file = $request->file('logo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/makes'), $filename);
-            $data['logo'] = 'uploads/makes/' . $filename;
+            $filename = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('makes', $filename, 'public');
+            $data['logo'] = $path;
         }
 
+        // Store original data for logging
+        $originalData = $make->toArray();
+
         $make->update($data);
+
+        // Log activity
+        if (class_exists('App\Services\ActivityLogService')) {
+            ActivityLogService::log(
+                'update',
+                'makes',
+                $make->id,
+                [
+                    'changed_fields' => array_keys(array_diff_assoc($data, array_intersect_key($originalData, $data))),
+                    'name' => $make->name
+                ]
+            );
+        }
 
         return redirect()->route('admin.makes.index')
             ->with('success', 'Make updated successfully.');
@@ -111,7 +165,35 @@ class MakeController extends Controller
      */
     public function destroy(Make $make)
     {
+        // Check if has related models
+        if ($make->models()->count() > 0) {
+            return redirect()->route('admin.makes.index')
+                ->with('error', 'Cannot delete make with related models. Please delete all models first.');
+        }
+
+        // Remove logo if exists
+        if ($make->logo) {
+            Storage::disk('public')->delete($make->logo);
+        }
+
+        // Store make info before deletion for logging
+        $makeInfo = [
+            'id' => $make->id,
+            'name' => $make->name
+        ];
+
         $make->delete();
+
+        // Log activity
+        if (class_exists('App\Services\ActivityLogService')) {
+            ActivityLogService::log(
+                'delete',
+                'makes',
+                $makeInfo['id'],
+                $makeInfo
+            );
+        }
+
         return redirect()->route('admin.makes.index')
             ->with('success', 'Make deleted successfully.');
     }

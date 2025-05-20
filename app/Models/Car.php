@@ -13,21 +13,59 @@ class Car extends Model
 
     protected $fillable = [
         'name',
-        'brand',
         'model_id',
         'engine_id',
-        'seats',
+        'seat_number',
         'transmission',
         'description',
-        'release_date',
-        'status'
+        'date_manufactured',
+        'isActive',
+        'main_image',
+        'additional_images',
+        'is_featured'
     ];
 
-    public function model() {
-        return $this->belongsTo(\App\Models\Model::class);
+    protected $casts = [
+        'additional_images' => 'array',
+        'isActive' => 'boolean',
+        'is_featured' => 'boolean'
+    ];
+
+    /**
+     * Get the model that the car belongs to.
+     */
+    public function model()
+    {
+        return $this->belongsTo(CarModel::class, 'model_id');
+    }
+
+    /**
+     * Get the make/brand of the car through the model relationship.
+     */
+    public function make()
+    {
+        return $this->hasOneThrough(
+            Make::class,
+            CarModel::class,
+            'id',
+            'id',
+            'model_id',
+            'make_id'
+        );
     }
 
     public function engine() {
         return $this->belongsTo(\App\Models\Engine::class);
+    }
+
+    public function carDetails() {
+        return $this->hasMany(\App\Models\CarDetail::class);
+    }
+
+    public function invoices() {
+        return $this->hasManyThrough(
+            \App\Models\Invoice::class,
+            \App\Models\CarDetail::class
+        );
     }
 }

@@ -19,34 +19,45 @@
                 <tr>
                     <th class="px-4 py-2 text-center text-xs font-semibold text-gray-500 uppercase">#</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Color Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hex Code</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Color Preview</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($carcolors as $index => $color)
                     <tr>
-                        <td class="px-4 py-2 text-center">{{ ($colors->currentPage() - 1) * $colors->perPage() + $index + 1 }}</td>
-                        <td class="px-6 py-4">{{ $color->color_name }}</td>
+                        <td class="px-4 py-2 text-center">{{ ($carcolors->currentPage() - 1) * $carcolors->perPage() + $index + 1 }}</td>
+                        <td class="px-6 py-4">{{ $color->name }}</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ $color->hex_code }}">{{ $color->hex_code }}</span>
+                            <div class="flex items-center">
+                                <div class="h-8 w-8 rounded-full mr-2 border border-gray-200" style="background-color: {{ $color->hex_code }}"></div>
+                                <span class="text-sm font-medium">{{ $color->hex_code }}</span>
+                            </div>
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('admin.car_colors.edit', $color) }}" class="text-yellow-600 hover:text-yellow-800">
-                                <i class="fas fa-edit"></i>
+                            @if($color->is_active)
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                            @else
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <a href="{{ route('admin.car_colors.edit', $color) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <i class="fas fa-edit"></i> Edit
                             </a>
-                            <form action="{{ route('admin.car_colors.destroy', $color) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure?')">
+                            <form action="{{ route('admin.car_colors.destroy', $color) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this color?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-800">
-                                    <i class="fas fa-trash"></i>
+                                <button type="submit" class="text-red-600 hover:text-red-900">
+                                    <i class="fas fa-trash"></i> Delete
                                 </button>
                             </form>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">No car colors found.</td>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">No car colors found.</td>
                     </tr>
                 @endforelse
             </tbody>

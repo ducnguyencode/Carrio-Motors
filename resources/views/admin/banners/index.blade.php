@@ -51,11 +51,12 @@
                         <td class="px-4 py-2 text-center">{{ ($banners->currentPage() - 1) * $banners->perPage() + $index + 1 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($banner->video_url)
-                                <div class="w-24 h-16 overflow-hidden rounded">
-                                    <video width="96" height="64" controls muted class="object-cover">
-                                        <source src="{{ Storage::url($banner->video_url) }}" type="video/mp4">
+                                <div class="w-32 h-24 overflow-hidden rounded">
+                                    <video width="128" height="96" controls autoplay loop muted class="object-cover" preload="metadata">
+                                        <source src="{{ url('storage/' . $banner->video_url) }}" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
+                                    <p class="text-xs mt-1 text-gray-500">Video URL: {{ url('storage/' . $banner->video_url) }}</p>
                                 </div>
                             @else
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-800">No Video</span>

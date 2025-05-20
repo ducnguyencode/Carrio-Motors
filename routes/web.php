@@ -83,6 +83,7 @@ Route::middleware(['auth', 'role:admin,saler'])->prefix('admin')->name('admin.')
 // Cars routes accessible to all admin roles
 Route::middleware(['auth', 'role:admin,content,saler'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('cars', CarController::class)->except(['destroy']);
+    Route::get('get-models-by-make', [CarController::class, 'getModelsByMake'])->name('get-models-by-make');
 });
 
 // Email Verification Routes
@@ -117,15 +118,3 @@ Route::get('/featured-cars', [PageController::class, 'featuredCars'])->name('fea
 
 // Detail
 Route::get('/cars/{id}', [PageController::class, 'carDetail'])->name('car.detail');
-// Test PHP config
-Route::get('/php-info', function () {
-    return response()->json([
-        'upload_max_filesize' => ini_get('upload_max_filesize'),
-        'post_max_size' => ini_get('post_max_size'),
-        'memory_limit' => ini_get('memory_limit'),
-        'max_execution_time' => ini_get('max_execution_time'),
-        'max_input_time' => ini_get('max_input_time'),
-        'file_uploads' => ini_get('file_uploads'),
-        'max_file_uploads' => ini_get('max_file_uploads'),
-    ]);
-})->name('php.info');

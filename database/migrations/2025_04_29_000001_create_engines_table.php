@@ -11,11 +11,12 @@ class CreateEnginesTable extends Migration
         Schema::create('engines', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->float('displacement')->nullable(); // in liters
-            $table->integer('cylinders')->nullable();
-            $table->integer('power')->nullable(); // in horsepower
-            $table->integer('torque')->nullable(); // in Nm
-            $table->enum('fuel_type', ['gasoline', 'diesel', 'electric', 'hybrid', 'plug-in hybrid'])->default('gasoline');
+            $table->integer('horsepower')->nullable(); // in horsepower
+            $table->string('level')->nullable();
+            $table->integer('max_speed')->nullable(); // in km/h
+            $table->string('drive_type')->nullable();
+            $table->string('engine_type')->nullable();
+            $table->boolean('isActive')->default(true);
             $table->timestamps();
         });
     }

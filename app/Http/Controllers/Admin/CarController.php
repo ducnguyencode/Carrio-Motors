@@ -10,6 +10,8 @@ use App\Models\Engine;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Models;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CarModel;
+use App\Models\InvoiceDetail;
 
 class CarController extends Controller
 {
@@ -31,10 +33,25 @@ class CarController extends Controller
      */
     public function create()
     {
-        $makes = Make::all();
+        $makes = Make::where('isActive', true)->get();
         $models = [];
         $engines = Engine::all();
         return view('admin.cars.create', compact('makes', 'models', 'engines'));
+    }
+
+    /**
+     * Get models by make id for AJAX request
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getModelsByMake(Request $request)
+    {
+        $make_id = $request->input('make_id');
+        $models = CarModel::where('make_id', $make_id)
+                    ->where('isActive', true)
+                    ->get();
+        return response()->json($models);
     }
 
     /**
@@ -46,29 +63,30 @@ class CarController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'make_id' => 'required|exists:makes,id',
             'model_id' => 'required|exists:models,id',
             'engine_id' => 'required|exists:engines,id',
-            'name' => 'required|string|max:255',
+            'seat_number' => 'required|integer|in:2,4,5,7,9',
+            'transmission' => 'required|in:manual,automatic',
             'description' => 'nullable|string',
-            'base_price' => 'required|numeric|min:0',
-            'status' => 'required|in:available,soon,sold_out',
-            'features' => 'nullable|string',
-            'specification' => 'nullable|string',
+            'date_manufactured' => 'required|date',
             'main_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Create new car
         $car = new Car();
+        $car->name = $validated['name'];
         $car->model_id = $validated['model_id'];
         $car->engine_id = $validated['engine_id'];
-        $car->name = $validated['name'];
+        $car->seat_number = $validated['seat_number'];
+        $car->transmission = $validated['transmission'];
         $car->description = $validated['description'] ?? null;
-        $car->base_price = $validated['base_price'];
-        $car->status = $validated['status'];
-        $car->features = $validated['features'] ?? null;
-        $car->specification = $validated['specification'] ?? null;
+        $car->isActive = $request->has('is_active') ? true : false;
+        $car->date_manufactured = $validated['date_manufactured'];
 
-        // Xử lý upload ảnh chính
+        // Handle main image upload
         if ($request->hasFile('main_image')) {
             $mainImagePath = $request->file('main_image')->store('cars', 'public');
             $car->main_image = $mainImagePath;
@@ -76,19 +94,19 @@ class CarController extends Controller
 
         $car->save();
 
-        // Xử lý upload các ảnh bổ sung
+        // Handle additional images upload
         if ($request->hasFile('additional_images')) {
             $additionalImages = [];
             foreach ($request->file('additional_images') as $image) {
-                $path = $image->store('cars', 'public');
-                $additionalImages[] = $path;
+                $imagePath = $image->store('cars', 'public');
+                $additionalImages[] = $imagePath;
             }
             $car->additional_images = json_encode($additionalImages);
             $car->save();
         }
 
         return redirect()->route('admin.cars.index')
-            ->with('success', 'Xe đã được tạo thành công.');
+            ->with('success', 'Car created successfully');
     }
 
     /**
@@ -113,7 +131,7 @@ class CarController extends Controller
     {
         $makes = Make::all();
         $car->load('model.make');
-        $models = Model::where('make_id', $car->model->make_id)->get();
+        $models = CarModel::where('make_id', $car->model->make_id)->get();
         $engines = Engine::all();
         return view('admin.cars.edit', compact('car', 'makes', 'models', 'engines'));
     }
@@ -128,14 +146,14 @@ class CarController extends Controller
     public function update(Request $request, Car $car)
     {
         $validated = $request->validate([
+            'make_id' => 'required|exists:makes,id',
             'model_id' => 'required|exists:models,id',
             'engine_id' => 'required|exists:engines,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'base_price' => 'required|numeric|min:0',
-            'status' => 'required|in:available,soon,sold_out',
-            'features' => 'nullable|string',
-            'specification' => 'nullable|string',
+            'seat_number' => 'required|integer|in:2,4,5,7,9',
+            'transmission' => 'required|in:manual,automatic',
+            'date_manufactured' => 'required|date',
             'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'remove_additional_images' => 'nullable|array',
@@ -145,10 +163,10 @@ class CarController extends Controller
         $car->engine_id = $validated['engine_id'];
         $car->name = $validated['name'];
         $car->description = $validated['description'] ?? null;
-        $car->base_price = $validated['base_price'];
-        $car->status = $validated['status'];
-        $car->features = $validated['features'] ?? null;
-        $car->specification = $validated['specification'] ?? null;
+        $car->seat_number = $validated['seat_number'];
+        $car->transmission = $validated['transmission'];
+        $car->isActive = $request->has('is_active') ? true : false;
+        $car->date_manufactured = $validated['date_manufactured'];
 
         // Xử lý upload ảnh chính nếu có
         if ($request->hasFile('main_image')) {
@@ -192,7 +210,7 @@ class CarController extends Controller
         $car->save();
 
         return redirect()->route('admin.cars.index')
-            ->with('success', 'Xe đã được cập nhật thành công.');
+            ->with('success', 'Car updated successfully.');
     }
 
     /**
@@ -204,9 +222,13 @@ class CarController extends Controller
     public function destroy(Car $car)
     {
         // Kiểm tra xem có đơn hàng nào liên quan không
-        if ($car->invoices()->count() > 0) {
+        $hasInvoices = InvoiceDetail::whereHas('carDetail', function($query) use ($car) {
+            $query->where('car_id', $car->id);
+        })->exists();
+
+        if ($hasInvoices) {
             return redirect()->route('admin.cars.index')
-                ->with('error', 'Không thể xóa xe này vì đã có đơn hàng liên kết.');
+                ->with('error', 'Cannot delete this car because it has associated orders.');
         }
 
         // Xóa ảnh chính
@@ -228,6 +250,6 @@ class CarController extends Controller
         $car->delete();
 
         return redirect()->route('admin.cars.index')
-            ->with('success', 'Xe đã được xóa thành công.');
+            ->with('success', 'Car deleted successfully.');
     }
 }

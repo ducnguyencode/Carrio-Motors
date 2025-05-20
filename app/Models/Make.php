@@ -9,7 +9,17 @@ class Make extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'logo'];
+    protected $fillable = ['name', 'description', 'logo', 'isActive'];
+
+    protected $casts = [
+        'isActive' => 'boolean',
+    ];
+
+    // Scope to get only active makes
+    public function scopeActive($query)
+    {
+        return $query->where('isActive', true);
+    }
 
     // Relationship with Model
     public function models()
@@ -21,5 +31,15 @@ class Make extends Model
     public function cars()
     {
         return $this->hasMany(Car::class);
+    }
+
+    // Define accessor for logo URL
+    public function getLogoUrlAttribute()
+    {
+        if (!$this->logo) {
+            return asset('images/no-image.png');
+        }
+
+        return asset('storage/' . $this->logo);
     }
 }
