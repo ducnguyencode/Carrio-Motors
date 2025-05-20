@@ -70,6 +70,7 @@ class InvoiceController extends Controller
             ->join('car_colors', 'cars_details.color_id', '=', 'car_colors.id')
             ->where('cars.isActive', true)
             ->where('cars_details.quantity', '>', 0)
+            ->where('cars_details.is_available', true)
             ->select(
                 'cars_details.*',
                 'cars.name as car_name',
@@ -114,7 +115,7 @@ class InvoiceController extends Controller
             $invoice->customer_phone = $request->customer_phone;
             $invoice->customer_address = $request->customer_address;
             $invoice->payment_method = $request->payment_method;
-            $invoice->status = 'pending'; // Set initial status to pending
+            $invoice->status = 'pending';
             $invoice->saler_id = Auth::id();
             $invoice->purchase_date = now();
             $invoice->save();
@@ -125,13 +126,16 @@ class InvoiceController extends Controller
             foreach ($request->car_detail_ids as $index => $carDetailId) {
                 $quantity = $request->quantities[$index];
 
-                // Get car detail with available stock
+                // Get car detail with available stock and active status
                 $carDetail = CarDetail::where('id', $carDetailId)
                     ->where('quantity', '>=', $quantity)
+                    ->whereHas('car', function($query) {
+                        $query->where('isActive', true);
+                    })
                     ->first();
 
                 if (!$carDetail) {
-                    throw new \Exception('Selected car is not available in the requested quantity.');
+                    throw new \Exception('Sorry, this car is no longer available. It may have just been purchased by another customer. Please select another car.');
                 }
 
                 // Create invoice detail
@@ -314,7 +318,13 @@ class InvoiceController extends Controller
     public function destroy(Invoice $invoice)
     {
         try {
-            // Check if user is saler and has permission to delete this invoice
+            // Check if invoice status is not deletable
+            $nonDeletableStatuses = ['completed', 'done', 'processing'];
+            if (in_array($invoice->status, $nonDeletableStatuses)) {
+                return back()->with('error', 'Cannot delete invoice with status: ' . ucfirst($invoice->status));
+            }
+
+            // Check permissions if user is saler
             if (Auth::user()->role === 'saler') {
                 if ($invoice->saler_id !== Auth::id() && $invoice->user->saler_id !== Auth::id()) {
                     return back()->with('error', 'You do not have permission to delete this invoice.');

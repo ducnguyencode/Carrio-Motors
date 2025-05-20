@@ -86,20 +86,14 @@
                             <div class="mb-4">
                                 <label class="block mb-1 font-medium">Select Car</label>
                                 <div class="flex gap-2">
-                                    <select name="car_detail_ids[]" required
-                                        class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 car-select @error('car_detail_ids.0') border-red-500 @enderror">
-                                        <option value="">Select a Car</option>
+                                    <select name="car_detail_ids[]" class="car-select form-select" required>
+                                        <option value="">Select a car</option>
                                         @foreach($carDetails as $carDetail)
                                             <option value="{{ $carDetail->id }}"
-                                                data-price="{{ $carDetail->price }}"
-                                                data-max="{{ $carDetail->quantity }}"
-                                                {{ old('car_detail_ids.0') == $carDetail->id ? 'selected' : '' }}>
-                                                {{ $carDetail->car_name }} -
-                                                {{ $carDetail->model_name }} -
-                                                {{ $carDetail->engine_name }} -
-                                                {{ $carDetail->color_name }} -
-                                                ${{ number_format($carDetail->price, 2) }}
-                                                ({{ $carDetail->quantity }} available)
+                                                    data-max="{{ $carDetail->quantity }}"
+                                                    data-price="{{ $carDetail->price }}">
+                                                {{ $carDetail->car_name }} - {{ $carDetail->model_name }} - {{ $carDetail->engine_name }} - {{ $carDetail->color_name }}
+                                                (Available: {{ $carDetail->quantity }})
                                             </option>
                                         @endforeach
                                     </select>

@@ -129,6 +129,7 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const quantityInputs = document.querySelectorAll('.quantity-input');
@@ -157,6 +158,25 @@
             input.addEventListener('change', updateTotals);
             input.addEventListener('input', updateTotals);
         });
+
+        const form = document.querySelector('form[action*="invoices/update"]') || document.querySelector('form[action*="invoices.update"]');
+        if(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you really want to change the invoice status?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, change it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        }
     });
 </script>
 @endpush
