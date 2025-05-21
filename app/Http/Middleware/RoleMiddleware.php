@@ -26,7 +26,7 @@ class RoleMiddleware
             return redirect('/login')->with('error', 'Authentication required!');
         }
 
-        // Đường dẫn hiện tại
+        // Current URL path
         $currentUrl = $request->path();
 
         // Allow content role to access specific management routes
@@ -36,6 +36,7 @@ class RoleMiddleware
                                           strpos($currentUrl, 'admin/car_colors') === 0 ||
                                           strpos($currentUrl, 'admin/banners') === 0 ||
                                           strpos($currentUrl, 'admin/car_details') === 0 ||
+                                          strpos($currentUrl, 'admin/blog') === 0 ||
                                           strpos($currentUrl, 'admin/cars') === 0)) {
             return $next($request);
         }
@@ -94,7 +95,7 @@ class RoleMiddleware
             return redirect('/dashboard')->with('error', "Access denied. Your role '{$user->role}' does not have permission for this page. Required roles: " . implode(', ', $allowedRoles));
         }
 
-        // Regular users redirect to user dashboard
-        return redirect('/dashboard')->with('error', "Access denied. Your role '{$user->role}' does not have permission for this page. Required roles: " . implode(', ', $allowedRoles));
+        // Regular users redirect to purchase history
+        return redirect()->route('user.purchases')->with('error', "Access denied. Your role '{$user->role}' does not have permission for this page. Required roles: " . implode(', ', $allowedRoles));
     }
 }

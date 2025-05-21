@@ -638,6 +638,109 @@ function toggleVideoSource() {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     toggleVideoSource();
+
+    // Initialize link behavior
+    initLinkBehavior();
 });
+
+function initLinkBehavior() {
+    const carSelect = document.getElementById('car_id');
+    const customUrlInput = document.getElementById('click_url');
+    const carSelectParent = carSelect.closest('div');
+    const customUrlParent = customUrlInput.closest('div');
+
+    // Initial check
+    checkLinkState();
+
+    // Add event listeners
+    carSelect.addEventListener('change', checkLinkState);
+    customUrlInput.addEventListener('input', checkLinkState);
+
+    function checkLinkState() {
+        // If car is selected, disable custom URL
+        if (carSelect.value) {
+            customUrlInput.value = '';
+            customUrlInput.disabled = true;
+            customUrlParent.style.opacity = '0.5';
+            customUrlParent.querySelector('.text-gray-500').innerHTML =
+                'Not available when a car is selected. Clear car selection to enable custom URL.';
+        }
+        // If custom URL has value, disable car select
+        else if (customUrlInput.value.trim()) {
+            carSelect.value = '';
+            carSelect.disabled = true;
+            carSelectParent.style.opacity = '0.5';
+            carSelectParent.querySelector('.text-gray-500').innerHTML =
+                'Not available when using a custom URL. Clear custom URL to enable car selection.';
+        }
+        // Both empty, enable both
+        else {
+            customUrlInput.disabled = false;
+            carSelect.disabled = false;
+            customUrlParent.style.opacity = '1';
+            carSelectParent.style.opacity = '1';
+            carSelectParent.querySelector('.text-gray-500').innerHTML =
+                'When selected, clicking the banner will go to this car\'s details page';
+            customUrlParent.querySelector('.text-gray-500').innerHTML =
+                'If provided, clicking on the banner will redirect to this URL instead of the linked car page';
+        }
+    }
+
+    // Add clear buttons
+    addClearButton(carSelectParent, carSelect);
+    addClearButton(customUrlParent, customUrlInput);
+}
+
+function addClearButton(parentDiv, inputElement) {
+    const clearButton = document.createElement('button');
+    clearButton.type = 'button';
+    clearButton.className = 'text-xs text-red-500 hover:text-red-700 mt-1';
+    clearButton.textContent = 'Clear selection';
+    clearButton.style.display = 'none';
+
+    // Add button after help text
+    const helpText = parentDiv.querySelector('.text-gray-500');
+    helpText.parentNode.insertBefore(clearButton, helpText.nextSibling);
+
+    // Show/hide clear button based on input state
+    function updateClearButton() {
+        if (inputElement.disabled) {
+            clearButton.style.display = 'block';
+        } else {
+            clearButton.style.display = 'none';
+        }
+    }
+
+    // Clear the input and re-enable options
+    clearButton.addEventListener('click', function() {
+        inputElement.value = '';
+        inputElement.disabled = false;
+
+        const carSelect = document.getElementById('car_id');
+        const customUrlInput = document.getElementById('click_url');
+
+        carSelect.disabled = false;
+        customUrlInput.disabled = false;
+
+        carSelect.closest('div').style.opacity = '1';
+        customUrlInput.closest('div').style.opacity = '1';
+
+        carSelect.closest('div').querySelector('.text-gray-500').innerHTML =
+            'When selected, clicking the banner will go to this car\'s details page';
+        customUrlInput.closest('div').querySelector('.text-gray-500').innerHTML =
+            'If provided, clicking on the banner will redirect to this URL instead of the linked car page';
+
+        updateClearButton();
+        document.getElementById('car_id').closest('div').querySelector('button').style.display = 'none';
+        document.getElementById('click_url').closest('div').querySelector('button').style.display = 'none';
+    });
+
+    // Update clear button visibility on input change
+    inputElement.addEventListener('change', updateClearButton);
+    inputElement.addEventListener('input', updateClearButton);
+
+    // Initial update
+    updateClearButton();
+}
 </script>
 @endsection

@@ -62,14 +62,14 @@ class InvoiceController extends Controller
         $users = User::where('role', 'user')->get();
         $salers = User::where('role', 'saler')->get();
 
-        // Thay đổi cách lấy dữ liệu car details
+        // Change data car details
         $carDetails = DB::table('cars_details')
             ->join('cars', 'cars_details.car_id', '=', 'cars.id')
             ->join('models', 'cars.model_id', '=', 'models.id')
             ->join('engines', 'cars.engine_id', '=', 'engines.id')
             ->join('car_colors', 'cars_details.color_id', '=', 'car_colors.id')
-            ->where('cars.isActive', true)
             ->where('cars_details.quantity', '>', 0)
+            ->where('cars_details.is_available', 1)
             ->select(
                 'cars_details.*',
                 'cars.name as car_name',
@@ -97,11 +97,15 @@ class InvoiceController extends Controller
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20',
             'customer_address' => 'required|string|max:255',
+            'seller_tax_code' => 'required|string|max:20',
+            'customer_tax_code' => 'nullable|string|max:20',
+            'tax_rate' => 'required|numeric|min:0|max:100',
             'payment_method' => 'required|in:cash,bank_transfer,credit_card',
             'car_detail_ids' => 'required|array',
             'car_detail_ids.*' => 'required|exists:cars_details,id',
             'quantities' => 'required|array',
             'quantities.*' => 'required|integer|min:1',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         try {
@@ -113,9 +117,13 @@ class InvoiceController extends Controller
             $invoice->customer_email = $request->customer_email;
             $invoice->customer_phone = $request->customer_phone;
             $invoice->customer_address = $request->customer_address;
+            $invoice->seller_tax_code = $request->seller_tax_code;
+            $invoice->customer_tax_code = $request->customer_tax_code;
+            $invoice->tax_rate = $request->tax_rate;
             $invoice->payment_method = $request->payment_method;
             $invoice->status = 'pending'; // Set initial status to pending
             $invoice->saler_id = Auth::id();
+            $invoice->user_id = $request->user_id; // Store the user ID if selected
             $invoice->purchase_date = now();
             $invoice->save();
 
@@ -149,7 +157,11 @@ class InvoiceController extends Controller
                 $total_price += $carDetail->price * $quantity;
             }
 
-            // Update invoice total price
+            // Calculate tax amount
+            $tax_amount = $total_price * ($invoice->tax_rate / 100);
+
+            // Update invoice total price and tax amount
+            $invoice->tax_amount = $tax_amount;
             $invoice->total_price = $total_price;
             $invoice->save();
 
@@ -199,6 +211,12 @@ class InvoiceController extends Controller
             abort(403);
         }
 
+        // Check if invoice status is "done" - cannot edit done invoices
+        if (strtolower($invoice->status) === Invoice::STATUS_DONE) {
+            return redirect()->route('admin.invoices.show', $invoice->id)
+                ->with('error', 'Completed invoices cannot be edited.');
+        }
+
         $users = User::where('role', 'user')->get();
         $salers = User::where('role', 'saler')->get();
         $invoice->load(['invoiceDetails.carDetail.car', 'invoiceDetails.carDetail.carColor']);
@@ -235,8 +253,12 @@ class InvoiceController extends Controller
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20',
             'customer_address' => 'required|string|max:255',
+            'seller_tax_code' => 'required|string|max:20',
+            'customer_tax_code' => 'nullable|string|max:20',
+            'tax_rate' => 'required|numeric|min:0|max:100',
             'payment_method' => 'required|in:cash,bank_transfer,credit_card',
-            'status' => 'required|in:' . implode(',', $validStatuses)
+            'status' => 'required|in:' . implode(',', $validStatuses),
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         try {
@@ -251,9 +273,25 @@ class InvoiceController extends Controller
                 'customer_email' => $request->customer_email,
                 'customer_phone' => $request->customer_phone,
                 'customer_address' => $request->customer_address,
+                'seller_tax_code' => $request->seller_tax_code,
+                'customer_tax_code' => $request->customer_tax_code,
+                'tax_rate' => $request->tax_rate,
                 'payment_method' => $request->payment_method,
-                'status' => strtolower($request->status)
+                'status' => strtolower($request->status),
+                'user_id' => $request->user_id
             ]);
+
+            // If status is changed to cancel, restore car quantities
+            if ($oldStatus !== Invoice::STATUS_CANCEL && strtolower($request->status) === Invoice::STATUS_CANCEL) {
+                foreach ($invoice->invoiceDetails as $detail) {
+                    $carDetail = $detail->carDetail;
+                    if ($carDetail) {
+                        // Add the quantity back to the car detail
+                        $carDetail->quantity += $detail->quantity;
+                        $carDetail->save();
+                    }
+                }
+            }
 
             // Save changes
             $invoice->save();
@@ -280,6 +318,11 @@ class InvoiceController extends Controller
                     $total_price += $detail->price * $detail->quantity;
                 }
                 $invoice->total_price = $total_price;
+
+                // Calculate tax amount
+                $tax_amount = $total_price * ($invoice->tax_rate / 100);
+                $invoice->tax_amount = $tax_amount;
+
                 $invoice->save();
             }
 
@@ -321,7 +364,22 @@ class InvoiceController extends Controller
                 }
             }
 
+            // Check if invoice status is "done" - cannot delete done invoices
+            if (strtolower($invoice->status) === Invoice::STATUS_DONE) {
+                return back()->with('error', 'Completed invoices cannot be deleted.');
+            }
+
             DB::beginTransaction();
+
+            // Restore car quantities before soft deleting invoice
+            foreach ($invoice->invoiceDetails as $detail) {
+                $carDetail = $detail->carDetail;
+                if ($carDetail) {
+                    // Add the quantity back to the car detail
+                    $carDetail->quantity += $detail->quantity;
+                    $carDetail->save();
+                }
+            }
 
             // Soft delete the invoice
             $invoice->delete();
@@ -329,7 +387,7 @@ class InvoiceController extends Controller
             DB::commit();
 
             return redirect()->route('admin.invoices.index')
-                ->with('success', 'Invoice has been moved to trash.');
+                ->with('success', 'Invoice has been moved to trash and car quantities have been restored.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -400,6 +458,16 @@ class InvoiceController extends Controller
 
             $invoice = Invoice::onlyTrashed()->findOrFail($id);
 
+            // Restore car quantities before deleting invoice details
+            foreach ($invoice->invoiceDetails as $detail) {
+                $carDetail = $detail->carDetail;
+                if ($carDetail) {
+                    // Add the quantity back to the car detail
+                    $carDetail->quantity += $detail->quantity;
+                    $carDetail->save();
+                }
+            }
+
             // Delete related invoice details
             $invoice->invoiceDetails()->delete();
 
@@ -409,7 +477,7 @@ class InvoiceController extends Controller
             DB::commit();
 
             return redirect()->route('admin.invoices.trash')
-                ->with('success', 'Invoice has been permanently deleted.');
+                ->with('success', 'Invoice has been permanently deleted and car quantities have been restored.');
 
         } catch (\Exception $e) {
             DB::rollBack();

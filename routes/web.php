@@ -23,16 +23,22 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\BlogController;
 
 // Public routes
 Route::get('/', [PageController::class, 'home'])->name('home');
 
-Route::get('/about', [PageController::class, 'about']);
+Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/cars', [PageController::class, 'cars'])->name('cars');
 Route::get('/cars/{id}', [PageController::class, 'carDetail']);
-Route::get('/buy/{id?}', [PageController::class, 'buyForm']);
-Route::post('/buy/submit', [BuyController::class, 'submit']);
-Route::get('/contact', [PageController::class, 'contact']);
+
+// Buy routes
+Route::get('/buy/{carId}', [BuyController::class, 'showPurchaseForm'])->name('buy.form');
+Route::post('/buy/process', [BuyController::class, 'processPurchase'])->name('buy.process');
+Route::get('/buy/success', [BuyController::class, 'showSuccessPage'])->name('buy.success');
+
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::post('/contact', [PageController::class, 'submitContact'])->name('contact.submit');
 
 // Registration routes (public)
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -102,7 +108,18 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    return redirect('/dashboard')->with('success', 'Your email has been successfully verified!');
+
+    // Redirect based on user role after verification
+    $role = Auth::user()->role;
+    if ($role === 'admin') {
+        return redirect()->route('admin.dashboard')->with('success', 'Your email has been successfully verified!');
+    } elseif ($role === 'content') {
+        return redirect()->route('admin.makes.index')->with('success', 'Your email has been successfully verified!');
+    } elseif ($role === 'saler') {
+        return redirect()->route('admin.invoices.index')->with('success', 'Your email has been successfully verified!');
+    } else {
+        return redirect()->route('user.purchases')->with('success', 'Your email has been successfully verified!');
+    }
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {
@@ -112,7 +129,23 @@ Route::post('/email/verification-notification', function (Request $request) {
 
 // Authentication routes
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Redirect /dashboard to appropriate role-based dashboard
+    Route::get('/dashboard', function() {
+        $role = Auth::user()->role;
+        if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($role === 'content') {
+            return redirect()->route('admin.makes.index');
+        } elseif ($role === 'saler') {
+            return redirect()->route('admin.invoices.index');
+        } else {
+            return redirect()->route('user.purchases');
+        }
+    })->name('dashboard');
+
+    // Purchase history for regular users
+    Route::get('/purchase-history', [InvoiceController::class, 'userPurchases'])
+        ->name('user.purchases');
 });
 
 // Search Bar
@@ -135,5 +168,17 @@ Route::get('/compare', [PageController::class, 'carComparison'])->name('car.comp
 Route::get('/wishlist', [PageController::class, 'wishlist'])->name('wishlist');
 
 // Blog
-Route::get('/blog', [PageController::class, 'blog'])->name('blog');
-Route::get('/blog/{slug}', [PageController::class, 'blogPost'])->name('blog.post');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.post');
+
+// Admin Blog Management
+Route::middleware(['auth', 'role:admin,content'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/blog', [App\Http\Controllers\Admin\BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/create', [App\Http\Controllers\Admin\BlogController::class, 'create'])->name('blog.create');
+    Route::post('/blog', [App\Http\Controllers\Admin\BlogController::class, 'store'])->name('blog.store');
+    Route::get('/blog/{id}/edit', [App\Http\Controllers\Admin\BlogController::class, 'edit'])->name('blog.edit');
+    Route::put('/blog/{id}', [App\Http\Controllers\Admin\BlogController::class, 'update'])->name('blog.update');
+    Route::delete('/blog/{id}', [App\Http\Controllers\Admin\BlogController::class, 'destroy'])->name('blog.destroy');
+    Route::patch('/blog/{id}/status', [App\Http\Controllers\Admin\BlogController::class, 'changeStatus'])->name('blog.status');
+    Route::post('/upload/image', [App\Http\Controllers\Admin\BlogController::class, 'uploadImage'])->name('upload.image');
+});

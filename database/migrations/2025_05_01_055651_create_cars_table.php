@@ -20,6 +20,8 @@ return new class extends Migration
             $table->enum('transmission',['manual','automatic']);
             $table->integer('seats')->check('seats IN (5,7)');
             $table->boolean('status')->default(true);
+            $table->integer('reviews_count')->default(0);
+            $table->decimal('rating', 3, 1)->default(4.5);
             $table->timestamps();
         });
     }

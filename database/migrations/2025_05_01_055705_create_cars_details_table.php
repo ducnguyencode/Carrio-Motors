@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('price');
             $table->boolean('is_available')->default(true);
+            $table->string('main_image')->nullable();
+            $table->json('additional_images')->nullable();
             $table->timestamps();
         });
     }

@@ -1,5 +1,14 @@
 @extends('admin.layouts.app')
 
+@section('title', 'Trashed Invoices')
+
+@section('page-heading', 'Trashed Invoices')
+
+@php
+    // Set flag to prevent duplicate flash messages from layout
+    $hideFlashMessages = true;
+@endphp
+
 @section('content')
 <div class="container-fluid">
     <div class="bg-white rounded-lg shadow p-6 mt-6">

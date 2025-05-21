@@ -22,7 +22,18 @@ class Car extends Model
         'isActive',
         'main_image',
         'additional_images',
-        'is_featured'
+        'is_featured',
+        'reviews_count',
+        'rating',
+        'horsepower',
+        'torque',
+        'acceleration',
+        'fuel_consumption',
+        'length',
+        'width',
+        'height',
+        'cargo_volume',
+        'fuel_capacity',
     ];
 
     public function carModel() {
@@ -72,5 +83,15 @@ class Car extends Model
             \App\Models\Invoice::class,
             \App\Models\CarDetail::class
         );
+    }
+
+    /**
+     * Get fuel type attribute from engine
+     *
+     * @return string
+     */
+    public function getFuelTypeAttribute()
+    {
+        return $this->engine ? $this->engine->engine_type : 'N/A';
     }
 }

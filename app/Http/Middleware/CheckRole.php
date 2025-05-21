@@ -23,13 +23,13 @@ class CheckRole
         if (!$request->user()) {
             return redirect('/login')->with('error', 'Please login to access this page');
         }
-        
+
         // Get user's role
         $userRole = $request->user()->role;
-        
+
         // Process the input roles to handle both direct parameters and comma-separated strings
         $allowedRoles = [];
-        
+
         // Handle roles passed as multiple parameters or a single comma-separated string
         foreach ($roles as $role) {
             if (str_contains($role, ',')) {
@@ -41,7 +41,7 @@ class CheckRole
                 $allowedRoles[] = trim($role);
             }
         }
-        
+
         // Log the check for debugging purposes
         Log::debug('Role check', [
             'user_role' => $userRole,
@@ -49,13 +49,14 @@ class CheckRole
             'url' => $request->url(),
             'route_name' => $request->route() ? $request->route()->getName() : 'unknown'
         ]);
-        
+
         // If user's role is in the allowed roles, allow access
         if (in_array($userRole, $allowedRoles)) {
             return $next($request);
         }
-        
-        // If using a menu item that's not allowed, redirect to dashboard with message
-        return redirect('/dashboard')->with('error', "Access denied. Your role '{$userRole}' does not have permission for this page.");
+
+        // Instead of redirecting to dashboard which causes redirect loops
+        // Return a 403 Forbidden response with an error message
+        return abort(403, "Access denied. Your role '{$userRole}' does not have permission for this page.");
     }
 }

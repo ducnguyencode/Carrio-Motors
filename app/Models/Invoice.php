@@ -16,11 +16,16 @@ class Invoice extends Model
         'customer_email',
         'customer_phone',
         'customer_address',
+        'seller_tax_code',
+        'customer_tax_code',
+        'tax_rate',
+        'tax_amount',
         'purchase_date',
         'total_price',
         'payment_method',
         'status',
-        'saler_id'
+        'saler_id',
+        'user_id'
     ];
 
     protected $attributes = [

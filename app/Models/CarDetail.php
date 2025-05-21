@@ -16,7 +16,14 @@ class CarDetail extends Model
         'color_id',
         'quantity',
         'price',
-        'is_available'
+        'is_available',
+        'main_image',
+        'additional_images'
+    ];
+
+    protected $casts = [
+        'additional_images' => 'array',
+        'is_available' => 'boolean'
     ];
 
     public function car() {

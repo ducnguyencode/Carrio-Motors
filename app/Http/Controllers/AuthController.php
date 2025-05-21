@@ -21,8 +21,14 @@ class AuthController extends Controller
             $role = Auth::user()->role;
             if ($role === 'admin') {
                 return redirect()->route('admin.dashboard');
+            } elseif ($role === 'content') {
+                return redirect()->route('admin.makes.index');
+            } elseif ($role === 'saler') {
+                return redirect()->route('admin.invoices.index');
+            } else {
+                // Regular users will be redirected to purchase history page
+                return redirect()->route('user.purchases');
             }
-            return redirect('/dashboard');
         }
 
         return view('auth.login');
@@ -54,11 +60,19 @@ class AuthController extends Controller
                 ['role' => $role]
             );
 
+            // Redirect based on role
             if ($role === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
+            } elseif ($role === 'content') {
+                // Content staff will be redirected to makes management instead of blog
+                return redirect()->route('admin.makes.index')->with('success', 'Login successful!');
+            } elseif ($role === 'saler') {
+                // Sales staff will be redirected to invoice management
+                return redirect()->route('admin.invoices.index')->with('success', 'Login successful!');
+            } else {
+                // Regular users will be redirected to purchase history page
+                return redirect()->route('user.purchases')->with('success', 'Login successful!');
             }
-            // For 'content', 'saler' and 'user' roles, redirect to /dashboard
-            return redirect()->intended('/dashboard')->with('success', 'Login successful!');
         }
 
         return back()->withErrors([
