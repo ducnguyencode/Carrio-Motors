@@ -215,6 +215,17 @@ class BannerController extends Controller
     }
 
     /**
+     * Display the specified banner.
+     *
+     * @param  \App\Models\Banner  $banner
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Banner $banner)
+    {
+        return view('admin.banners.show', compact('banner'));
+    }
+
+    /**
      * Show the form for editing the specified banner.
      *
      * @param  \App\Models\Banner  $banner

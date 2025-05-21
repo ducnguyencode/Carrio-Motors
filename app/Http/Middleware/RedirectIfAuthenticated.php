@@ -21,7 +21,8 @@ class RedirectIfAuthenticated
             if ($role === 'admin' || $role === 'content' || $role === 'saler') {
                 return redirect()->route('admin.dashboard');
             }
-            return redirect('/dashboard');
+            // Regular users will be redirected to purchase history page
+            return redirect()->route('user.purchases');
         }
 
         return $next($request);

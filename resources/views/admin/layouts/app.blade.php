@@ -39,6 +39,222 @@
         .transition-all {
             transition: all 0.2s ease-in-out;
         }
+
+        /* @apply directive styles for blog pages */
+        .bg-white {
+            background-color: white;
+        }
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .overflow-hidden {
+            overflow: hidden;
+        }
+        .mb-5 {
+            margin-bottom: 1.25rem;
+        }
+        .px-5 {
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+        }
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .border-b {
+            border-bottom-width: 1px;
+        }
+        .border-gray-100 {
+            border-color: rgba(243, 244, 246, 1);
+        }
+        .flex {
+            display: flex;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .p-5 {
+            padding: 1.25rem;
+        }
+        .block {
+            display: block;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        .font-medium {
+            font-weight: 500;
+        }
+        .text-gray-700 {
+            color: rgba(55, 65, 81, 1);
+        }
+        .mb-1 {
+            margin-bottom: 0.25rem;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .rounded-md {
+            border-radius: 0.375rem;
+        }
+        .border-gray-300 {
+            border-color: rgba(209, 213, 219, 1);
+        }
+        .focus\:border-blue-500:focus {
+            border-color: rgba(59, 130, 246, 1);
+        }
+        .focus\:ring:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .focus\:ring-blue-200:focus {
+            box-shadow: 0 0 0 3px rgba(191, 219, 254, 0.5);
+        }
+        .focus\:ring-opacity-50:focus {
+            --tw-ring-opacity: 0.5;
+        }
+        .text-lg {
+            font-size: 1.125rem;
+        }
+        .font-medium {
+            font-weight: 500;
+        }
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+        .text-blue-500 {
+            color: rgba(59, 130, 246, 1);
+        }
+        .w-5 {
+            width: 1.25rem;
+        }
+        .h-5 {
+            height: 1.25rem;
+        }
+        .flex-shrink-0 {
+            flex-shrink: 0;
+        }
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+        .justify-center {
+            justify-content: center;
+        }
+        .pt-5 {
+            padding-top: 1.25rem;
+        }
+        .pb-6 {
+            padding-bottom: 1.5rem;
+        }
+        .border-2 {
+            border-width: 2px;
+        }
+        .border-gray-300 {
+            border-color: rgba(209, 213, 219, 1);
+        }
+        .border-dashed {
+            border-style: dashed;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .hover\:bg-gray-50:hover {
+            background-color: rgba(249, 250, 251, 1);
+        }
+        .transition-colors {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        .bg-gray-100 {
+            background-color: rgba(243, 244, 246, 1);
+        }
+        .text-gray-800 {
+            color: rgba(31, 41, 55, 1);
+        }
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        .px-3 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        .py-1 {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        .ml-2 {
+            margin-left: 0.5rem;
+        }
+        .text-gray-500 {
+            color: rgba(107, 114, 128, 1);
+        }
+        .hover\:text-red-500:hover {
+            color: rgba(239, 68, 68, 1);
+        }
+        .bg-blue-600 {
+            background-color: rgba(37, 99, 235, 1);
+        }
+        .hover\:bg-blue-700:hover {
+            background-color: rgba(29, 78, 216, 1);
+        }
+        .text-white {
+            color: rgba(255, 255, 255, 1);
+        }
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .bg-white {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        .border {
+            border-width: 1px;
+        }
+        .text-gray-700 {
+            color: rgba(55, 65, 81, 1);
+        }
+        .hover\:bg-gray-50:hover {
+            background-color: rgba(249, 250, 251, 1);
+        }
+        .justify-between {
+            justify-content: space-between;
+        }
+        .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+            --tw-space-x-reverse: 0;
+            margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+            margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+        }
+        .mt-6 {
+            margin-top: 1.5rem;
+        }
+        .flex-1 {
+            flex: 1 1 0%;
+        }
+        .text-center {
+            text-align: center;
+        }
     </style>
 
     @yield('styles')
@@ -58,11 +274,6 @@
                     <nav class="flex-1 px-2 py-4 space-y-1">
                         @if(auth()->user()->role === 'admin')
                         <a href="{{ route('admin.dashboard') }}" class="flex items-center px-2 py-2 text-sm font-medium text-white rounded-md hover:bg-gray-700">
-                            <i class="mr-3 text-lg fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </a>
-                        @else
-                        <a href="{{ url('/dashboard') }}" class="flex items-center px-2 py-2 text-sm font-medium text-white rounded-md hover:bg-gray-700">
                             <i class="mr-3 text-lg fas fa-tachometer-alt"></i>
                             Dashboard
                         </a>
@@ -102,6 +313,12 @@
                             <i class="mr-3 text-lg fas fa-info-circle"></i>
                             Car Details
                         </a>
+                        @if(auth()->user()->role === 'admin' || auth()->user()->role === 'content')
+                        <a href="{{ route('admin.blog.index') }}" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white {{ request()->routeIs('admin.blog*') ? 'bg-gray-700' : '' }}">
+                            <i class="mr-3 text-lg fas fa-newspaper"></i>
+                            Blog
+                        </a>
+                        @endif
                         <a href="{{ route('admin.banners.index') }}" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white">
                             <i class="mr-3 text-lg fas fa-images"></i>
                             Banners
@@ -109,7 +326,7 @@
                         @endif
 
                         @if(auth()->user()->role === 'admin' || auth()->user()->role === 'saler')
-                        @if(auth()->user()->role === 'saler')
+                        @if(auth()->user()->role === 'admin')
                         <a href="{{ route('admin.cars.index') }}" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white">
                             <i class="mr-3 text-lg fas fa-car"></i>
                             Cars
@@ -121,7 +338,7 @@
                         </a>
                         @endif
                         @if(auth()->user()->role === 'user')
-                        <a href="{{ url('/dashboard') }}" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white">
+                        <a href="{{ route('user.purchases') }}" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white">
                             <i class="mr-3 text-lg fas fa-file-invoice-dollar"></i>
                             Purchase History
                         </a>
@@ -142,36 +359,37 @@
                         <h1 class="text-2xl font-semibold text-gray-900 my-auto">@yield('page-heading')</h1>
                     </div>
                     <div class="flex items-center ml-4 md:ml-6">
-                        <div class="relative ml-3">
-                            <div>
-                                <button class="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu-button">
-                                    <span class="mr-2 text-gray-700">{{ auth()->user()->name }}</span>
-                                    <i class="text-gray-400 fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                            <div id="user-menu" class="absolute right-0 hidden w-48 py-1 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-                                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Sign out
-                                </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                                    @csrf
-                                </form>
-                            </div>
+                        <div class="flex items-center">
+                            <span class="mr-2 text-gray-700">{{ auth()->user()->name }}</span>
+                            <span class="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-200 rounded-full">{{ auth()->user()->role }}</span>
                         </div>
+
+                        <!-- Modern Sign Out Button -->
+                        <a href="{{ route('logout') }}"
+                           onclick="event.preventDefault(); document.getElementById('logout-form-2').submit();"
+                           class="inline-flex items-center px-3 py-2 ml-3 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <i class="mr-2 fas fa-sign-out-alt"></i>
+                            Sign Out
+                        </a>
+                        <form id="logout-form-2" action="{{ route('logout') }}" method="POST" class="hidden">
+                            @csrf
+                        </form>
                     </div>
                 </div>
             </div>
 
             <main class="relative flex-1 overflow-y-auto focus:outline-none p-6">
-                @if(session('success'))
-                    <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
-                        <p>{{ session('success') }}</p>
+                @if(session('success') && !isset($hideFlashMessages) && !request()->routeIs('admin.blog*'))
+                    <div class="mb-4 p-3 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex justify-between items-center">
+                        <span>{{ session('success') }}</span>
+                        <button onclick="this.parentElement.style.display='none'" class="ml-4 text-green-700 hover:text-green-900">&times;</button>
                     </div>
                 @endif
 
-                @if(session('error'))
-                    <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
-                        <p>{{ session('error') }}</p>
+                @if(session('error') && !isset($hideFlashMessages) && !request()->routeIs('admin.blog*'))
+                    <div class="mb-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-700 rounded flex justify-between items-center">
+                        <span>{{ session('error') }}</span>
+                        <button onclick="this.parentElement.style.display='none'" class="ml-4 text-red-700 hover:text-red-900">&times;</button>
                     </div>
                 @endif
 
@@ -189,22 +407,6 @@
             sidebarToggle.addEventListener('click', () => {
                 sidebar.classList.toggle('hidden');
                 sidebar.classList.toggle('md:flex');
-            });
-        }
-
-        // User menu toggle
-        const userMenuButton = document.getElementById('user-menu-button');
-        const userMenu = document.getElementById('user-menu');
-
-        if (userMenuButton && userMenu) {
-            userMenuButton.addEventListener('click', () => {
-                userMenu.classList.toggle('hidden');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!userMenuButton.contains(e.target) && !userMenu.contains(e.target)) {
-                    userMenu.classList.add('hidden');
-                }
             });
         }
     </script>

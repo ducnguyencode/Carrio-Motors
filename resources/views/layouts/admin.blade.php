@@ -306,5 +306,7 @@
             document.querySelector('.main-content').classList.toggle('active');
         });
     </script>
+
+    @stack('scripts')
 </body>
 </html>

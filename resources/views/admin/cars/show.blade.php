@@ -22,6 +22,45 @@
         </div>
     </div>
 
+    <!-- Car Images Section -->
+    <div class="mb-6">
+        <h3 class="text-md font-medium text-gray-700 mb-3">Car Images</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="col-span-1 md:col-span-2">
+                <div class="border rounded-lg overflow-hidden">
+                    @if($car->main_image)
+                        <img src="{{ asset('storage/' . $car->main_image) }}" alt="{{ $car->name }}" class="w-full h-48 object-cover">
+                    @else
+                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <span class="text-gray-500">No main image available</span>
+                        </div>
+                    @endif
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Main Image</p>
+            </div>
+
+            <div class="col-span-1 md:col-span-2">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    @if($car->additional_images)
+                        @foreach(json_decode($car->additional_images) ?? [] as $index => $image)
+                            <div class="border rounded-lg overflow-hidden">
+                                <img src="{{ asset('storage/' . $image) }}" alt="Additional Image {{ $index + 1 }}" class="w-full h-24 object-cover">
+                            </div>
+                            @if($index >= 5) @break @endif
+                        @endforeach
+                    @else
+                        <div class="col-span-3 border rounded-lg overflow-hidden">
+                            <div class="w-full h-24 bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-500 text-sm">No additional images</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Additional Images</p>
+            </div>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
             <div class="mb-4">

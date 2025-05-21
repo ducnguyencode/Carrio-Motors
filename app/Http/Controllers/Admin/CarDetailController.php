@@ -75,6 +75,9 @@ class CarDetailController extends Controller
             'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
             'is_available' => 'nullable|boolean',
+            'main_image' => 'nullable|image|max:2048',
+            'additional_images' => 'nullable|array',
+            'additional_images.*' => 'image|max:2048',
         ]);
 
         try {
@@ -85,12 +88,30 @@ class CarDetailController extends Controller
             $carDetail->price = $validated['price'];
             $carDetail->is_available = $request->has('is_available') ? 1 : 0;
 
+            // Handle main image upload
+            if ($request->hasFile('main_image')) {
+                $mainImagePath = $request->file('main_image')->store('images/cars', 'public');
+                $carDetail->main_image = 'storage/' . $mainImagePath;
+            }
+
+            // Handle additional images upload
+            if ($request->hasFile('additional_images')) {
+                $additionalImagePaths = [];
+                foreach ($request->file('additional_images') as $image) {
+                    $path = $image->store('images/cars', 'public');
+                    $additionalImagePaths[] = 'storage/' . $path;
+                }
+                $carDetail->additional_images = json_encode($additionalImagePaths);
+            }
+
             \Log::info('Attempting to save car detail:', [
                 'car_id' => $carDetail->car_id,
                 'color_id' => $carDetail->color_id,
                 'quantity' => $carDetail->quantity,
                 'price' => $carDetail->price,
-                'is_available' => $carDetail->is_available
+                'is_available' => $carDetail->is_available,
+                'main_image' => $carDetail->main_image,
+                'additional_images' => $carDetail->additional_images
             ]);
 
             $carDetail->save();
@@ -148,6 +169,9 @@ class CarDetailController extends Controller
             'car_color_id' => 'required|exists:car_colors,id',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
+            'main_image' => 'nullable|image|max:2048',
+            'additional_images' => 'nullable|array',
+            'additional_images.*' => 'image|max:2048',
         ]);
 
         $carDetail->car_id = $validated['car_id'];
@@ -155,6 +179,38 @@ class CarDetailController extends Controller
         $carDetail->quantity = $validated['quantity'];
         $carDetail->price = $validated['price'];
         $carDetail->is_available = $request->has('is_available') ? 1 : 0;
+
+        // Handle main image upload
+        if ($request->hasFile('main_image')) {
+            // Delete old image if exists
+            if ($carDetail->main_image && Storage::disk('public')->exists(str_replace('storage/', '', $carDetail->main_image))) {
+                Storage::disk('public')->delete(str_replace('storage/', '', $carDetail->main_image));
+            }
+
+            $mainImagePath = $request->file('main_image')->store('images/cars', 'public');
+            $carDetail->main_image = 'storage/' . $mainImagePath;
+        }
+
+        // Handle additional images upload
+        if ($request->hasFile('additional_images')) {
+            // Delete old images if they exist
+            if ($carDetail->additional_images) {
+                $oldImages = json_decode($carDetail->additional_images);
+                foreach ($oldImages as $oldImage) {
+                    $path = str_replace('storage/', '', $oldImage);
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+            }
+
+            $additionalImagePaths = [];
+            foreach ($request->file('additional_images') as $image) {
+                $path = $image->store('images/cars', 'public');
+                $additionalImagePaths[] = 'storage/' . $path;
+            }
+            $carDetail->additional_images = json_encode($additionalImagePaths);
+        }
 
         $carDetail->save();
 
@@ -174,6 +230,25 @@ class CarDetailController extends Controller
         if ($carDetail->invoiceDetails()->count() > 0) {
             return redirect()->route('admin.car_details.index')
                 ->with('error', 'Cannot delete this car detail because it has associated orders.');
+        }
+
+        // Delete main image if exists
+        if ($carDetail->main_image) {
+            $mainImagePath = str_replace('storage/', '', $carDetail->main_image);
+            if (Storage::disk('public')->exists($mainImagePath)) {
+                Storage::disk('public')->delete($mainImagePath);
+            }
+        }
+
+        // Delete additional images if they exist
+        if ($carDetail->additional_images) {
+            $additionalImages = json_decode($carDetail->additional_images);
+            foreach ($additionalImages as $image) {
+                $path = str_replace('storage/', '', $image);
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
         }
 
         $carDetail->delete();

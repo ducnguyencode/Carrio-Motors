@@ -1,150 +1,208 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Blog</li>
-        </ol>
-    </nav>
+<!-- Hero Section with Parallax Effect -->
+<div class="blog-hero position-relative overflow-hidden">
+    <div class="parallax-bg" style="background-image: url('{{ asset('images/blog/blog-hero.jpg') }}');"></div>
+    <div class="hero-content container d-flex flex-column justify-content-center">
+        <h1 class="display-3 fw-bold text-white text-center mb-2">Carrio Motors Blog</h1>
+        <p class="lead text-white text-center mb-0">Latest news, reviews, and insights from the automotive world</p>
+    </div>
+</div>
 
-    <!-- Blog Header -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="card bg-dark text-white border-0 rounded-3 overflow-hidden position-relative">
-                <img src="{{ asset('images/blog/blog-header.jpg') }}" class="card-img opacity-50" alt="Car Blog" style="height: 300px; object-fit: cover;">
-                <div class="card-img-overlay d-flex flex-column justify-content-center text-center">
-                    <h1 class="card-title display-4 fw-bold">Carrio Motors Blog</h1>
-                    <p class="card-text fs-5 mb-4">Stay informed with the latest automotive news, tips, and insights</p>
+<div class="container py-5">
+    <!-- Featured Post -->
+    @if($posts->isNotEmpty())
+    <div class="featured-post mb-5">
+        @php
+            $featuredPost = $posts->first();
+        @endphp
+        <div class="row g-0 bg-white shadow-sm rounded-4 overflow-hidden">
+            <div class="col-lg-6">
+                <div class="featured-image h-100">
+                    <img src="{{ $featuredPost->featured_image ? asset('storage/' . $featuredPost->featured_image) : asset('images/blog/default.jpg') }}"
+                         alt="{{ $featuredPost->title }}" class="w-100 h-100 object-cover">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="p-4 p-lg-5 d-flex flex-column h-100">
+                    <div class="mb-3">
+                        @if($featuredPost->category)
+                        <span class="badge bg-primary">{{ $featuredPost->category }}</span>
+                        @endif
+                        <span class="text-muted ms-2"><i class="far fa-calendar-alt me-1"></i> {{ $featuredPost->formatted_date }}</span>
+                    </div>
+                    <h2 class="h1 fw-bold mb-3">{{ $featuredPost->title }}</h2>
+                    <p class="text-muted flex-grow-1">{{ $featuredPost->excerpt }}</p>
+                    <div class="mt-3">
+                        <a href="{{ route('blog.post', $featuredPost->slug) }}" class="btn btn-primary">
+                            Read Article <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    @endif
 
+    <!-- Latest Articles -->
     <div class="row">
-        <!-- Blog Posts -->
-        <div class="col-lg-8">
+        <div class="col-12">
+            <h2 class="h3 fw-bold mb-4">Latest Articles</h2>
+
             <div class="row">
-                @foreach($posts as $post)
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow-sm hover-shadow">
-                        <div class="position-relative">
-                            <img src="{{ asset($post['image']) }}" class="card-img-top" alt="{{ $post['title'] }}" style="height: 200px; object-fit: cover;">
-                            <span class="position-absolute top-0 start-0 bg-primary text-white py-1 px-2 m-2 rounded-pill small">{{ $post['category'] }}</span>
-                        </div>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ $post['title'] }}</h5>
-                            <div class="d-flex align-items-center text-muted small mb-3">
-                                <i class="bi bi-person-circle me-1"></i> {{ $post['author'] }}
-                                <span class="mx-2">|</span>
-                                <i class="bi bi-calendar3 me-1"></i> {{ $post['date'] }}
+                @foreach($posts as $index => $post)
+                    @if($index > 0) <!-- Skip the first post (featured) -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card border-0 shadow-sm h-100 post-card">
+                            <div class="post-image">
+                                <img src="{{ $post->featured_image ? asset('storage/' . $post->featured_image) : asset('images/blog/default.jpg') }}"
+                                     class="card-img-top" alt="{{ $post->title }}">
+                                @if($post->category)
+                                <span class="category-badge">{{ $post->category }}</span>
+                                @endif
                             </div>
-                            <p class="card-text">{{ $post['excerpt'] }}</p>
-                            <div class="mt-auto">
-                                <div class="d-flex flex-wrap gap-1 mb-3">
-                                    @foreach($post['tags'] as $tag)
-                                    <span class="badge bg-light text-dark">#{{ $tag }}</span>
-                                    @endforeach
+                            <div class="card-body d-flex flex-column">
+                                <div class="post-meta mb-2">
+                                    <span class="text-muted small">
+                                        <i class="far fa-calendar-alt me-1"></i> {{ $post->formatted_date }}
+                                    </span>
+                                    <span class="ms-3 text-muted small">
+                                        <i class="far fa-clock me-1"></i> {{ $post->reading_time }} min read
+                                    </span>
                                 </div>
-                                <a href="{{ route('blog.post', $post['slug']) }}" class="btn btn-outline-primary">Read More</a>
+                                <h3 class="card-title h5 fw-bold">{{ $post->title }}</h3>
+                                <p class="card-text text-muted flex-grow-1">{{ Str::limit($post->excerpt, 100) }}</p>
+                                <a href="{{ route('blog.post', $post->slug) }}" class="text-decoration-none text-primary mt-2">
+                                    Read more <i class="fas fa-arrow-right ms-1 small"></i>
+                                </a>
                             </div>
+                        </div>
+                    </div>
+                    @endif
+                @endforeach
+            </div>
+
+            <!-- Pagination with modern styling -->
+            <div class="d-flex justify-content-center mt-5 mb-5">
+                {{ $posts->links() }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Posts -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h2 class="h3 fw-bold mb-4">Recent Posts</h2>
+            <div class="row">
+                @foreach($posts->take(3) as $recentPost)
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0 me-3" style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px;">
+                                    <img src="{{ $recentPost->featured_image ? asset('storage/' . $recentPost->featured_image) : asset('images/blog/default.jpg') }}"
+                                        alt="{{ $recentPost->title }}" class="w-100 h-100 object-cover">
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">{{ Str::limit($recentPost->title, 50) }}</h5>
+                                    <div class="small text-muted">{{ $recentPost->formatted_date }}</div>
+                                </div>
+                            </div>
+                            <a href="{{ route('blog.post', $recentPost->slug) }}" class="btn btn-sm btn-outline-primary">Read Article</a>
                         </div>
                     </div>
                 </div>
                 @endforeach
             </div>
-
-            <!-- Pagination -->
-            <nav class="mt-4 d-flex justify-content-center">
-                <ul class="pagination">
-                    <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                </ul>
-            </nav>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Search Widget -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Search</h5>
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for articles...">
-                        <button class="btn btn-primary" type="button">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Categories Widget -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Categories</h5>
-                    <ul class="list-group list-group-flush">
-                        @foreach($categories as $category => $count)
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <a href="#" class="text-decoration-none text-dark">{{ $category }}</a>
-                            <span class="badge bg-primary rounded-pill">{{ $count }}</span>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Featured Post Widget -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Featured Post</h5>
-                    <div class="position-relative mb-3">
-                        <img src="{{ asset($posts[0]['image']) }}" class="img-fluid rounded" alt="{{ $posts[0]['title'] }}">
-                        <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-white">
-                            <h6 class="mb-0">{{ $posts[0]['title'] }}</h6>
-                        </div>
-                    </div>
-                    <p class="small">{{ $posts[0]['excerpt'] }}</p>
-                    <a href="{{ route('blog.post', $posts[0]['slug']) }}" class="btn btn-sm btn-outline-primary">Read More</a>
-                </div>
-            </div>
-
-            <!-- Popular Tags Widget -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Popular Tags</h5>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Electric</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Luxury</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#SUV</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Maintenance</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Tesla</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Sports</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Family</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Technology</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Future</a>
-                        <a href="#" class="badge bg-light text-dark text-decoration-none p-2">#Hybrid</a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
+
+@include('partials.footer')
 @endsection
 
 @push('styles')
 <style>
-    .hover-shadow {
-        transition: all 0.3s ease;
+    /* Hero styles */
+    .blog-hero {
+        height: 400px;
+        color: white;
     }
 
-    .hover-shadow:hover {
+    .parallax-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        filter: brightness(0.5);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        height: 100%;
+    }
+
+    /* Card styles */
+    .post-card {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .post-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .post-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .post-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .post-card:hover .post-image img {
+        transform: scale(1.05);
+    }
+
+    .category-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    /* Featured post */
+    .featured-post .featured-image {
+        height: 100%;
+        min-height: 400px;
+    }
+
+    .object-cover {
+        object-fit: cover;
+    }
+
+    @media (max-width: 991px) {
+        .featured-post .featured-image {
+            min-height: 300px;
+        }
     }
 </style>
 @endpush

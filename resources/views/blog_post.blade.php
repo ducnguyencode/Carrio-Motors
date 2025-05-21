@@ -11,9 +11,9 @@
         </ol>
     </nav>
 
+    <!-- Main Content -->
     <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
+        <div class="col-12">
             <!-- Post Header -->
             <div class="mb-4">
                 <h1 class="display-5 fw-bold">{{ $post['title'] }}</h1>
@@ -63,8 +63,37 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Comments Section -->
+    <!-- Recent Posts -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12">
+            <h3 class="mb-4">Recent Posts</h3>
+            <div class="row">
+                @foreach($recentPosts as $recentPost)
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light rounded-circle p-3 me-3">
+                                    <i class="bi bi-file-text text-primary fs-4"></i>
+                                </div>
+                                <h5 class="card-title mb-0">{{ $recentPost['title'] }}</h5>
+                            </div>
+                            <p class="card-text text-muted small">{{ $recentPost['date'] }}</p>
+                            <a href="{{ route('blog.post', $recentPost['slug']) }}" class="btn btn-sm btn-outline-primary">Read Article</a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="row">
+        <div class="col-12">
             <div class="blog-comments mb-5">
                 <h3 class="mb-4">Comments <span class="text-muted">(3)</span></h3>
 
@@ -109,7 +138,7 @@
             </div>
 
             <!-- Comment Form -->
-            <div class="blog-comment-form">
+            <div class="blog-comment-form mb-5">
                 <h3 class="mb-4">Leave a Comment</h3>
                 <form>
                     <div class="row mb-3">
@@ -125,111 +154,6 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Post Comment</button>
                 </form>
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Author Widget -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">About the Author</h5>
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="https://via.placeholder.com/70" class="rounded-circle me-3" alt="{{ $post['author'] }}">
-                        <div>
-                            <h6 class="mb-1">{{ $post['author'] }}</h6>
-                            <span class="text-muted small">Automotive Specialist</span>
-                        </div>
-                    </div>
-                    <p class="small">A passionate automotive journalist with over 10 years of experience in the industry. Specializes in electric vehicles and emerging automotive technologies.</p>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-twitter"></i></a>
-                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-linkedin"></i></a>
-                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-facebook"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search Widget -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Search</h5>
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for articles...">
-                        <button class="btn btn-primary" type="button">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Posts Widget -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Recent Posts</h5>
-                    <ul class="list-group list-group-flush">
-                        @foreach($recentPosts as $recentPost)
-                        <li class="list-group-item px-0">
-                            <a href="{{ route('blog.post', $recentPost['slug']) }}" class="text-decoration-none">
-                                <div class="row g-0 align-items-center">
-                                    <div class="col-3">
-                                        <div class="bg-light rounded" style="width: 60px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-file-text text-primary fs-4"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-9">
-                                        <div class="ms-2">
-                                            <h6 class="mb-1 text-truncate">{{ $recentPost['title'] }}</h6>
-                                            <small class="text-muted">{{ $recentPost['date'] }}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Categories Widget -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Categories</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <a href="#" class="text-decoration-none text-dark">Electric Vehicles</a>
-                            <span class="badge bg-primary rounded-pill">8</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <a href="#" class="text-decoration-none text-dark">Luxury Cars</a>
-                            <span class="badge bg-primary rounded-pill">12</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <a href="#" class="text-decoration-none text-dark">Technology</a>
-                            <span class="badge bg-primary rounded-pill">15</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <a href="#" class="text-decoration-none text-dark">Maintenance</a>
-                            <span class="badge bg-primary rounded-pill">9</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <a href="#" class="text-decoration-none text-dark">Comparisons</a>
-                            <span class="badge bg-primary rounded-pill">5</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Share Widget -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Share This Post</h5>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-facebook me-1"></i> Facebook</a>
-                        <a href="#" class="btn btn-outline-info flex-grow-1"><i class="bi bi-twitter me-1"></i> Twitter</a>
-                        <a href="#" class="btn btn-outline-success flex-grow-1"><i class="bi bi-whatsapp me-1"></i> WhatsApp</a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

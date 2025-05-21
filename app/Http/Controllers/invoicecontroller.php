@@ -40,6 +40,7 @@ class InvoiceController extends Controller
     {
         $user = Auth::user();
         $invoices = Invoice::where('user_id', $user->id)
+            ->with(['invoiceDetails.carDetail.car', 'invoiceDetails.carDetail.carColor'])
             ->latest()
             ->paginate(10);
 

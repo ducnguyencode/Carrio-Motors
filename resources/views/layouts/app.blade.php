@@ -298,6 +298,169 @@
         .main-content {
             margin-top: 30px;
         }
+
+        /* Footer Styles */
+        footer.bg-dark {
+            background-color: #212529 !important;
+        }
+
+        footer .text-primary {
+            color: #1e88e5 !important;
+        }
+
+        footer hr.bg-light {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            height: 1px;
+            opacity: 1;
+        }
+
+        footer a.text-white {
+            transition: all 0.3s ease;
+        }
+
+        footer a.text-white:hover {
+            color: #1e88e5 !important;
+            text-decoration: underline !important;
+        }
+
+        footer .me-3 {
+            transition: all 0.3s ease;
+        }
+
+        footer .me-3:hover {
+            color: #1e88e5 !important;
+            transform: translateY(-3px);
+        }
+
+        /* Modern Footer Styles */
+        .footer {
+            background-color: #212121;
+            color: #f5f5f5;
+            padding-top: 80px;
+        }
+
+        .footer-top {
+            padding-bottom: 40px;
+        }
+
+        .footer-logo {
+            margin-bottom: 20px;
+        }
+
+        .footer-logo img {
+            height: 50px;
+        }
+
+        .footer-text {
+            color: #bdbdbd;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .social-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            color: #f5f5f5;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background-color: #1e88e5;
+            transform: translateY(-3px);
+        }
+
+        .footer-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: #1e88e5;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 15px;
+        }
+
+        .footer-links a {
+            color: #bdbdbd;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .footer-links a::before {
+            content: '›';
+            position: absolute;
+            left: 0;
+            color: #1e88e5;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+            padding-left: 20px;
+        }
+
+        .footer-links a:hover::before {
+            left: 5px;
+        }
+
+        .contact-info {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .contact-info li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            color: #bdbdbd;
+        }
+
+        .contact-info i {
+            color: #1e88e5;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer-bottom {
+            padding: 20px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .copyright {
+            color: #9e9e9e;
+        }
     </style>
 </head>
 <body>
@@ -312,49 +475,72 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> About</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="carsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-car me-1"></i> Cars
+                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                            <i class="bi bi-house-door-fill me-1"></i> Home
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="carsDropdown">
-                            <li><a class="dropdown-item" href="{{ route('cars') }}">All Cars</a></li>
-                            <li><a class="dropdown-item" href="{{ route('featured.cars') }}">Featured Cars</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('brands') }}">Browse by Brand</a></li>
-                            <li><a class="dropdown-item" href="{{ route('car.compare') }}">Compare Cars</a></li>
-                        </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/buy"><i class="fas fa-shopping-cart me-1"></i> Buy</a>
+                        <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">
+                            <i class="bi bi-info-circle-fill me-1"></i> About
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/contact"><i class="fas fa-envelope me-1"></i> Contact</a>
+                        <a class="nav-link {{ request()->routeIs('cars*') ? 'active' : '' }}" href="{{ route('cars') }}">
+                            <i class="bi bi-car-front-fill me-1"></i> Cars
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('blog') }}"><i class="bi bi-newspaper me-1"></i> Blog</a>
+                        <a class="nav-link {{ request()->routeIs('blog*') ? 'active' : '' }}" href="{{ route('blog') }}">
+                            <i class="bi bi-journal-text me-1"></i> Blog
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">
+                            <i class="bi bi-envelope-fill me-1"></i> Contact
+                        </a>
                     </li>
                 </ul>
+            </div>
 
-                <div class="d-flex align-items-center">
-                    <button class="search-btn" id="searchToggleBtn" aria-label="Toggle search">
-                        <i class="bi bi-search"></i>
-                    </button>
+            <div class="d-flex align-items-center">
+                <button class="search-btn" id="searchToggleBtn" aria-label="Toggle search">
+                    <i class="bi bi-search"></i>
+                </button>
 
-                    <a class="nav-link p-0" href="{{ route('wishlist') }}">
-                        <div class="wishlist-icon text-dark">
-                            <i class="bi bi-heart-fill"></i>
-                            <span class="wishlist-count" id="wishlist-count">0</span>
-                        </div>
+                @auth
+                <div class="dropdown ms-3">
+                    <a class="btn btn-sm btn-outline-dark dropdown-toggle" href="#" role="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+                        @if(Auth::user()->role == 'admin')
+                        <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a>
+                        </li>
+                        @elseif(Auth::user()->role == 'content')
+                        <li><a class="dropdown-item" href="{{ route('admin.blog.index') }}">
+                            <i class="bi bi-newspaper me-2"></i>Blog Management</a>
+                        </li>
+                        @elseif(Auth::user()->role == 'saler')
+                        <li><a class="dropdown-item" href="{{ route('admin.invoices.index') }}">
+                            <i class="bi bi-receipt me-2"></i>Invoices</a>
+                        </li>
+                        @endif
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
+                @endauth
             </div>
         </div>
     </nav>
@@ -371,6 +557,8 @@
     </div>
 
     @yield('content')
+
+    @yield('footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -435,9 +623,6 @@
                 });
             }
 
-            // Update wishlist count
-            updateWishlistCount();
-
             // Sticky navbar behavior
             const navbar = document.querySelector('.navbar-modern');
             let lastScrollTop = 0;
@@ -489,13 +674,9 @@
             }
         });
 
-        // Wishlist functionality
+        // Function placeholder for backwards compatibility
         function updateWishlistCount() {
-            const wishlistCount = document.getElementById('wishlist-count');
-            if (!wishlistCount) return;
-
-            const wishlist = JSON.parse(localStorage.getItem('carWishlist')) || [];
-            wishlistCount.textContent = wishlist.length;
+            // No longer needed since wishlist button was removed
         }
     </script>
 

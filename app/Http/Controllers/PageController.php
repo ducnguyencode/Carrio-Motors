@@ -7,151 +7,158 @@ use App\Models\Car;
 use App\Models\CarDetail;
 use App\Models\Banner;
 use App\Models\Make;
-
+use App\Models\Invoice;
+use App\Models\InvoiceDetail;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use App\Models\Engine;
 
 class PageController extends Controller
 {
     public function home() {
-        $useMockData = true;
+        // Get date range for last week
+        $lastWeekStart = Carbon::now()->subWeek()->startOfWeek();
+        $lastWeekEnd = Carbon::now()->subWeek()->endOfWeek();
 
-        if ($useMockData) {
-            $featuredCars = [[
-                    'id' => 1,
-                    'name' => 'Toyota Supra',
-                    'image_url' => asset('images/cars/supra.jpg'),
-                    'rating' => 4.8,
-                    'reviews' => 120,
+        // Initialize bestSellingCars as an empty collection
+        $bestSellingCars = collect();
+
+        // Try to get best selling cars, handle any database errors
+        try {
+            // Get best selling cars from all completed invoices, not just last week
+            $bestSellingCars = InvoiceDetail::select(
+                'cars_details.car_id',
+                DB::raw('SUM(invoice_details.quantity) as total_sold')
+            )
+            ->join('invoices', 'invoice_details.invoice_id', '=', 'invoices.id')
+            ->join('cars_details', 'invoice_details.car_detail_id', '=', 'cars_details.id')
+            ->where('invoices.status', Invoice::STATUS_DONE)
+            ->groupBy('cars_details.car_id')
+            ->orderBy('total_sold', 'desc')
+            ->take(4)
+            ->get();
+
+            // Log the best selling cars for debugging
+            \Illuminate\Support\Facades\Log::info('Best selling cars found', [
+                'count' => $bestSellingCars->count(),
+                'cars' => $bestSellingCars->toArray()
+            ]);
+
+            // Extract just the car IDs
+            $bestSellingCarIds = $bestSellingCars->pluck('car_id');
+        } catch (\Exception $e) {
+            // Log the error
+            \Illuminate\Support\Facades\Log::error('Error fetching best selling cars: ' . $e->getMessage());
+
+            // Set to empty collection if error occurs
+            $bestSellingCarIds = collect();
+        }
+
+        // Get the featured cars based on best sellers
+        if ($bestSellingCarIds->count() > 0) {
+            $featuredCars = Car::whereIn('id', $bestSellingCarIds)
+                ->with(['engine', 'model.make', 'carDetails.carColor'])
+                ->get();
+
+            // Sort the cars in the same order as the best sellers list
+            $featuredCars = $featuredCars->sortBy(function($car) use ($bestSellingCarIds) {
+                return array_search($car->id, $bestSellingCarIds->toArray());
+            });
+
+            $featuredCars = $featuredCars->map(function($car) {
+                // Get the car details with the highest quantity
+                $bestDetail = $car->carDetails->sortByDesc('quantity')->first();
+
+                // Get the color from car detail
+                $color = $bestDetail && $bestDetail->carColor ? $bestDetail->carColor->name : 'N/A';
+
+                // Use the price from the best car detail
+                $price = $bestDetail ? $bestDetail->price : 0;
+
+                return [
+                    'id' => $car->id,
+                    'name' => $car->name,
+                    'image_url' => asset($car->main_image ? 'storage/'.$car->main_image : 'images/cars/default.jpg'),
+                    'rating' => $car->rating ?? 4.5, // Use actual rating if available
+                    'reviews' => $car->reviews_count ?? 100, // Use actual review count if available
                     'is_best_seller' => true,
-                    'price' => 45000,
-                    'engine' => '3.0L Turbo',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Automatic',
-                    'seats' => 2,
-                    'color' => 'Red',
-                ],[
-                    'id' => 2,
-                    'name' => 'Honda Civic Type R',
-                    'image_url' => asset('images/cars/civic.jpg'),
-                    'rating' => 4.7,
-                    'reviews' => 98,
-                    'is_best_seller' => true,
-                    'price' => 38000,
-                    'engine' => '2.0L Turbo',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Manual',
-                    'seats' => 4,
-                    'color' => 'Blue',
-                ],[
-                    'id' => 3,
-                    'name' => 'BMW 320i',
-                    'image_url' => asset('images/cars/bmw-320i.jpg'),
-                    'rating' => 4.9,
-                    'reviews' => 99,
-                    'is_best_seller' => true,
-                    'price' => 55000,
-                    'engine' => '2.0L TwinPower Turbo',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Automatic',
-                    'seats' => 5,
-                    'color' => 'Black',
-                ],[
-                    'id' => 4,
-                    'name' => 'VinFast Lux A2.0',
-                    'image_url' => asset('images/cars/vinfast-lux-a20.jpg'),
-                    'rating' => 4.6,
-                    'reviews' => 85,
-                    'is_best_seller' => true,
-                    'price' => 39000,
-                    'engine' => '2.0L Turbo',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Automatic',
-                    'seats' => 5,
-                    'color' => 'Gray',
-                ],[
-                    'id' => 5,
-                    'name' => 'Hyundai Tucson',
-                    'image_url' => asset('images/cars/tucson.jpg'),
-                    'rating' => 4.8,
-                    'reviews' => 90,
-                    'is_best_seller' => false,
-                    'price' => 34000,
-                    'engine' => '2.0L MPI',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Automatic',
-                    'seats' => 5,
-                    'color' => 'White',
-                ],[
-                    'id' => 6,
-                    'name' => 'Ford Ranger',
-                    'image_url' => asset('images/cars/ranger.jpg'),
-                    'rating' => 4.9,
-                    'reviews' => 134,
-                    'is_best_seller' => true,
-                    'price' => 42000,
-                    'engine' => '2.2L Diesel',
-                    'fuel_type' => 'Diesel',
-                    'transmission' => 'Manual',
-                    'seats' => 5,
-                    'color' => 'Silver',
-                ],[
-                    'id' => 7,
-                    'name' => 'Mazda CX-5',
-                    'image_url' => asset('images/cars/cx5.jpg'),
-                    'rating' => 4.7,
-                    'reviews' => 95,
-                    'is_best_seller' => false,
-                    'price' => 37000,
-                    'engine' => '2.5L SkyActiv',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Automatic',
-                    'seats' => 5,
-                    'color' => 'Brown',
-                ],[
-                    'id' => 8,
-                    'name' => 'Mercedes C-Class',
-                    'image_url' => asset('images/cars/mercedes-c.jpg'),
-                    'rating' => 4.9,
-                    'reviews' => 88,
-                    'is_best_seller' => false,
-                    'price' => 60000,
-                    'engine' => '2.0L Turbo',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Automatic',
-                    'seats' => 5,
-                    'color' => 'Black',
-                ],[
-                    'id' => 9,
-                    'name' => 'Kia Seltos',
-                    'image_url' => asset('images/cars/seltos.jpg'),
-                    'rating' => 4.7,
-                    'reviews' => 75,
-                    'is_best_seller' => false,
-                    'price' => 30000,
-                    'engine' => '1.6L Turbo',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'CVT',
-                    'seats' => 5,
-                    'color' => 'Orange',
-                ],[
-                    'id' => 10,
-                    'name' => 'Mitsubishi Xpander',
-                    'image_url' => asset('images/cars/xpander.jpg'),
-                    'rating' => 4.8,
-                    'reviews' => 110,
-                    'is_best_seller' => false,
-                    'price' => 32000,
-                    'engine' => '1.5L MIVEC',
-                    'fuel_type' => 'Petrol',
-                    'transmission' => 'Automatic',
-                    'seats' => 7,
-                    'color' => 'Silver',
-                ],];}else {
-                    $featuredCars = Car::where('is_featured', true)
-                        ->with('engine')
-                        ->take(4)
-                        ->get();
+                    'price' => $price,
+                    'engine' => $car->engine ? $car->engine->name : 'N/A',
+                    'fuel_type' => $car->engine ? $car->engine->fuel_type : 'N/A',
+                    'transmission' => $car->transmission ?: 'N/A',
+                    'seats' => $car->seat_number ?: 'N/A',
+                    'color' => $color,
+                ];
+            })
+            ->toArray();
+        } else {
+            // Fallback to featured cars if no sales data available
+            $featuredCars = Car::where('is_featured', true)
+                ->with(['engine', 'model.make', 'carDetails.carColor'])
+                ->take(4)
+                ->get();
+
+            // If still no cars found, use active cars from car details
+            if ($featuredCars->count() == 0) {
+                $carDetails = CarDetail::where('quantity', '>', 0)
+                    ->with(['car.engine', 'car.model.make', 'carColor'])
+                    ->orderBy('price', 'desc')
+                    ->take(4)
+                    ->get();
+
+                if ($carDetails->count() > 0) {
+                    $featuredCars = $carDetails->map(function($detail) {
+                        $car = $detail->car;
+                        return [
+                            'id' => $car->id,
+                            'name' => $car->name,
+                            'image_url' => asset($car->main_image ? 'storage/'.$car->main_image : 'images/cars/default.jpg'),
+                            'rating' => $car->rating ?? 4.5, // Use actual rating if available
+                            'reviews' => $car->reviews_count ?? 100, // Use actual review count if available
+                            'is_best_seller' => false,
+                            'price' => $detail->price,
+                            'engine' => $car->engine ? $car->engine->name : 'N/A',
+                            'fuel_type' => $car->engine ? $car->engine->fuel_type : 'N/A',
+                            'transmission' => $car->transmission ?: 'N/A',
+                            'seats' => $car->seat_number ?: 'N/A',
+                            'color' => $detail->carColor ? $detail->carColor->name : 'N/A',
+                        ];
+                    })->toArray();
+                } else {
+                    // Last resort: use mock data
+                    $featuredCars = $this->getMockFeaturedCars();
                 }
+            } else {
+                $featuredCars = $featuredCars->map(function($car) {
+                    // Get the car details with the highest quantity
+                    $bestDetail = $car->carDetails->sortByDesc('quantity')->first();
+
+                    // Get the color from car detail
+                    $color = $bestDetail && $bestDetail->carColor ? $bestDetail->carColor->name : 'N/A';
+
+                    // Use the price from the best car detail
+                    $price = $bestDetail ? $bestDetail->price : 0;
+
+                    return [
+                        'id' => $car->id,
+                        'name' => $car->name,
+                        'image_url' => asset($car->main_image ? 'storage/'.$car->main_image : 'images/cars/default.jpg'),
+                        'rating' => $car->rating ?? 4.5, // Use actual rating if available
+                        'reviews' => $car->reviews_count ?? 100, // Use actual review count if available
+                        'is_best_seller' => false,
+                        'price' => $price,
+                        'engine' => $car->engine ? $car->engine->name : 'N/A',
+                        'fuel_type' => $car->engine ? $car->engine->fuel_type : 'N/A',
+                        'transmission' => $car->transmission ?: 'N/A',
+                        'seats' => $car->seat_number ?: 'N/A',
+                        'color' => $color,
+                    ];
+                })
+                ->toArray();
+            }
+        }
+
         $banners = Banner::where('is_active', true)
             ->orderBy('position')
             ->with('car')
@@ -201,25 +208,275 @@ class PageController extends Controller
             }
         }
 
-        return view('home', compact('banners', 'featuredCars'));
+        return view('home', compact('featuredCars', 'banners'));
+    }
+
+    /**
+     * Get mock data for featured cars when no data is available
+     * @return array
+     */
+    private function getMockFeaturedCars()
+    {
+        return [
+            [
+                'id' => 1,
+                'name' => 'V8 New',
+                'image_url' => asset('images/cars/default.jpg'),
+                'rating' => 4.8,
+                'reviews' => 100,
+                'is_best_seller' => true,
+                'price' => 75000,
+                'engine' => 'Electric',
+                'fuel_type' => 'Electric',
+                'transmission' => 'Automatic',
+                'seats' => 2,
+                'color' => 'Orange',
+            ],
+            [
+                'id' => 2,
+                'name' => 'Model S',
+                'image_url' => asset('images/cars/default.jpg'),
+                'rating' => 4.8,
+                'reviews' => 100,
+                'is_best_seller' => true,
+                'price' => 85000,
+                'engine' => 'V8 Gasoline',
+                'fuel_type' => 'Petrol',
+                'transmission' => 'Automatic',
+                'seats' => 4,
+                'color' => 'Yellow',
+            ],
+            [
+                'id' => 3,
+                'name' => 'M850i Coupe',
+                'image_url' => asset('images/cars/default.jpg'),
+                'rating' => 4.9,
+                'reviews' => 120,
+                'is_best_seller' => true,
+                'price' => 95000,
+                'engine' => '4.4L Twin-Turbo V8',
+                'fuel_type' => 'Petrol',
+                'transmission' => 'Automatic',
+                'seats' => 4,
+                'color' => 'Black',
+            ],
+            [
+                'id' => 4,
+                'name' => 'AMG GT',
+                'image_url' => asset('images/cars/default.jpg'),
+                'rating' => 4.7,
+                'reviews' => 95,
+                'is_best_seller' => true,
+                'price' => 118000,
+                'engine' => '4.0L Biturbo V8',
+                'fuel_type' => 'Petrol',
+                'transmission' => 'Automatic',
+                'seats' => 2,
+                'color' => 'Silver',
+            ],
+        ];
     }
 
     public function about() {
         return view('about');
     }
 
-    public function cars() {
-        $cars = Car::all();
-        return view('cars', compact('cars'));
+    public function cars(Request $request) {
+        // Base query
+        $query = Car::with(['model.make', 'engine', 'carDetails.carColor'])
+                ->where('isActive', true);
+
+        // Apply price filter
+        if ($request->has('min_price') && $request->min_price) {
+            $minPrice = (float) $request->min_price;
+            $query->whereHas('carDetails', function($q) use ($minPrice) {
+                $q->where('price', '>=', $minPrice);
+            });
+        }
+
+        if ($request->has('max_price') && $request->max_price) {
+            $maxPrice = (float) $request->max_price;
+            $query->whereHas('carDetails', function($q) use ($maxPrice) {
+                $q->where('price', '<=', $maxPrice);
+            });
+        }
+
+        // Apply brand filter
+        if ($request->has('brand') && $request->brand) {
+            $brand = $request->brand;
+            $query->whereHas('model.make', function($q) use ($brand) {
+                $q->where('name', $brand);
+            });
+        }
+
+        // Apply fuel type filter
+        if ($request->has('fuel_type') && is_array($request->fuel_type)) {
+            $fuelTypes = $request->fuel_type;
+            $query->whereHas('engine', function($q) use ($fuelTypes) {
+                $q->whereIn('engine_type', $fuelTypes);
+            });
+        }
+
+        // Apply transmission filter
+        if ($request->has('transmission') && $request->transmission) {
+            $query->where('transmission', $request->transmission);
+        }
+
+        // Apply seats filter
+        if ($request->has('seats') && is_array($request->seats)) {
+            $query->where(function($q) use ($request) {
+                foreach ($request->seats as $seatCount) {
+                    if ($seatCount == '7') {
+                        // For 7+ seats, look for cars with 7 or more seats
+                        $q->orWhere('seat_number', '>=', 7);
+                    } else {
+                        $q->orWhere('seat_number', $seatCount);
+                    }
+                }
+            });
+        }
+
+        // Apply sorting
+        $sortBy = $request->get('sort', 'price-asc');
+
+        // Simple approach to avoid SQL errors
+        switch ($sortBy) {
+            case 'price-desc':
+                // Get all cars first
+                $carsData = Car::where('isActive', true)->get();
+                // Then sort by their cheapest price
+                $sortedIds = $carsData->sortByDesc(function($car) {
+                    $cheapestDetail = $car->carDetails->sortBy('price')->first();
+                    return $cheapestDetail ? $cheapestDetail->price : PHP_INT_MAX;
+                })->pluck('id')->toArray();
+                // Use ordered ids to sort the query
+                $query->whereIn('id', $sortedIds)
+                      ->orderByRaw("FIELD(id, " . implode(',', $sortedIds) . ")");
+                break;
+            case 'name-asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name-desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'rating-desc':
+                // Sort by rating (descending) then by reviews_count (descending)
+                $carsData = Car::where('isActive', true)->get();
+
+                // First, sort by rating, then by reviews_count
+                $sortedIds = $carsData->sortByDesc(function($car) {
+                    // Create a more balanced formula between rating and review count
+                    // New formula: (rating * 10) + (reviews_count / 100)
+                    // This still prioritizes rating as the most important factor
+                    // but cars with more reviews will rank higher when ratings are close
+                    return ($car->rating * 10) + ($car->reviews_count / 100);
+                })->pluck('id')->toArray();
+
+                // Apply the sort if we have results
+                if (!empty($sortedIds)) {
+                    $query->whereIn('id', $sortedIds)
+                          ->orderByRaw("FIELD(id, " . implode(',', $sortedIds) . ")");
+                } else {
+                    // Fallback to database sorting if no cars
+                    $query->orderBy('rating', 'desc')
+                          ->orderBy('reviews_count', 'desc');
+                }
+                break;
+            case 'price-asc':
+            default:
+                // Get all cars first
+                $carsData = Car::where('isActive', true)->get();
+                // Then sort by their cheapest price
+                $sortedIds = $carsData->sortBy(function($car) {
+                    $cheapestDetail = $car->carDetails->sortBy('price')->first();
+                    return $cheapestDetail ? $cheapestDetail->price : PHP_INT_MAX;
+                })->pluck('id')->toArray();
+
+                if (empty($sortedIds)) {
+                    $query->orderBy('id', 'asc'); // Fallback if no cars found
+                } else {
+                    // Use ordered ids to sort the query
+                    $query->whereIn('id', $sortedIds)
+                          ->orderByRaw("FIELD(id, " . implode(',', $sortedIds) . ")");
+                }
+                break;
+        }
+
+        // Get cars with pagination
+        $cars = $query->paginate(10);
+
+        // Load additional data for each car
+        foreach ($cars as $car) {
+            // Get the lowest price variant
+            $car->cheapestDetail = $car->carDetails()->orderBy('price', 'asc')->first();
+
+            // Get available colors with proper mapping
+            $carDetails = $car->carDetails()->with('carColor')->get();
+            $availableColors = collect();
+
+            foreach($carDetails as $detail) {
+                if ($detail->carColor && !$availableColors->contains('id', $detail->carColor->id)) {
+                    $availableColors->push($detail->carColor);
+                }
+            }
+
+            $car->availableColors = $availableColors;
+        }
+
+        // Get all brands for filter dropdown
+        $brands = Make::orderBy('name')->get();
+
+        // Get fuel types from engine table or use default values if the column doesn't exist
+        try {
+            $fuelTypes = Engine::select('engine_type')->distinct()->pluck('engine_type');
+
+            // If no engine types found, use default values
+            if ($fuelTypes->isEmpty()) {
+                $fuelTypes = collect(['Petrol', 'Diesel', 'Hybrid', 'Electric']);
+            }
+        } catch (\Exception $e) {
+            // Fallback to default values if there's an error
+            $fuelTypes = collect(['Petrol', 'Diesel', 'Hybrid', 'Electric']);
+        }
+        return view('cars', compact('cars', 'brands', 'fuelTypes'));
     }
 
     public function carDetail($id) {
-        $car = Car::findOrFail($id);
-        return view('car-detail', compact('car'));
+        // Load the car with all relationships needed for display
+        $car = Car::with([
+            'carDetails.carColor',
+            'engine',
+            'model.make'
+        ])->findOrFail($id);
+
+        // For debugging - log the car details to see what variants are available
+        \Illuminate\Support\Facades\Log::info('Car Details for ID: ' . $id, [
+            'total_details' => $car->carDetails->count(),
+            'details' => $car->carDetails->map(function($detail) {
+                return [
+                    'id' => $detail->id,
+                    'color' => $detail->carColor ? $detail->carColor->name : 'None',
+                    'price' => $detail->price,
+                    'quantity' => $detail->quantity
+                ];
+            })
+        ]);
+
+        // Ensure all details are loaded and sorted by price
+        if ($car->carDetails && $car->carDetails->count() > 0) {
+            $car->carDetails = $car->carDetails->sortBy('price');
+
+            // If car price is not set, use the price from first variant
+            if (!$car->price) {
+                $car->price = $car->carDetails->first()->price ?? 0;
+            }
+        }
+
+        return view('cars_detail', compact('car'));
     }
 
     public function buyForm($id = null) {
-        $carDetails = CarDetail::with(['car', 'color'])->get();
+        $carDetails = CarDetail::with(['car', 'carColor'])->get();
         return view('buy', compact('carDetails'));
     }
 
@@ -228,11 +485,23 @@ class PageController extends Controller
     }
 
     public function search(Request $request) {
-    $query = $request->get('q');
-    $cars = Car::where('name', 'LIKE', "%$query%")
-                ->orWhere('brand', 'LIKE', "%$query%")
-                ->get(['id', 'name', 'brand', 'image_url']);
-    return response()->json($cars);
+        $query = $request->get('q');
+        $cars = Car::where('name', 'LIKE', "%$query%")
+                    ->orWhereHas('model.make', function($q) use ($query) {
+                        $q->where('name', 'LIKE', "%$query%");
+                    })
+                    ->with(['model.make'])
+                    ->take(10)
+                    ->get();
+
+        return response()->json($cars->map(function($car) {
+            return [
+                'id' => $car->id,
+                'name' => $car->name,
+                'brand' => $car->model->make->name ?? 'Unknown',
+                'image_url' => $car->main_image ? asset('storage/' . $car->main_image) : asset('images/cars/default.jpg')
+            ];
+        }));
     }
 
     public function featuredCars() {
@@ -496,5 +765,84 @@ class PageController extends Controller
         ];
 
         return view('blog_post', compact('post', 'recentPosts'));
+    }
+
+    /**
+     * Process the contact form submission and send email notification
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function submitContact(Request $request)
+    {
+        // Validate the form data
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+            'privacy' => 'accepted',
+            // Add validation
+            'car' => 'required_if:subject,Car Purchase|string|max:255',
+            'quantity' => 'required_if:subject,Car Purchase|integer|min:1',
+            'payment_method' => 'required_if:subject,Car Purchase|string|max:255',
+        ]);
+
+        try {
+            // Tạo dữ liệu cho email
+            $emailData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? 'Not provided',
+                'subject' => $validated['subject'],
+                'userMessage' => $validated['message'],
+            ];
+
+            // Thêm thông tin mua xe nếu chủ đề là Car Purchase
+            if ($validated['subject'] === 'Car Purchase') {
+                $emailData['car'] = $validated['car'];
+                $emailData['quantity'] = $validated['quantity'];
+                $emailData['payment_method'] = $validated['payment_method'];
+                $emailData['is_purchase'] = true;
+            }
+
+            // Send email notification to admin
+            \Illuminate\Support\Facades\Mail::send('emails.contact', $emailData, function ($message) use ($validated) {
+                $message->from(config('mail.from.address'), config('mail.from.name'));
+                $message->to(config('mail.from.address'), 'Carrio Motors Support');
+                $message->subject('New Contact Form Submission: ' . $validated['subject']);
+            });
+
+            // Log success message
+            \Illuminate\Support\Facades\Log::info('Contact form submitted', [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'subject' => $validated['subject'],
+                'is_purchase' => $validated['subject'] === 'Car Purchase',
+            ]);
+
+            // Thêm logic xử lý đơn hàng nếu là Car Purchase
+            if ($validated['subject'] === 'Car Purchase') {
+                // Ghi log riêng cho đơn đặt hàng
+                \Illuminate\Support\Facades\Log::info('Car purchase request', [
+                    'car' => $validated['car'],
+                    'quantity' => $validated['quantity'],
+                    'payment_method' => $validated['payment_method'],
+                ]);
+
+                // Có thể thêm code để lưu vào database nếu cần
+                // ...
+            }
+
+            // Redirect back with success message
+            return redirect()->back()->with('success', 'Thank you for your message! We will get back to you soon.');
+        } catch (\Exception $e) {
+            // Log error
+            \Illuminate\Support\Facades\Log::error('Failed to send contact email: ' . $e->getMessage());
+
+            // Redirect back with error message
+            return redirect()->back()->with('error', 'Sorry, there was a problem sending your message. Please try again later.')->withInput();
+        }
     }
 }

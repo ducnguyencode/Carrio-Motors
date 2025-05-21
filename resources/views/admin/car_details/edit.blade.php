@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow-md p-8 max-w-3xl mx-auto">
-    <form action="{{ route('admin.car_details.update', $carDetail) }}" method="POST" class="space-y-6">
+    <form action="{{ route('admin.car_details.update', $carDetail) }}" method="POST" class="space-y-6" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -61,7 +61,51 @@
                 @enderror
             </div>
 
+            <!-- Main Image -->
+            <div class="md:col-span-2">
+                <label for="main_image" class="block text-sm font-semibold text-gray-700 mb-1">Main Image</label>
+                <input type="file" name="main_image" id="main_image" accept="image/*" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('main_image') border-red-500 @enderror">
+                <div id="main-image-preview" class="mt-2"></div>
+                @if($carDetail->main_image)
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-600 mb-1">Current image:</p>
+                        <img src="{{ asset($carDetail->main_image) }}" alt="Current main image" class="w-32 h-32 object-cover rounded-md border border-gray-300">
+                    </div>
+                @endif
+                @error('main_image')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
 
+            <!-- Additional Images -->
+            <div class="md:col-span-2">
+                <label for="additional_images" class="block text-sm font-semibold text-gray-700 mb-1">Additional Images</label>
+                <div class="flex items-center space-x-2">
+                    <input type="file" name="additional_images[]" id="additional_images" accept="image/*" multiple class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none text-base @error('additional_images') border-red-500 @enderror">
+                    <button type="button" id="clear-additional-images" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Clear</button>
+                </div>
+                <p class="mt-1 text-sm text-blue-600 font-medium">You can select multiple images at once. Just hold Ctrl (Windows) or Command (Mac) and select multiple files.</p>
+                <div id="additional-images-preview" class="mt-2 grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+                <p class="mt-1 text-xs text-gray-500"><span id="selected-count">0</span> new images selected</p>
+
+                @if($carDetail->additional_images)
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-600 mb-1">Current additional images:</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach(json_decode($carDetail->additional_images) ?? [] as $image)
+                                <div class="relative group">
+                                    <img src="{{ asset($image) }}" alt="Additional image" class="w-24 h-24 object-cover rounded-md border border-gray-300">
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="text-xs mt-1 text-red-500">Note: Uploading new images will replace all existing ones</p>
+                    </div>
+                @endif
+
+                @error('additional_images')
+                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
 
             <!-- Is Available -->
             <div class="flex items-center mt-8">
@@ -76,4 +120,65 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Main image preview
+    const mainImageInput = document.getElementById('main_image');
+    const mainImagePreview = document.getElementById('main-image-preview');
+
+    mainImageInput.addEventListener('change', function() {
+        mainImagePreview.innerHTML = '';
+        if (this.files && this.files[0]) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(this.files[0]);
+            img.className = 'w-32 h-32 object-cover rounded-md border border-gray-300 mt-2';
+            img.onload = function() {
+                URL.revokeObjectURL(this.src);
+            }
+            mainImagePreview.appendChild(img);
+        }
+    });
+
+    // Additional images preview
+    const additionalImagesInput = document.getElementById('additional_images');
+    const additionalImagesPreview = document.getElementById('additional-images-preview');
+    const selectedCount = document.getElementById('selected-count');
+    const clearBtn = document.getElementById('clear-additional-images');
+
+    additionalImagesInput.addEventListener('change', function() {
+        additionalImagesPreview.innerHTML = '';
+        selectedCount.textContent = this.files.length;
+
+        if (this.files && this.files.length > 0) {
+            for (let i = 0; i < this.files.length; i++) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(this.files[i]);
+                img.className = 'w-full h-24 object-cover rounded-md border border-gray-300';
+                img.onload = function() {
+                    URL.revokeObjectURL(this.src);
+                }
+
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'relative';
+                imgContainer.appendChild(img);
+
+                // Show file name on hover
+                imgContainer.title = this.files[i].name;
+
+                additionalImagesPreview.appendChild(imgContainer);
+            }
+        }
+    });
+
+    // Clear button functionality
+    clearBtn.addEventListener('click', function() {
+        additionalImagesInput.value = '';
+        additionalImagesPreview.innerHTML = '';
+        selectedCount.textContent = '0';
+    });
+});
+</script>
+@endpush
 @endsection

@@ -81,6 +81,9 @@
                             @endif
                         </td>
                         <td class="px-4 py-2">
+                            <a href="{{ route('admin.banners.show', $banner->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 mr-1" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
                             <a href="{{ route('admin.banners.edit', $banner->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200 mr-1" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>

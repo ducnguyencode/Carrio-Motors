@@ -387,6 +387,8 @@
 
     // Initialize page state from localStorage
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, checking Bootstrap availability:', typeof bootstrap);
+
         // Get cars from localStorage
         const comparisonList = JSON.parse(localStorage.getItem('carComparison')) || [];
 
@@ -408,6 +410,54 @@
 
         // Setup event listeners
         setupEventListeners();
+
+        // Initialize Bootstrap modals
+        if (typeof bootstrap !== 'undefined') {
+            console.log('Bootstrap found, registering click handlers');
+            // Modal is already initialized
+            document.querySelectorAll('.select-car-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Add Car button clicked');
+
+                    // Get the slot number from the button ID
+                    currentSlot = parseInt(this.id.replace('select-car-', ''));
+                    console.log('Current slot:', currentSlot);
+
+                    // Show the car selection modal
+                    const carSelectionModal = new bootstrap.Modal(document.getElementById('carSelectionModal'));
+                    console.log('Modal initialized:', carSelectionModal);
+                    carSelectionModal.show();
+                });
+            });
+        } else {
+            console.log('Bootstrap not found, attempting to load it');
+            // Load Bootstrap JavaScript if it's not already loaded
+            const bootstrapScript = document.createElement('script');
+            bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js';
+            bootstrapScript.integrity = 'sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4';
+            bootstrapScript.crossOrigin = 'anonymous';
+            bootstrapScript.onload = function() {
+                console.log('Bootstrap loaded dynamically');
+                // Bootstrap loaded, now initialize the modal and add event listeners
+                document.querySelectorAll('.select-car-btn').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Add Car button clicked (after dynamic load)');
+
+                        // Get the slot number from the button ID
+                        currentSlot = parseInt(this.id.replace('select-car-', ''));
+                        console.log('Current slot:', currentSlot);
+
+                        // Show the car selection modal
+                        const carSelectionModal = new bootstrap.Modal(document.getElementById('carSelectionModal'));
+                        console.log('Modal initialized:', carSelectionModal);
+                        carSelectionModal.show();
+                    });
+                });
+            };
+            document.head.appendChild(bootstrapScript);
+        }
     });
 
     // Mock function to load car data - in a real app this would be an API call
@@ -508,8 +558,10 @@
                 currentSlot = parseInt(this.id.replace('select-car-', ''));
 
                 // Show the car selection modal
-                const modal = new bootstrap.Modal(document.getElementById('carSelectionModal'));
-                modal.show();
+                if (typeof bootstrap !== 'undefined') {
+                    const modal = new bootstrap.Modal(document.getElementById('carSelectionModal'));
+                    modal.show();
+                }
             });
         });
 

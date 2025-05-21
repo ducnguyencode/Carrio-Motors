@@ -140,7 +140,6 @@ class CarController extends Controller
      */
     public function show(Car $car)
     {
-        $car->load(['model.make', 'engine', 'carDetails.carColor']);
         return view('admin.cars.show', compact('car'));
     }
 

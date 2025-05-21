@@ -8,12 +8,22 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
+                @if(auth()->user()->role === 'admin')
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                        href="{{ route('admin.dashboard') }}">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                 </li>
+                @endif
+                @if(auth()->user()->role === 'content')
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.makes.*') ? 'active' : '' }}"
+                       href="{{ route('admin.makes.index') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                @endif
                 @if(auth()->user()->role === 'admin')
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
@@ -22,12 +32,14 @@
                     </a>
                 </li>
                 @endif
+                @if(auth()->user()->role === 'admin')
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.cars.*') ? 'active' : '' }}"
                        href="{{ route('admin.cars.index') }}">
                         <i class="fas fa-car"></i> Cars
                     </a>
                 </li>
+                @endif
                 @if(in_array(auth()->user()->role, ['admin', 'saler']))
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}"
@@ -37,6 +49,12 @@
                 </li>
                 @endif
                 @if(in_array(auth()->user()->role, ['admin', 'content']))
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}"
+                       href="{{ route('admin.blog.index') }}">
+                        <i class="fas fa-newspaper"></i> Blog
+                    </a>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle {{ request()->routeIs(['admin.makes.*', 'admin.models.*', 'admin.engines.*', 'admin.car_colors.*']) ? 'active' : '' }}"
                        href="#" id="navbarDropdownCatalog" role="button" data-bs-toggle="dropdown">
