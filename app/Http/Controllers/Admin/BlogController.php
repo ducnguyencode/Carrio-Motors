@@ -279,6 +279,8 @@ class BlogController extends Controller
     public function uploadImage(Request $request)
     {
         if (!$request->hasFile('upload')) {
+            \Illuminate\Support\Facades\Log::error('CKEditor upload error: No file uploaded');
+
             return response()->json([
                 'error' => [
                     'message' => 'No file was uploaded.'
@@ -295,6 +297,10 @@ class BlogController extends Controller
         );
 
         if ($validator->fails()) {
+            \Illuminate\Support\Facades\Log::error('CKEditor upload validation error', [
+                'errors' => $validator->errors()->first('upload')
+            ]);
+
             return response()->json([
                 'error' => [
                     'message' => $validator->errors()->first('upload')
@@ -302,13 +308,46 @@ class BlogController extends Controller
             ], 422);
         }
 
-        // Store the file
-        $path = $file->store('blog/content', 'public');
-        $url = asset('storage/' . $path);
+        try {
+            // Generate a unique name for the file
+            $fileName = uniqid() . '_' . $file->getClientOriginalName();
 
-        // Return response for CKEditor
-        return response()->json([
-            'url' => $url,
-        ]);
+            // Ensure the storage directory exists
+            $uploadPath = 'public/blog/content';
+            if (!Storage::exists($uploadPath)) {
+                Storage::makeDirectory($uploadPath);
+            }
+
+            // Store the file
+            $path = $file->storeAs('blog/content', $fileName, 'public');
+            $url = asset('storage/' . $path);
+
+            // Debug information
+            \Illuminate\Support\Facades\Log::info('CKEditor image uploaded successfully', [
+                'fileName' => $fileName,
+                'path' => $path,
+                'url' => $url,
+                'storage_path' => Storage::path($uploadPath)
+            ]);
+
+            // Return response for CKEditor
+            return response()->json([
+                'uploaded' => 1,
+                'fileName' => $fileName,
+                'url' => $url,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('CKEditor upload error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'uploaded' => 0,
+                'error' => [
+                    'message' => 'Error uploading image: ' . $e->getMessage()
+                ]
+            ], 500);
+        }
     }
 }

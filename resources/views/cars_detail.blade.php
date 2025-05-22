@@ -758,6 +758,323 @@
             </div>
         </div>
     </div>
+
+    <!-- INLINE EMERGENCY SCRIPT - Direct color and thumbnails fix -->
+    <script>
+        // Direct color selection fix - ensures proper UI updates
+        (function() {
+            // Initialize after page load
+            window.addEventListener('load', function() {
+                initColorSelection();
+                initThumbnailGallery();
+            });
+
+            // Initialize immediately and retry after 1 second
+            setTimeout(initColorSelection, 0);
+            setTimeout(initThumbnailGallery, 0);
+            setTimeout(initColorSelection, 1000);
+            setTimeout(initThumbnailGallery, 1000);
+
+            // Fix for thumbnails not working
+            function initThumbnailGallery() {
+                console.log("Initializing thumbnail gallery...");
+
+                // Find all thumbnail images
+                const thumbnails = document.querySelectorAll('.thumbnail-image');
+
+                // Remove existing click events and add new ones
+                thumbnails.forEach(thumb => {
+                    // Clone to remove existing event listeners
+                    const newThumb = thumb.cloneNode(true);
+                    if (thumb.parentNode) {
+                        thumb.parentNode.replaceChild(newThumb, thumb);
+                    }
+
+                    // Add new click handler with direct DOM manipulation
+                    newThumb.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Get image source
+                        const src = this.src;
+
+                        // Update main image
+                        const mainImage = document.getElementById('mainImage');
+                        if (mainImage) {
+                            mainImage.src = src;
+                        }
+
+                        // Update active state on thumbnails
+                        document.querySelectorAll('.thumbnail-image').forEach(t => {
+                            t.classList.remove('active');
+                        });
+                        this.classList.add('active');
+
+                        console.log("Thumbnail clicked: " + src);
+                    });
+                });
+            }
+
+            // Main fix function for color selection
+            function initColorSelection() {
+                // Capture all clicks on the page
+                document.body.addEventListener('click', function(e) {
+                    // Find clicked color circle or color option
+                    let targetElement = e.target;
+                    let colorCircle = null;
+
+                    // Check if clicked on a color
+                    if (targetElement.classList.contains('color-circle')) {
+                        colorCircle = targetElement;
+                    } else if (targetElement.closest('.color-option')) {
+                        colorCircle = targetElement.closest('.color-option').querySelector('.color-circle');
+                    }
+
+                    if (!colorCircle) return; // Not a click on color
+
+                    // Prevent default events
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Find radio button ID
+                    const radioId = colorCircle.getAttribute('for');
+                    if (!radioId) return;
+
+                    // Find corresponding radio button
+                    const radio = document.getElementById(radioId);
+                    if (!radio) return;
+
+                    // Get data from radio button
+                    const color = radio.getAttribute('data-color');
+                    const price = radio.getAttribute('data-price');
+                    const quantity = radio.getAttribute('data-quantity');
+                    const mainImage = radio.getAttribute('data-main-image');
+                    const additionalImages = radio.getAttribute('data-additional-images');
+
+                    // 1. Select radio button
+                    radio.checked = true;
+
+                    // 2. Update color display
+                    updateColorDisplay(colorCircle, color);
+
+                    // 3. Update price
+                    updatePrice(price);
+
+                    // 4. Update stock status
+                    updateStock(quantity);
+
+                    // 5. Update image and gallery
+                    updateImageAndGallery(mainImage, additionalImages);
+                }, true); // capture = true to catch events before other handlers
+
+                // Function to update color display
+                function updateColorDisplay(colorCircle, colorName) {
+                    const preview = document.getElementById('selected-color-preview');
+                    if (!preview) return;
+
+                    // Get color from colorCircle
+                    const bgColor = getComputedStyle(colorCircle).backgroundColor;
+                    preview.style.backgroundColor = bgColor;
+
+                    // Update text
+                    const nameElement = preview.parentElement;
+                    if (nameElement) {
+                        nameElement.innerHTML = preview.outerHTML + ' ' + colorName;
+                    }
+                }
+
+                // Function to update price
+                function updatePrice(price) {
+                    if (!price) return;
+
+                    const numPrice = parseFloat(price.replace(/[^\d.]/g, ''));
+                    if (isNaN(numPrice)) return;
+
+                    const formatted = numPrice.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    // Find ALL price elements and update them
+                    [
+                        '#main-price',
+                        '.selected-price',
+                        '.pricing .h3',
+                        '.variant-details .selected-price',
+                        '.h3.fw-bold'
+                    ].forEach(selector => {
+                        document.querySelectorAll(selector).forEach(el => {
+                            if (el) el.textContent = '$' + formatted;
+                        });
+                    });
+
+                    // Update finance info
+                    const financeInfo = document.getElementById('finance-info');
+                    if (financeInfo) {
+                        const monthlyPayment = (numPrice / 60).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+
+                        financeInfo.innerHTML = financeInfo.innerHTML.replace(
+                            /\$[\d,]+\.\d{2}\/month\*/,
+                            '$' + monthlyPayment + '/month*'
+                        );
+                    }
+                }
+
+                // Function to update stock status
+                function updateStock(quantity) {
+                    const qty = parseInt(quantity, 10);
+                    const inStock = qty > 0;
+
+                    // Update main status
+                    const status = document.getElementById('stock-status');
+                    if (status) {
+                        const dot = status.querySelector('.dot');
+                        if (dot) {
+                            dot.className = inStock ? 'dot bg-success me-2' : 'dot bg-danger me-2';
+                        }
+
+                        const text = status.querySelector('span:not(.dot):not(.text-muted)');
+                        if (text) {
+                            text.textContent = inStock ? 'In Stock' : 'Out of Stock';
+                        }
+
+                        const qtyText = status.querySelector('small.text-muted');
+                        if (qtyText) {
+                            qtyText.textContent = inStock ? `(${quantity} available)` : '';
+                            qtyText.style.display = inStock ? '' : 'none';
+                        }
+                    }
+
+                    // Update variant details
+                    const variantStock = document.querySelector('.variant-details .mt-2.small');
+                    if (variantStock) {
+                        variantStock.innerHTML = '<span class="text-' + (inStock ? 'success' : 'danger') + '">' +
+                            (inStock ? '✓' : '✗') + '</span> ' +
+                            (inStock ? 'In stock: ' + quantity + ' available' : 'Out of stock');
+                    }
+                }
+
+                // Function to update image and gallery
+                function updateImageAndGallery(mainImagePath, additionalImagesJson) {
+                    if (!mainImagePath) return;
+
+                    // Ensure path is correct
+                    if (!mainImagePath.startsWith('http') && !mainImagePath.startsWith('/')) {
+                        mainImagePath = '/' + mainImagePath;
+                    }
+
+                    // Update main image
+                    const mainImg = document.getElementById('mainImage');
+                    if (mainImg) {
+                        // Force image reload with timestamp
+                        const timestamp = new Date().getTime();
+                        const newSrc = mainImagePath + (mainImagePath.includes('?') ? '&' : '?') + 'ts=' + timestamp;
+
+                        // Create new image to preload
+                        const preloadImg = new Image();
+                        preloadImg.onload = function() {
+                            mainImg.src = this.src;
+                        };
+                        preloadImg.onerror = function() {
+                            mainImg.src = '/images/cars/default.jpg';
+                        };
+                        preloadImg.src = newSrc;
+                    }
+
+                    // Update gallery thumbnails
+                    updateGalleryWithNewImages(mainImagePath, additionalImagesJson);
+                }
+
+                // Create fresh thumbnails for selected color
+                function updateGalleryWithNewImages(mainImagePath, additionalImagesJson) {
+                    // Find the gallery container
+                    const gallery = document.getElementById('thumbnailGallery');
+                    if (!gallery) return;
+
+                    // Clear current thumbnails
+                    gallery.innerHTML = '';
+
+                    // Create thumbnail for main image
+                    const mainThumb = createThumbnail(mainImagePath, true);
+                    gallery.appendChild(mainThumb);
+
+                    // Process additional images if available
+                    if (additionalImagesJson) {
+                        try {
+                            // Handle different formats of additionalImagesJson
+                            let imagesArray;
+
+                            try {
+                                // Try parsing as JSON
+                                imagesArray = JSON.parse(additionalImagesJson);
+                            } catch (e) {
+                                // If not valid JSON, try treating as comma-separated string
+                                if (typeof additionalImagesJson === 'string') {
+                                    imagesArray = additionalImagesJson.split(',').map(img => img.trim());
+                                } else {
+                                    imagesArray = [];
+                                }
+                            }
+
+                            // Ensure it's an array
+                            if (!Array.isArray(imagesArray)) {
+                                imagesArray = [imagesArray];
+                            }
+
+                            // Add each additional image
+                            imagesArray.forEach(imgPath => {
+                                if (!imgPath) return;
+
+                                // Ensure path is a string
+                                const imagePath = String(imgPath);
+
+                                // Normalize path
+                                let normalizedPath = imagePath;
+                                if (!normalizedPath.startsWith('http') && !normalizedPath.startsWith('/')) {
+                                    normalizedPath = '/' + normalizedPath;
+                                }
+
+                                // Create and add thumbnail
+                                const thumb = createThumbnail(normalizedPath, false);
+                                gallery.appendChild(thumb);
+                            });
+                        } catch (e) {
+                            console.error('Error processing additional images:', e);
+                        }
+                    }
+
+                    // Re-initialize thumbnail gallery event handlers
+                    initThumbnailGallery();
+                }
+
+                // Helper function to create thumbnail elements
+                function createThumbnail(imagePath, isActive) {
+                    const thumb = document.createElement('img');
+                    thumb.src = imagePath;
+                    thumb.className = 'thumbnail-image me-2 rounded cursor-pointer' + (isActive ? ' active' : '');
+                    thumb.alt = 'Thumbnail';
+                    thumb.style = 'width: 80px; height: 60px; object-fit: cover;';
+
+                    // Add error handler
+                    thumb.onerror = function() {
+                        this.src = '/images/cars/default.jpg';
+                        this.onerror = null;
+                    };
+
+                    return thumb;
+                }
+
+                // Auto-select first color to activate state
+                const firstColorCircle = document.querySelector('.color-circle');
+                if (firstColorCircle) {
+                    firstColorCircle.click();
+                }
+            }
+        })();
+    </script>
 </div>
 
 <!-- Review Modal -->
@@ -1129,11 +1446,435 @@
         transform: translateY(-3px) !important;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
     }
+
+    /* Enhanced visibility for black color option */
+    .color-option-black .color-circle[style*="background-color: #000"],
+    .color-option-black .color-circle[style*="background-color: black"] {
+        border: 3px solid #999;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .color-option-black .text-center {
+        font-weight: bold;
+        color: #333;
+        text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+    }
 </style>
 @endpush
 
 @push('scripts')
 <script>
+    // Giải pháp MutationObserver - theo dõi và ghi đè hoàn toàn giao diện người dùng
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('▶️ DOM loaded - initializing ULTIMATE FIX with MutationObserver');
+
+        // Lưu giá trị trạng thái hiện tại để so sánh khi có thay đổi
+        let currentState = {
+            selectedColorId: null,
+            price: null,
+            color: null
+        };
+
+        // Lấy tất cả các phần tử màu và dữ liệu liên quan
+        function getAllColorData() {
+            const colorData = [];
+
+            // Tìm tất cả các phần tử màu
+            document.querySelectorAll('.color-circle').forEach((circle, index) => {
+                const radioId = circle.getAttribute('for');
+                if (!radioId) return;
+
+                const radio = document.getElementById(radioId);
+                if (!radio) return;
+
+                colorData.push({
+                    index: index,
+                    colorCircle: circle,
+                    radio: radio,
+                    colorName: radio.getAttribute('data-color'),
+                    price: radio.getAttribute('data-price'),
+                    quantity: radio.getAttribute('data-quantity'),
+                    mainImage: radio.getAttribute('data-main-image'),
+                    additionalImages: radio.getAttribute('data-additional-images'),
+                    backgroundColor: getComputedStyle(circle).backgroundColor,
+                    isChecked: radio.checked
+                });
+            });
+
+            console.log(`🔍 Found ${colorData.length} color options:`, colorData);
+            return colorData;
+        }
+
+        // Cập nhật giao diện người dùng cho một màu được chọn
+        function updateUIForColor(colorData) {
+            if (!colorData) {
+                console.error('❌ No color data provided to updateUIForColor');
+                return;
+            }
+
+            console.log('🔄 Updating UI for color:', colorData);
+
+            // 1. Chọn radio button
+            if (!colorData.radio.checked) {
+                colorData.radio.checked = true;
+            }
+
+            // 2. Cập nhật hiển thị màu
+            const colorPreview = document.getElementById('selected-color-preview');
+            if (colorPreview) {
+                colorPreview.style.backgroundColor = colorData.backgroundColor;
+
+                const colorNameElement = colorPreview.parentElement;
+                if (colorNameElement) {
+                    colorNameElement.innerHTML = colorPreview.outerHTML + ' ' + colorData.colorName;
+                }
+            }
+
+            // 3. Cập nhật giá
+            const priceValue = parseFloat(colorData.price.replace(/[^\d.]/g, ''));
+            if (!isNaN(priceValue)) {
+                const formattedPrice = priceValue.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                // Cập nhật TẤT CẢ các phần tử hiển thị giá
+                document.querySelectorAll('#main-price, .selected-price, .pricing .h3, h3.fw-bold, .variant-details .selected-price, .h3.fw-bold').forEach(el => {
+                    if (el) {
+                        el.textContent = '$' + formattedPrice;
+                    }
+                });
+
+                // Cập nhật thông tin tài chính
+                const financeInfo = document.getElementById('finance-info');
+                if (financeInfo) {
+                    const monthlyPayment = (priceValue / 60).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    financeInfo.innerHTML = financeInfo.innerHTML.replace(
+                        /\$[\d,]+\.\d{2}\/month\*/,
+                        '$' + monthlyPayment + '/month*'
+                    );
+                }
+            }
+
+            // 4. Cập nhật trạng thái tồn kho
+            const quantity = parseInt(colorData.quantity, 10);
+            const isInStock = quantity > 0;
+
+            // Phần tử trạng thái tồn kho chính
+            const stockStatus = document.getElementById('stock-status');
+            if (stockStatus) {
+                const dot = stockStatus.querySelector('.dot');
+                if (dot) {
+                    dot.className = isInStock ? 'dot bg-success me-2' : 'dot bg-danger me-2';
+                }
+
+                const statusText = stockStatus.querySelector('span:not(.dot):not(.text-muted)');
+                if (statusText) {
+                    statusText.textContent = isInStock ? 'In Stock' : 'Out of Stock';
+                }
+
+                const quantityEl = stockStatus.querySelector('small.text-muted');
+                if (quantityEl) {
+                    quantityEl.textContent = isInStock ? `(${quantity} available)` : '';
+                    quantityEl.style.display = isInStock ? '' : 'none';
+                }
+            }
+
+            // Phần tử hiển thị trạng thái tồn kho trong chi tiết biến thể
+            const variantStock = document.querySelector('.variant-details .mt-2.small');
+            if (variantStock) {
+                variantStock.innerHTML = '<span class="text-' + (isInStock ? 'success' : 'danger') + '">' +
+                (isInStock ? '✓' : '✗') + '</span> ' +
+                (isInStock ? 'In stock: ' + quantity + ' available' : 'Out of stock');
+        }
+
+            // 5. Cập nhật hình ảnh
+            if (colorData.mainImage) {
+                const mainImageEl = document.getElementById('mainImage');
+                if (mainImageEl) {
+                    let imagePath = colorData.mainImage;
+                    if (!imagePath.startsWith('http') && !imagePath.startsWith('/')) {
+                        imagePath = '/' + imagePath;
+                    }
+
+                    mainImageEl.src = imagePath;
+
+                    // Cập nhật gallery hình ảnh
+                    updateGallery(imagePath, colorData.additionalImages);
+                }
+            }
+
+            // 6. Cập nhật thông số kỹ thuật
+            updateSpecs(colorData.radio);
+
+            // Cập nhật trạng thái hiện tại
+            currentState = {
+                selectedColorId: colorData.radio.id,
+                price: colorData.price,
+                color: colorData.colorName
+            };
+
+            console.log('✅ UI updated successfully for', colorData.colorName);
+        }
+
+        // Cập nhật gallery hình ảnh
+        function updateGallery(mainImage, additionalImagesJson) {
+            if (!mainImage) return;
+
+            // Chuẩn bị hình ảnh chính
+            if (!mainImage.startsWith('http') && !mainImage.startsWith('/')) {
+                mainImage = '/' + mainImage;
+            }
+
+            // Phân tích cú pháp hình ảnh bổ sung nếu có
+        let additionalImages = [];
+        if (additionalImagesJson) {
+            try {
+                additionalImages = JSON.parse(additionalImagesJson);
+            } catch (e) {
+                console.error('Failed to parse additional images:', e);
+            }
+        }
+
+            // Đảm bảo đường dẫn đúng cho hình ảnh bổ sung
+            additionalImages = additionalImages.map(img => {
+                if (!img.startsWith('http') && !img.startsWith('/')) {
+                    return '/' + img;
+                }
+                return img;
+            });
+
+            // Cập nhật gallery
+        const galleryElement = document.getElementById('thumbnailGallery');
+            if (!galleryElement) return;
+
+            // Xóa các thumbnail hiện tại
+            galleryElement.innerHTML = '';
+
+            // Thêm hình ảnh chính làm thumbnail đầu tiên
+                const mainThumb = document.createElement('img');
+                mainThumb.src = mainImage;
+                mainThumb.className = 'thumbnail-image active me-2 rounded cursor-pointer';
+                mainThumb.alt = 'Thumbnail';
+                mainThumb.style = 'width: 80px; height: 60px; object-fit: cover;';
+                mainThumb.onclick = function() { changeMainImage(this.src); };
+
+            // Thêm xử lý lỗi cho thumbnail
+            mainThumb.onerror = function() {
+                this.src = '/images/cars/default.jpg';
+                this.onerror = null;
+            };
+
+                galleryElement.appendChild(mainThumb);
+
+            // Thêm các hình ảnh bổ sung làm thumbnail
+            if (additionalImages && additionalImages.length > 0) {
+                additionalImages.forEach(image => {
+                    const thumb = document.createElement('img');
+                    thumb.src = image;
+                    thumb.className = 'thumbnail-image me-2 rounded cursor-pointer';
+                    thumb.alt = 'Thumbnail';
+                    thumb.style = 'width: 80px; height: 60px; object-fit: cover;';
+                    thumb.onclick = function() { changeMainImage(this.src); };
+
+                    thumb.onerror = function() {
+                        this.src = '/images/cars/default.jpg';
+                        this.onerror = null;
+                    };
+
+                    galleryElement.appendChild(thumb);
+                });
+            }
+        }
+
+        // Cập nhật thông số kỹ thuật
+        function updateSpecs(radioInput) {
+            if (!radioInput) return;
+
+            try {
+                // Cố gắng sử dụng hàm hiện có nếu được định nghĩa
+                if (typeof updateSpecifications === 'function') {
+                    updateSpecifications(radioInput);
+                } else {
+                    // Tự triển khai cập nhật thông số kỹ thuật
+                    const specMappings = [
+                        { attr: 'engine', selector: '#specs tbody tr:nth-child(1) td' },
+                        { attr: 'horsepower', selector: '#specs tbody tr:nth-child(2) td' },
+                        { attr: 'torque', selector: '#specs tbody tr:nth-child(3) td' },
+                        { attr: 'acceleration', selector: '#specs tbody tr:nth-child(4) td' },
+                        { attr: 'fuel-consumption', selector: '#specs tbody tr:nth-child(5) td' },
+                        { attr: 'fuel-type', selector: '#specs tbody tr:nth-child(6) td' },
+                        { attr: 'transmission', selector: 'tbody tr:nth-child(7) td, .key-specs .d-flex:nth-child(3) span' },
+                        { attr: 'seat-number', selector: '.key-specs .d-flex:nth-child(4) span' }
+                    ];
+
+                    // Cập nhật từng thông số nếu có dữ liệu
+                    specMappings.forEach(spec => {
+                        const value = radioInput.getAttribute('data-' + spec.attr);
+            if (value) {
+                            document.querySelectorAll(spec.selector).forEach(el => {
+                                el.textContent = value;
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Error updating specifications:', e);
+            }
+        }
+
+        // Thiết lập MutationObserver để theo dõi thay đổi DOM
+        const colorObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                // Kiểm tra xem có radio button nào được chọn
+                if (mutation.type === 'attributes' &&
+                    mutation.attributeName === 'checked' &&
+                    mutation.target.name === 'car_variant') {
+
+                    console.log('🔄 Detected change in car variant selection:', mutation.target);
+
+                    // Tìm dữ liệu màu cho radio button được chọn
+                    const allColors = getAllColorData();
+                    const selectedColor = allColors.find(c => c.radio === mutation.target);
+
+                    if (selectedColor) {
+                        updateUIForColor(selectedColor);
+                    }
+                }
+            });
+        });
+
+        // Khởi tạo xử lý trực tiếp cho click
+        function setupDirectClickHandlers() {
+            console.log('🔧 Setting up direct click handlers for color circles');
+
+            document.querySelectorAll('.color-circle, .color-option').forEach((element) => {
+                // Tạo bản sao phần tử để loại bỏ tất cả các trình xử lý sự kiện hiện có
+                const newElement = element.cloneNode(true);
+                if (element.parentNode) {
+                    element.parentNode.replaceChild(newElement, element);
+                }
+
+                // Thêm trình xử lý sự kiện mới
+                newElement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    console.log('🖱️ Direct click detected on:', this);
+
+                    // Xác định phần tử màu
+                    let colorCircle = this;
+                    if (this.classList.contains('color-option')) {
+                        colorCircle = this.querySelector('.color-circle');
+                    }
+
+                    if (!colorCircle) {
+                        console.error('❌ Could not find color circle element');
+                        return;
+                    }
+
+                    // Tìm và cập nhật màu được chọn
+                    const allColors = getAllColorData();
+                    const clickedColor = allColors.find(c => c.colorCircle === colorCircle);
+
+                    if (clickedColor) {
+                        updateUIForColor(clickedColor);
+                    } else {
+                        console.error('❌ Could not find color data for clicked circle');
+                    }
+                }, true);
+            });
+        }
+
+        // Start MutationObserver
+        const config = {
+            attributes: true,
+            childList: true,
+            subtree: true,
+            attributeFilter: ['checked']
+        };
+
+        // Bắt đầu quan sát thay đổi trên toàn bộ trang
+        colorObserver.observe(document.body, config);
+
+        // Thiết lập trình xử lý click trực tiếp
+        setTimeout(setupDirectClickHandlers, 1000);
+
+        // Thiết lập trình xử lý toàn cục để bắt tất cả các click trên trang
+        document.addEventListener('click', function(e) {
+            // Check if click was on or near a color option
+            let element = e.target;
+
+            // Walk up the DOM tree
+            while (element && element !== document) {
+                if (element.classList.contains('color-circle') ||
+                    element.classList.contains('color-option') ||
+                    element.parentElement?.classList.contains('color-option')) {
+
+                    console.log('🎯 Global click intercepted on color element:', element);
+
+                    // Find the actual circle
+                    let colorCircle = element;
+                    if (element.classList.contains('color-option')) {
+                        colorCircle = element.querySelector('.color-circle');
+                    } else if (element.parentElement?.classList.contains('color-option')) {
+                        colorCircle = element.parentElement.querySelector('.color-circle');
+                    }
+
+                    if (!colorCircle) {
+                        console.error('❌ Could not find color circle from clicked element');
+                        return;
+                    }
+
+                    // Find and update the selected color
+                    const allColors = getAllColorData();
+                    const clickedColor = allColors.find(c => c.colorCircle === colorCircle ||
+                                                        c.colorCircle.getAttribute('for') === colorCircle.getAttribute('for'));
+
+                    if (clickedColor) {
+                        updateUIForColor(clickedColor);
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }
+
+                element = element.parentElement;
+            }
+        }, true);
+
+        // Thêm chức năng chọn màu từ console
+        window.forceSelectColor = function(index) {
+            const colorData = getAllColorData();
+            if (colorData.length > index) {
+                console.log(`⚡ Manually forcing color selection for index ${index}:`, colorData[index]);
+                updateUIForColor(colorData[index]);
+                return true;
+            } else {
+                console.error(`❌ No color found at index ${index}. Available colors:`, colorData.length);
+                return false;
+            }
+        };
+
+        // Chọn màu mặc định ban đầu
+        setTimeout(function() {
+            const colorData = getAllColorData();
+            if (colorData.length > 0) {
+                // Tìm màu đã được chọn hoặc sử dụng màu đầu tiên
+                const selectedColor = colorData.find(c => c.isChecked) || colorData[0];
+                console.log('🔄 Selecting initial color:', selectedColor);
+                updateUIForColor(selectedColor);
+            }
+        }, 500);
+
+        console.log('✅ ULTIMATE FIX initialized successfully');
+        console.log('💡 TIP: You can manually force color selection by running in console: forceSelectColor(0) or forceSelectColor(1)');
+    });
+
     // Function to change main image when clicking on thumbnails
     function changeMainImage(src) {
         const mainImage = document.getElementById('mainImage');
@@ -1151,386 +1892,7 @@
         });
     }
 
-    // Declare all functions in global scope first for accessibility
-    function updateColorDisplay(colorName, detailId) {
-        const selectedColorPreview = document.getElementById('selected-color-preview');
-        const radioInput = document.getElementById('color-' + detailId);
-
-        // Update color circle
-        if (selectedColorPreview && radioInput) {
-            const hexCode = radioInput.parentElement.querySelector('.color-circle').style.backgroundColor;
-            selectedColorPreview.style.backgroundColor = hexCode;
-
-            // Update color name text
-            const colorDisplayElement = selectedColorPreview.parentElement;
-            if (colorDisplayElement) {
-                // Keep the color preview span and update only the text part
-                const currentHTML = colorDisplayElement.innerHTML;
-                const previewSpan = currentHTML.substring(0, currentHTML.indexOf('</span>') + 7);
-                colorDisplayElement.innerHTML = previewSpan + ' ' + colorName;
-            }
-
-            // Update description if available
-            const description = radioInput.getAttribute('data-description');
-            const descElement = document.querySelector('.variant-details p.small');
-            if (descElement && description) {
-                descElement.textContent = description;
-            }
-        }
-    }
-
-    function updatePrices(formattedPrice) {
-        // Update all price displays on the page
-        const priceElements = [
-            document.getElementById('main-price'),
-            document.querySelector('.selected-price'),
-            document.getElementById('finance-info')
-        ];
-
-        for (const element of priceElements) {
-            if (element) {
-                if (element.id === 'main-price' || element.classList.contains('selected-price')) {
-                    element.textContent = '$' + formattedPrice;
-                } else if (element.id === 'finance-info') {
-                    // Update finance info with monthly payment (price/60)
-                    const numericPrice = parseFloat(formattedPrice.replace(/,/g, ''));
-                    const monthlyPayment = (numericPrice / 60).toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-                    element.innerHTML = element.innerHTML.replace(/\$[\d,]+\.\d{2}/, '$' + monthlyPayment);
-                }
-            }
-        }
-    }
-
-    function updateStockStatus(quantity) {
-        const stockStatusElement = document.getElementById('stock-status');
-        const stockInfoElement = document.querySelector('.variant-details .mt-2.small');
-
-        if (stockStatusElement && stockInfoElement) {
-            const quantityNum = parseInt(quantity, 10);
-            const isInStock = quantityNum > 0;
-
-            // Update stock status dot and text
-            const dotElement = stockStatusElement.querySelector('.dot');
-            if (dotElement) {
-                dotElement.className = isInStock ? 'dot bg-success me-2' : 'dot bg-danger me-2';
-            }
-
-            // Update stock status text
-            const textElement = stockStatusElement.querySelector('span:not(.dot):not(.text-muted)');
-            if (textElement) {
-                textElement.textContent = isInStock ? 'In Stock' : 'Out of Stock';
-            }
-
-            // Update quantity available text
-            const quantityElement = stockStatusElement.querySelector('small.text-muted');
-            if (quantityElement) {
-                quantityElement.textContent = isInStock ? `(${quantity} available)` : '';
-            }
-
-            // Update variant details stock info
-            stockInfoElement.innerHTML = '<span class="text-' + (isInStock ? 'success' : 'danger') + '">' +
-                (isInStock ? '✓' : '✗') + '</span> ' +
-                (isInStock ? 'In stock: ' + quantity + ' available' : 'Out of stock');
-        }
-    }
-
-    function updateImages(mainImage, additionalImagesJson) {
-        // Update main image
-        const mainImageElement = document.getElementById('mainImage');
-        if (mainImageElement && mainImage) {
-            mainImageElement.src = mainImage;
-        }
-
-        // Parse additional images JSON
-        let additionalImages = [];
-        if (additionalImagesJson) {
-            try {
-                additionalImages = JSON.parse(additionalImagesJson);
-            } catch (e) {
-                console.error('Failed to parse additional images:', e);
-            }
-        }
-
-        // Update gallery thumbnails
-        const galleryElement = document.getElementById('thumbnailGallery');
-        if (galleryElement) {
-            // Clear existing thumbnails
-            galleryElement.innerHTML = '';
-
-            // Add main image as first thumbnail
-            if (mainImage) {
-                const mainThumb = document.createElement('img');
-                mainThumb.src = mainImage;
-                mainThumb.className = 'thumbnail-image active me-2 rounded cursor-pointer';
-                mainThumb.alt = 'Thumbnail';
-                mainThumb.style = 'width: 80px; height: 60px; object-fit: cover;';
-                mainThumb.onclick = function() { changeMainImage(this.src); };
-                galleryElement.appendChild(mainThumb);
-            }
-
-            // Add additional images as thumbnails
-            if (additionalImages && additionalImages.length > 0) {
-                for (const image of additionalImages) {
-                    const thumb = document.createElement('img');
-                    thumb.src = image;
-                    thumb.className = 'thumbnail-image me-2 rounded cursor-pointer';
-                    thumb.alt = 'Thumbnail';
-                    thumb.style = 'width: 80px; height: 60px; object-fit: cover;';
-                    thumb.onclick = function() { changeMainImage(this.src); };
-                    galleryElement.appendChild(thumb);
-                }
-            }
-        }
-    }
-
-    function updateSpecifications(radioInput) {
-        // Update specifications from data attributes
-        const specs = [
-            { name: 'engine', selector: 'tbody tr:nth-child(1) td' },
-            { name: 'horsepower', selector: 'tbody tr:nth-child(2) td' },
-            { name: 'torque', selector: 'tbody tr:nth-child(3) td' },
-            { name: 'acceleration', selector: 'tbody tr:nth-child(4) td' },
-            { name: 'fuel-consumption', selector: 'tbody tr:nth-child(5) td' },
-            { name: 'fuel-type', selector: 'tbody tr:nth-child(6) td' },
-            { name: 'transmission', selector: 'tbody tr:nth-child(7) td' }
-        ];
-
-        // Update each specification if data attribute exists
-        for (const spec of specs) {
-            const value = radioInput.getAttribute('data-' + spec.name);
-            if (value) {
-                const element = document.querySelector('#specs ' + spec.selector);
-                if (element) {
-                    element.textContent = value;
-                }
-            }
-        }
-    }
-
-    // Main function to handle color selection
-    function handleColorSelection(detailId) {
-        console.log('Direct color selection for ID:', detailId);
-
-        // Find the radio input
-        const radioInput = document.getElementById('color-' + detailId);
-        if (!radioInput) {
-            console.error('Could not find radio input for detail ID:', detailId);
-            return;
-        }
-
-        // Select the radio
-        radioInput.checked = true;
-
-        // Get all the necessary attributes
-        const selectedColor = radioInput.getAttribute('data-color');
-        const price = radioInput.getAttribute('data-price');
-        const quantity = radioInput.getAttribute('data-quantity');
-        const mainImage = radioInput.getAttribute('data-main-image');
-        const additionalImagesJson = radioInput.getAttribute('data-additional-images');
-
-        console.log('----DIRECT COLOR SELECTION----');
-        console.log('Selected color:', selectedColor);
-        console.log('Price:', price, 'Type:', typeof price);
-
-        // Process the price
-        let numericPrice = price;
-        if (typeof price === 'string') {
-            numericPrice = price.replace(/[^\d.]/g, '');
-        }
-
-        let parsedPrice = parseFloat(numericPrice);
-        console.log('Parsed price:', parsedPrice);
-
-        // Handle invalid price - use fallback price or default value instead of returning
-        if (isNaN(parsedPrice)) {
-            console.warn('Invalid price format detected for color:', selectedColor);
-            // Try to get the default price from the main car price element
-            const mainPriceElement = document.getElementById('main-price');
-            if (mainPriceElement) {
-                const mainPrice = mainPriceElement.textContent.replace(/[^\d.]/g, '');
-                parsedPrice = parseFloat(mainPrice) || 9500.00; // Fallback to 9500 if everything fails
-            } else {
-                parsedPrice = 9500.00; // Default fallback price
-            }
-            console.log('Using fallback price:', parsedPrice);
-        }
-
-        // Format the price
-        let formattedPrice = parsedPrice.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-
-        // Update UI
-        updateColorDisplay(selectedColor, detailId);
-        updatePrices(formattedPrice);
-        updateStockStatus(quantity);
-        updateImages(mainImage, additionalImagesJson);
-        updateSpecifications(radioInput);
-
-        // Special handling for Black color due to previous issues
-        if (selectedColor === 'Black') {
-            console.log('BLACK COLOR SELECTED - PRICE CHECK:');
-            console.log('Original price attribute:', price);
-            console.log('Cleaned numeric price:', numericPrice);
-            console.log('Parsed price as number:', parsedPrice);
-            console.log('Formatted price for display:', formattedPrice);
-
-            // Extra validation for Black color price - fix specific case of Aventador V8 in Black
-            if (document.querySelector('h1').textContent.includes('Aventador') && parsedPrice < 10000) {
-                console.warn('Detected incorrect price for Black Aventador - applying correction');
-
-                // Special correction for the known issue with Black Aventador
-                const correctedPrice = 90000.00;
-                formattedPrice = correctedPrice.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-
-                // Update UI with corrected price
-                updatePrices(formattedPrice);
-            }
-        }
-    }
-
-    // Đảm bảo tất cả JavaScript đã tải xong
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM fully loaded - attaching color selection handlers');
-
-        // Gắn sự kiện click cho tất cả các tùy chọn màu
-        document.querySelectorAll('.color-option').forEach(function(colorOption) {
-            // Lấy ID của biến thể từ phần tử
-            const detailId = colorOption.getAttribute('data-detail-id');
-
-            // Gắn sự kiện click cho toàn bộ vùng màu và các thành phần con
-            colorOption.addEventListener('click', function() {
-                handleColorSelection(detailId);
-            });
-
-            // Gắn sự kiện click cho label và text
-            const label = colorOption.querySelector('label.color-circle');
-            if (label) {
-                label.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Ngăn bubble up để tránh kích hoạt 2 lần
-                    handleColorSelection(detailId);
-                });
-            }
-
-            const text = colorOption.querySelector('.text-center');
-            if (text) {
-                text.addEventListener('click', function(e) {
-                    e.stopPropagation(); // Ngăn bubble up
-                    handleColorSelection(detailId);
-                });
-            }
-        });
-
-        // Chọn màu đầu tiên khi trang tải xong (nếu chưa có màu nào được chọn)
-        const firstRadio = document.querySelector('input[name="car_variant"]:checked');
-        if (firstRadio) {
-            handleColorSelection(firstRadio.getAttribute('data-detail-id'));
-        }
-    });
-
-    // Chức năng wishlist
-    function toggleWishlist(carId) {
-        console.log('Toggle wishlist for car ID:', carId);
-
-        // Lấy danh sách wishlist hiện tại từ localStorage
-        let wishlist = JSON.parse(localStorage.getItem('carWishlist')) || [];
-
-        // Kiểm tra xem xe đã có trong wishlist chưa
-        const index = wishlist.indexOf(carId);
-        const wishlistBtn = document.getElementById('wishlistBtn');
-        const wishlistIcon = document.getElementById('wishlistIcon');
-
-        if (index === -1) {
-            // Nếu chưa có, thêm vào
-            wishlist.push(carId);
-
-            // Cập nhật giao diện nút
-            if (wishlistBtn) {
-                wishlistBtn.classList.remove('btn-outline-danger');
-                wishlistBtn.classList.add('btn-danger');
-            }
-
-            // Lưu thông tin xe để hiển thị trong trang wishlist
-            const carName = document.querySelector('h1').textContent;
-            const carImage = document.getElementById('mainImage').src;
-
-            // Lấy thông tin giá
-            let price = 0;
-            const mainPriceEl = document.getElementById('main-price');
-            if (mainPriceEl) {
-                const priceText = mainPriceEl.textContent;
-                price = parseFloat(priceText.replace(/[^\d.]/g, ''));
-            }
-
-            // Lưu thông tin xe
-            const carData = {
-                id: carId,
-                name: carName,
-                image_url: carImage,
-                price: price,
-                fuel_type: document.querySelector('#specs tbody tr:nth-child(6) td').textContent,
-                transmission: document.querySelector('#specs tbody tr:nth-child(7) td').textContent,
-                seat_number: document.querySelector('.key-specs .d-flex:nth-child(4) span').textContent,
-                year: new Date().getFullYear()
-            };
-
-            // Lưu thông tin xe vào localStorage
-            localStorage.setItem(`car_${carId}`, JSON.stringify(carData));
-
-            // Hiển thị thông báo
-            alert('Added to wishlist successfully!');
-        } else {
-            // Nếu đã có, xóa đi
-            wishlist.splice(index, 1);
-
-            // Cập nhật giao diện nút
-            if (wishlistBtn) {
-                wishlistBtn.classList.remove('btn-danger');
-                wishlistBtn.classList.add('btn-outline-danger');
-            }
-
-            // Hiển thị thông báo
-            alert('Removed from wishlist!');
-        }
-
-        // Cập nhật localStorage
-        localStorage.setItem('carWishlist', JSON.stringify(wishlist));
-
-        // Cập nhật số lượng trong biểu tượng wishlist
-        updateWishlistCount();
-    }
-
-    // Kiểm tra xem xe đã trong wishlist chưa khi trang tải xong
-    document.addEventListener('DOMContentLoaded', function() {
-        const carId = {{ $car->id }};
-        const wishlist = JSON.parse(localStorage.getItem('carWishlist')) || [];
-        const wishlistBtn = document.getElementById('wishlistBtn');
-
-        // Nếu xe đã có trong wishlist, cập nhật giao diện nút
-        if (wishlist.includes(carId) && wishlistBtn) {
-            wishlistBtn.classList.remove('btn-outline-danger');
-            wishlistBtn.classList.add('btn-danger');
-        }
-    });
-
-    // Các hàm tiện ích khác cho trang
-    function scheduleTestDrive() {
-        const modal = new bootstrap.Modal(document.getElementById('testDriveModal'));
-        modal.show();
-    }
-
-    function addToComparison(carId) {
-        // Xử lý thêm xe vào danh sách so sánh
-        alert('Added to comparison list!');
-    }
-
+    // Social sharing functions
     function shareOnSocial(platform) {
         const url = window.location.href;
         const title = document.querySelector('h1').textContent;
@@ -1553,68 +1915,5 @@
             window.open(shareUrl, '_blank');
         }
     }
-
-    // Function to open purchase form modal
-    function openPurchaseForm(carId, carName) {
-        // Set car name in the modal
-        document.getElementById('modalCarName').textContent = carName;
-        document.getElementById('carModelInput').value = carName;
-
-        // Get selected variant information
-        const selectedVariant = document.querySelector('input[name="car_variant"]:checked');
-
-        if (selectedVariant) {
-            // Set price
-            const price = selectedVariant.getAttribute('data-price');
-            const formattedPrice = parseFloat(price).toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            });
-            document.getElementById('modalCarPrice').textContent = formattedPrice;
-
-            // Set color information
-            const colorName = selectedVariant.getAttribute('data-color');
-            document.getElementById('colorName').textContent = colorName;
-
-            // Find the matching color circle and get its color
-            const colorOption = document.querySelector(`.color-circle[for="color-${selectedVariant.value}"]`);
-            if (colorOption) {
-                const bgColor = getComputedStyle(colorOption).backgroundColor;
-                document.getElementById('colorIndicator').style.backgroundColor = bgColor;
-            }
-
-            // Set car image
-            const mainImage = document.getElementById('mainImage');
-            if (mainImage) {
-                const imgElement = document.createElement('img');
-                imgElement.src = mainImage.src;
-                imgElement.alt = carName;
-                imgElement.className = 'img-fluid rounded';
-                imgElement.style.width = '100px';
-                imgElement.style.height = '75px';
-                imgElement.style.objectFit = 'cover';
-
-                const imgContainer = document.getElementById('modalCarImage');
-                imgContainer.innerHTML = '';
-                imgContainer.appendChild(imgElement);
-            }
-        }
-
-        // Show the modal
-        const purchaseModal = new bootstrap.Modal(document.getElementById('purchaseFormModal'));
-        purchaseModal.show();
-    }
-
-    // Add this to the list of window.onload functions
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add event listeners and init price and text updates (existing code)
-        // ...
-
-        // Pre-populate purchase form from any query parameters (for test drive links, etc)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('name')) document.getElementById('purchaseName').value = urlParams.get('name');
-        if (urlParams.has('email')) document.getElementById('purchaseEmail').value = urlParams.get('email');
-        if (urlParams.has('phone')) document.getElementById('purchasePhone').value = urlParams.get('phone');
-    });
 </script>
 @endpush

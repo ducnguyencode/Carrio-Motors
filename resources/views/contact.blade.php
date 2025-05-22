@@ -183,7 +183,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input @error('privacy') is-invalid @enderror" type="checkbox" id="privacy" name="privacy" required>
                                     <label class="form-check-label" for="privacy">
-                                        I agree to the <a href="#">privacy policy</a> and <a href="#">terms of service</a>
+                                        I agree to the <a href="{{ route('privacy-policy') }}">privacy policy</a> and <a href="{{ route('terms-of-service') }}">terms of service</a>
                                     </label>
                                     @error('privacy')
                                     <div class="invalid-feedback">{{ $message }}</div>

@@ -1,193 +1,273 @@
 <!-- Footer -->
-<footer class="footer bg-dark text-white pt-4 pb-3 mt-4">
-    <div class="container footer-top">
-        <div class="row">
+<footer class="footer pt-5 pb-3 mt-4">
+    <div class="container">
+        <!-- Main Footer Content -->
+        <div class="row g-4 mb-4">
             <!-- Company Info -->
-            <div class="col-md-4 mb-3">
-                <div class="footer-logo mb-2">
-                    <img src="{{ asset('images/logo.svg') }}" alt="Carrio Motors Logo" style="filter: brightness(6) invert(1); height: 40px;">
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-brand mb-4">
+                    <img src="{{ asset('images/logo.svg') }}" alt="Carrio Motors Logo" class="footer-logo" style="filter: brightness(6) invert(1); height: 48px;">
                 </div>
-                <p class="footer-text small mb-2">Your trusted partner for premium vehicles and exceptional service since 2005.</p>
-                <div class="social-links mt-2">
-                    <a href="https://facebook.com" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://twitter.com" target="_blank" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="https://instagram.com" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="https://linkedin.com" target="_blank" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                <p class="footer-description mb-4">Your trusted partner for premium vehicles and exceptional service since 2005.</p>
+
+                <div class="social-icons">
+                    @php
+                        $socialLinks = \App\Models\SocialMediaLink::active()->ordered()->get();
+                    @endphp
+                    @foreach($socialLinks as $link)
+                        <a href="{{ $link->url }}" target="_blank" class="social-icon-link" aria-label="{{ $link->platform_name }}">
+                            <i class="{{ $link->icon_class }}"></i>
+                        </a>
+                    @endforeach
                 </div>
             </div>
 
             <!-- Quick Links -->
-            <div class="col-md-2 mb-3">
-                <h6 class="mb-2 text-primary footer-title">Quick Links</h6>
-                <ul class="footer-links">
-                    <li><a href="{{ route('home') }}">Home</a></li>
-                    <li><a href="{{ route('about') }}">About Us</a></li>
-                    <li><a href="{{ route('cars') }}">Our Cars</a></li>
-                    <li><a href="#">Services</a></li>
-                    <li><a href="{{ route('contact') }}">Contact</a></li>
+            <div class="col-lg-2 col-md-6 col-6">
+                <h5 class="footer-heading">Quick Links</h5>
+                <ul class="footer-nav">
+                    <li><a href="{{ route('home') }}" class="footer-link"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="{{ route('about') }}" class="footer-link"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a href="{{ route('cars') }}" class="footer-link"><i class="fas fa-chevron-right"></i> Our Cars</a></li>
+                    <li><a href="{{ route('blog') }}" class="footer-link"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                    <li><a href="{{ route('contact') }}" class="footer-link"><i class="fas fa-chevron-right"></i> Contact</a></li>
                 </ul>
             </div>
 
             <!-- Services -->
-            <div class="col-md-2 mb-3">
-                <h6 class="mb-2 text-primary footer-title">Services</h6>
-                <ul class="footer-links">
-                    <li><a href="#">New Cars</a></li>
-                    <li><a href="#">Used Cars</a></li>
-                    <li><a href="#">Car Service</a></li>
-                    <li><a href="#">Financing</a></li>
-                    <li><a href="#">Parts & Accessories</a></li>
+            <div class="col-lg-2 col-md-6 col-6">
+                <h5 class="footer-heading">Services</h5>
+                <ul class="footer-nav">
+                    <li><a href="{{ route('contact') }}?subject=Test+Drive" class="footer-link"><i class="fas fa-chevron-right"></i> Schedule Test Drive</a></li>
                 </ul>
             </div>
 
             <!-- Contact -->
-            <div class="col-md-4 mb-3">
-                <h6 class="mb-2 text-primary footer-title">Contact Us</h6>
-                <ul class="contact-info">
-                    <li><i class="fas fa-map-marker-alt"></i> 123 Dealership Road, Autoville, AV 12345</li>
-                    <li><i class="fas fa-phone-alt"></i> (123) 456-7890</li>
-                    <li><i class="fas fa-envelope"></i> info@carriomotors.com</li>
-                    <li><i class="fas fa-clock"></i> Mon-Sat: 9am - 6pm, Sun: Closed</li>
+            <div class="col-lg-4 col-md-6">
+                <h5 class="footer-heading">Contact Us</h5>
+                <ul class="footer-contact">
+                    <li class="d-flex align-items-start mb-3">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <span>35/6 D5, ward 25, Binh Thanh district, TP.HCM, Vietnam</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-3">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <span>1800-838-668 / +84 28 3512 1234</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-3">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <span>info@carriomotors.com</span>
+                    </li>
+                    <li class="d-flex align-items-start">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span>Mon-Fri: 8am - 6pm, Sat: 9am - 5pm, Sun: Closed</span>
+                    </li>
                 </ul>
             </div>
         </div>
 
-        <!-- Copyright -->
-        <div class="row footer-bottom">
-            <div class="col-md-6 text-center text-md-start">
-                <p class="mb-0 copyright small">&copy; {{ date('Y') }} Carrio Motors. All rights reserved.</p>
+        <!-- Divider -->
+        <hr class="footer-divider">
+
+        <!-- Copyright Row -->
+        <div class="row footer-copyright py-3">
+            <div class="col-md-6 col-12 text-center text-md-start">
+                <p class="mb-0">&copy; {{ date('Y') }} Carrio Motors. All rights reserved.</p>
             </div>
-            <div class="col-md-6 text-center text-md-end">
-                <p class="mb-0 small">
-                    <a href="#" class="text-white text-decoration-none">Privacy Policy</a> |
-                    <a href="#" class="text-white text-decoration-none">Terms of Service</a>
-                </p>
+            <div class="col-md-6 col-12 text-center text-md-end">
+                <a href="{{ route('privacy-policy') }}" class="footer-policy-link">Privacy Policy</a>
+                <span class="mx-2">|</span>
+                <a href="{{ route('terms-of-service') }}" class="footer-policy-link">Terms of Service</a>
             </div>
         </div>
     </div>
 </footer>
 
 <style>
+/* Modern Footer Styling */
 .footer {
-    background-color: #212121;
-    color: #f5f5f5;
+    background-color: #1a1a2e;
+    color: #e2e2e2;
+    position: relative;
 }
 
-.footer-top {
-    padding-bottom: 15px;
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #1e88e5, #42a5f5, #1e88e5);
 }
 
-.footer-logo img {
-    height: 40px;
+.footer-brand {
+    margin-bottom: 1.5rem;
 }
 
-.footer-text {
-    color: #bdbdbd;
-    line-height: 1.4;
+.footer-logo {
+    height: 48px;
+    transition: transform 0.3s ease;
 }
 
-.social-links {
+.footer-logo:hover {
+    transform: scale(1.05);
+}
+
+.footer-description {
+    color: #b0b0b0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.social-icons {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    margin-top: 1.5rem;
 }
 
-.social-icon {
+.social-icon-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    background-color: rgba(255,255,255,0.1);
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    color: #f5f5f5;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 16px;
     transition: all 0.3s ease;
 }
 
-.social-icon:hover {
+.social-icon-link:hover {
     background-color: #1e88e5;
+    color: #ffffff;
     transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(30, 136, 229, 0.3);
 }
 
-.footer-title {
-    font-size: 1.1rem;
+.footer-heading {
+    color: #ffffff;
+    font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 1.5rem;
     position: relative;
-    padding-bottom: 8px;
+    padding-bottom: 10px;
 }
 
-.footer-title::after {
+.footer-heading::after {
     content: '';
     position: absolute;
     bottom: 0;
     left: 0;
     width: 40px;
-    height: 2px;
+    height: 3px;
     background-color: #1e88e5;
+    border-radius: 2px;
 }
 
-.footer-links {
+.footer-nav {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.footer-links li {
-    margin-bottom: 8px;
+.footer-nav li {
+    margin-bottom: 12px;
 }
 
-.footer-links a {
-    color: #bdbdbd;
-    transition: all 0.3s ease;
+.footer-link {
+    color: #b0b0b0;
     text-decoration: none;
-    position: relative;
-    padding-left: 12px;
-    font-size: 0.9rem;
-}
-
-.footer-links a::before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: #1e88e5;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
 }
 
-.footer-links a:hover {
-    color: #fff;
-    padding-left: 15px;
+.footer-link i {
+    font-size: 0.75rem;
+    margin-right: 8px;
+    color: #1e88e5;
+    transition: transform 0.3s ease;
 }
 
-.footer-links a:hover::before {
-    left: 3px;
+.footer-link:hover {
+    color: #ffffff;
+    padding-left: 5px;
 }
 
-.contact-info {
+.footer-link:hover i {
+    transform: translateX(3px);
+}
+
+.footer-contact {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.contact-info li {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 10px;
-    color: #bdbdbd;
+.footer-contact li {
+    color: #b0b0b0;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+.icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: #1e88e5;
+    border-radius: 50%;
+    margin-right: 15px;
+    min-width: 24px;
+    color: #ffffff;
+    font-size: 0.8rem;
+}
+
+.footer-divider {
+    margin: 1.5rem 0;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.footer-copyright {
+    color: #888888;
     font-size: 0.9rem;
 }
 
-.contact-info i {
+.footer-policy-link {
+    color: #888888;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-policy-link:hover {
     color: #1e88e5;
-    margin-right: 10px;
-    font-size: 1rem;
 }
 
-.footer-bottom {
-    padding-top: 15px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
+@media (max-width: 767.98px) {
+    .footer-heading {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
 
-.copyright {
-    color: #9e9e9e;
+    .footer-copyright {
+        text-align: center;
+    }
+
+    .footer-nav li {
+        margin-bottom: 10px;
+    }
 }
 </style>

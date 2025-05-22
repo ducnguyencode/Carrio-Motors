@@ -5,7 +5,7 @@
 @section('page-heading', 'Blog Management')
 
 @section('content')
-<div class="bg-white rounded-lg shadow-md p-6 overflow-hidden">
+<div class="bg-white rounded-lg shadow-md p-6">
     <div class="flex flex-wrap justify-between items-center mb-4">
         <h2 class="text-lg font-semibold">All Blog Posts</h2>
         <div class="flex items-center gap-2">
@@ -43,32 +43,32 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead>
                 <tr>
-                    <th class="px-4 py-2 bg-gray-50 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Title</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Category</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/10">Status</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Author</th>
-                    <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Published</th>
-                    <th class="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Actions</th>
+                    <th class="px-4 py-2 bg-gray-50 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-10">#</th>
+                    <th class="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th class="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Category</th>
+                    <th class="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Status</th>
+                    <th class="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Author</th>
+                    <th class="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Published</th>
+                    <th class="px-4 py-2 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($posts as $index => $post)
                 <tr>
                     <td class="px-4 py-2 text-center">{{ ($posts->currentPage() - 1) * $posts->perPage() + $index + 1 }}</td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-gray-900 truncate">
-                            {{ Str::limit($post->title, 40) }}
+                    <td class="px-4 py-3">
+                        <div class="text-sm font-medium text-gray-900 truncate max-w-xs" title="{{ $post->title }}">
+                            {{ Str::limit($post->title, 30) }}
                         </div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3">
                         @if($post->category)
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ $post->category }}</span>
                         @else
                         <span class="text-gray-500 text-sm">No category</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3">
                         @if($post->status == 'published')
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Published</span>
                         @elseif($post->status == 'draft')
@@ -77,25 +77,35 @@
                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Archived</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3">
                         <div class="text-sm font-medium text-gray-900">{{ $post->author->fullname ?? $post->author->username }}</div>
                         <div class="text-xs text-gray-500">{{ $post->author->email ?? 'No email' }}</div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-4 py-3">
                         @if($post->published_at)
                         <span class="text-sm">{{ $post->published_at->format('M d, Y') }}</span>
                         @else
                         <span class="text-gray-500 text-sm">Not published</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 text-center">
-                        <div class="flex items-center justify-center gap-2">
+                    <td class="px-4 py-3 text-center">
+                        <div class="flex items-center justify-center space-x-1">
                             <a href="{{ route('blog.post', $post->slug) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200" title="View" target="_blank">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a href="{{ route('admin.blog.edit', $post->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 hover:bg-yellow-200" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            @if($post->status != 'published')
+                            <form action="{{ route('admin.blog.status', $post->id) }}" method="POST" class="inline-block">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="published">
+                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600 hover:bg-green-200" title="Publish">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            </form>
+                            @endif
                             <form action="{{ route('admin.blog.destroy', $post->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this post?')">
                                 @csrf
                                 @method('DELETE')
@@ -103,46 +113,12 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
-
-                            <!-- Status Change Dropdown -->
-                            <div class="relative inline-block text-left" x-data="{ open: false }">
-                                <button @click="open = !open" type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200" title="Change Status">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <div
-                                    x-show="open"
-                                    @click.away="open = false"
-                                    class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
-                                    role="menu"
-                                    aria-orientation="vertical">
-                                    <div class="py-1" role="none">
-                                        <form action="{{ route('admin.blog.status', $post->id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="published">
-                                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Publish</button>
-                                        </form>
-                                        <form action="{{ route('admin.blog.status', $post->id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="draft">
-                                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Move to Draft</button>
-                                        </form>
-                                        <form action="{{ route('admin.blog.status', $post->id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="archived">
-                                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Archive</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">No blog posts found.</td>
+                    <td colspan="7" class="px-4 py-3 text-center text-gray-500">No blog posts found.</td>
                 </tr>
                 @endforelse
             </tbody>
