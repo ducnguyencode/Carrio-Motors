@@ -89,7 +89,7 @@
                     <div class="mb-4">
                         <label for="user_id" class="block mb-1 text-sm font-medium">Link to User Account (Optional)</label>
                         <select id="user_id" name="user_id"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            class="select2-user w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
                             <option value="">Select User Account</option>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
@@ -137,7 +137,7 @@
                             <div class="mb-4">
                                 <label for="car_detail_ids" class="block mb-1 text-sm font-medium">Select Car</label>
                                 <select name="car_detail_ids[]" id="car_detail_ids" required
-                                    class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 car-select">
+                                    class="select2-car w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
                                     <option value="">Select a Car</option>
                                     @foreach($carDetails as $carDetail)
                                         <option value="{{ $carDetail->id }}"
@@ -185,9 +185,289 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        // Update quantity max based on available stock
-        $(document).on('change', '.car-select', function() {
-            const selected = $(this).find(':selected');
+        // Dữ liệu xe
+        const carData = [
+            @foreach($carDetails as $carDetail)
+            {
+                id: {{ $carDetail->id }},
+                name: "{{ $carDetail->car_name }}",
+                model: "{{ $carDetail->model_name }}",
+                engine: "{{ $carDetail->engine_name }}",
+                color: "{{ $carDetail->color_name }}",
+                price: {{ $carDetail->price }},
+                quantity: {{ $carDetail->quantity }},
+                searchText: "{{ strtolower($carDetail->car_name . ' ' . $carDetail->model_name . ' ' . $carDetail->engine_name . ' ' . $carDetail->color_name . ' ' . $carDetail->price) }}"
+            },
+            @endforeach
+        ];
+
+        // Dữ liệu người dùng
+        const userData = [
+            @foreach($users as $user)
+            {
+                id: {{ $user->id }},
+                name: "{{ $user->name }}",
+                email: "{{ $user->email }}",
+                searchText: "{{ strtolower($user->name . ' ' . $user->email) }}"
+            },
+            @endforeach
+        ];
+
+        // Xử lý tìm kiếm xe
+        $("#car_search").on("input", function() {
+            const searchText = $(this).val().toLowerCase();
+
+            if (searchText.length < 2) {
+                $("#car_results").addClass('hidden');
+                return;
+            }
+
+            const results = carData.filter(car => car.searchText.includes(searchText));
+            displayCarResults(results);
+        });
+
+        // Hiển thị kết quả tìm kiếm xe
+        function displayCarResults(results) {
+            const resultsContainer = $("#car_results");
+            resultsContainer.empty();
+
+            if (results.length === 0) {
+                resultsContainer.append('<div class="p-3 text-center text-gray-500">No cars found</div>');
+            } else {
+                results.forEach(car => {
+                    const resultItem = $(`
+                        <div class="search-result-item" data-id="${car.id}" tabindex="0">
+                            <div class="item-name">${car.name}</div>
+                            <div class="item-detail">${car.model} - ${car.engine} - ${car.color}</div>
+                            <div class="d-flex justify-content-between">
+                                <span class="item-price">$${car.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                <span class="item-detail">(${car.quantity} available)</span>
+                            </div>
+                        </div>
+                    `);
+
+                    resultItem.on('click', function() {
+                        selectCar(car);
+                    });
+
+                    resultItem.on('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            selectCar(car);
+                        }
+                    });
+
+                    resultsContainer.append(resultItem);
+                });
+            }
+
+            resultsContainer.removeClass('hidden');
+        }
+
+        // Chọn xe
+        function selectCar(car) {
+            // Cập nhật input ẩn với ID xe
+            $("#car_detail_id").val(car.id);
+
+            // Hiển thị thông tin xe đã chọn
+            $("#car_name").text(car.name);
+            $("#car_details").text(`${car.model} - ${car.engine} - ${car.color}`);
+            $("#car_price").text(`$${car.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+            $("#car_quantity").text(`${car.quantity} available`);
+
+            // Cập nhật ô tìm kiếm
+            $("#car_search").val(`${car.name} - ${car.model}`);
+
+            // Hiển thị thông tin chi tiết và ẩn kết quả tìm kiếm
+            $("#selected_car_info").removeClass('hidden');
+            $("#car_results").addClass('hidden');
+
+            // Cập nhật giá trị tối đa cho input số lượng
+            $("#quantities").attr('max', car.quantity);
+            if (parseInt($("#quantities").val()) > car.quantity) {
+                $("#quantities").val(car.quantity);
+            }
+        }
+
+        // Xử lý tìm kiếm người dùng
+        $("#user_search").on("input", function() {
+            const searchText = $(this).val().toLowerCase();
+
+            if (searchText.length < 2) {
+                $("#user_results").addClass('hidden');
+                return;
+            }
+
+            const results = userData.filter(user => user.searchText.includes(searchText));
+            displayUserResults(results);
+        });
+
+        // Hiển thị kết quả tìm kiếm người dùng
+        function displayUserResults(results) {
+            const resultsContainer = $("#user_results");
+            resultsContainer.empty();
+
+            if (results.length === 0) {
+                resultsContainer.append('<div class="p-3 text-center text-gray-500">No users found</div>');
+            } else {
+                results.forEach(user => {
+                    const resultItem = $(`
+                        <div class="search-result-item" data-id="${user.id}" tabindex="0">
+                            <div class="item-name">${user.name}</div>
+                            <div class="item-detail">${user.email}</div>
+                        </div>
+                    `);
+
+                    resultItem.on('click', function() {
+                        selectUser(user);
+                    });
+
+                    resultItem.on('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            selectUser(user);
+                        }
+                    });
+
+                    resultsContainer.append(resultItem);
+                });
+            }
+
+            resultsContainer.removeClass('hidden');
+        }
+
+        // Chọn người dùng
+        function selectUser(user) {
+            // Cập nhật input ẩn với ID người dùng
+            $("#user_id_hidden").val(user.id);
+
+            // Hiển thị thông tin người dùng đã chọn
+            $("#user_name").text(user.name);
+            $("#user_email").text(user.email);
+
+            // Cập nhật ô tìm kiếm
+            $("#user_search").val(user.name);
+
+            // Hiển thị thông tin chi tiết và ẩn kết quả tìm kiếm
+            $("#selected_user_info").removeClass('hidden');
+            $("#user_results").addClass('hidden');
+        }
+
+        // Xử lý khi click ra ngoài kết quả tìm kiếm
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.relative').length) {
+                $("#car_results").addClass('hidden');
+                $("#user_results").addClass('hidden');
+            }
+        });
+
+        // Chọn xe từ dữ liệu cũ (nếu có)
+        const oldCarId = "{{ old('car_detail_ids.0') }}";
+        if (oldCarId) {
+            const selectedCar = carData.find(car => car.id == oldCarId);
+            if (selectedCar) {
+                selectCar(selectedCar);
+            }
+        }
+
+        // Chọn người dùng từ dữ liệu cũ (nếu có)
+        const oldUserId = "{{ old('user_id') }}";
+        if (oldUserId) {
+            const selectedUser = userData.find(user => user.id == oldUserId);
+            if (selectedUser) {
+                selectUser(selectedUser);
+            }
+        }
+
+        // Initialize Select2 for car selection dropdown
+        $('.select2-car').select2({
+            placeholder: "Search and select a car",
+            allowClear: true,
+            width: '100%',
+            templateResult: formatCarOption,
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            dropdownParent: $('.car-selection')
+        });
+
+        // Initialize Select2 for user account dropdown
+        $('.select2-user').select2({
+            placeholder: "Search and select a user account",
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#user_id').parent()
+        });
+
+        // Format car options to show more details
+        function formatCarOption(car) {
+            if (!car.id) {
+                return car.text; // Return placeholder text as-is
+            }
+
+            // Get data attributes
+            const $option = $(car.element);
+            const price = $option.data('price');
+            const maxQuantity = $option.data('max');
+
+            // Split car text into parts
+            const parts = car.text.split(' - ');
+            const carName = parts[0];
+            const modelName = parts[1];
+            const engineName = parts[2];
+            const colorName = parts[3];
+
+            // Format price to show commas
+            const formattedPrice = price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            // Get color box based on color name
+            const colorBoxStyle = getColorBoxStyle(colorName);
+
+            // Create custom HTML for the option with separate color box
+            const template = `
+                <div class="car-option">
+                    <div class="car-name">${carName}</div>
+                    <div class="car-specs">
+                        <span>${modelName}</span>
+                        <span>${engineName}</span>
+                        <span>
+                            <span class="color-box" style="${colorBoxStyle}"></span>
+                            ${colorName}
+                        </span>
+                    </div>
+                    <div class="car-bottom">
+                        <div class="car-price">$${formattedPrice}</div>
+                        <div class="car-stock">${maxQuantity} available</div>
+                    </div>
+                </div>
+            `;
+
+            return template;
+        }
+
+        // Function to determine color style based on color name
+        function getColorBoxStyle(colorName) {
+            const colorLower = colorName ? colorName.toLowerCase().trim() : '';
+            let backgroundColor = '#777777'; // Default gray
+
+            if (colorLower.includes('black')) backgroundColor = '#000000';
+            else if (colorLower.includes('white')) backgroundColor = '#ffffff';
+            else if (colorLower.includes('red')) backgroundColor = '#dc2626';
+            else if (colorLower.includes('blue')) backgroundColor = '#2563eb';
+            else if (colorLower.includes('green')) backgroundColor = '#059669';
+            else if (colorLower.includes('yellow')) backgroundColor = '#fbbf24';
+            else if (colorLower.includes('orange')) backgroundColor = '#ea580c';
+            else if (colorLower.includes('purple')) backgroundColor = '#7c3aed';
+            else if (colorLower.includes('pink')) backgroundColor = '#db2777';
+            else if (colorLower.includes('brown')) backgroundColor = '#78350f';
+            else if (colorLower.includes('grey') || colorLower.includes('gray')) backgroundColor = '#6b7280';
+            else if (colorLower.includes('silver')) backgroundColor = '#d1d5db';
+            else if (colorLower.includes('gold')) backgroundColor = '#fbbf24';
+
+            return `background-color: ${backgroundColor}; border: 1px solid #00000033;`;
+        }
+
+        // Update quantity max based on available stock when car selection changes
+        $('.select2-car').on('change', function() {
+            const selected = $('option:selected', this);
             const maxQuantity = selected.data('max');
             const container = $(this).closest('.car-selection');
             const quantityInput = container.find('.quantity-input');
@@ -203,11 +483,12 @@
         });
 
         // Initialize max quantities for pre-selected cars
-        $('.car-select').each(function() {
-            const selected = $(this).find(':selected');
+        $('.select2-car').each(function() {
+            const selected = $('option:selected', this);
             const maxQuantity = selected.data('max');
             const container = $(this).closest('.car-selection');
             const quantityInput = container.find('.quantity-input');
+
             if (selected.val()) {
                 quantityInput.attr('max', maxQuantity);
             }
@@ -215,4 +496,125 @@
     });
 </script>
 @endpush
+
+@section('styles')
+<style>
+    /* Ẩn các option không khớp với tìm kiếm */
+    .option-hidden {
+        display: none;
+    }
+
+    /* Kiểu dáng cho kết quả tìm kiếm */
+    .search-result-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .search-result-item:hover,
+    .search-result-item:focus {
+        background-color: #f3f4f6;
+    }
+
+    .search-result-item .item-name {
+        font-weight: 500;
+    }
+
+    .search-result-item .item-detail {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .search-result-item .item-price {
+        color: #047857;
+        font-weight: 500;
+    }
+
+    /* Custom styling for Select2 dropdowns */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        padding: 5px;
+        border-color: #d1d5db;
+        border-radius: 0.375rem;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 26px;
+        color: #111827;
+    }
+
+    /* Fix for highlight colors in Select2 */
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #f3f4f6 !important;
+        color: #111827 !important;
+    }
+
+    .select2-dropdown {
+        border-color: #d1d5db;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .select2-search--dropdown .select2-search__field {
+        padding: 8px;
+        border-radius: 0.25rem;
+    }
+
+    .select2-container--default .select2-results__option {
+        padding: 8px 12px;
+    }
+
+    /* Car option template */
+    .car-option {
+        padding: 6px 0;
+    }
+
+    .car-option .car-name {
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+
+    .car-option .car-specs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 2px;
+    }
+
+    .car-option .car-specs span {
+        background-color: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+
+    .car-option .car-bottom {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .car-option .car-price {
+        color: #059669;
+        font-weight: 600;
+    }
+
+    .car-option .car-stock {
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+    /* Color box styling */
+    .color-box {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+</style>
+@endsection
 @endsection

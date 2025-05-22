@@ -1,36 +1,36 @@
 @component('mail::message')
-# Xác nhận đơn hàng
+# Order Confirmation
 
-Kính gửi {{ $order['name'] }},
+Dear {{ $order['name'] }},
 
-Cảm ơn bạn đã đặt mua xe tại Carrio Motors. Dưới đây là thông tin đơn hàng của bạn:
+Thank you for your purchase at Carrio Motors. Below are the details of your order:
 
-**Mã đơn hàng:** {{ $order['order_id'] }}
-**Ngày đặt hàng:** {{ $order['order_date'] }}
+**Order ID:** {{ $order['order_id'] }}
+**Order Date:** {{ $order['order_date'] }}
 
-## Chi tiết đơn hàng
+## Order Details
 
 @component('mail::table')
-| Xe | Màu sắc | Số lượng | Giá |
+| Car | Color | Quantity | Price |
 |:------------- |:------------- |:------------- |:------------- |
 | {{ $order['car'] }} | {{ $order['color'] }} | {{ $order['quantity'] }} | ${{ $order['price'] }} |
 @endcomponent
 
-**Tổng cộng:** ${{ $order['total'] }}
-**Phương thức thanh toán:** {{ $order['payment_method'] }}
+**Total:** ${{ $order['total'] }}
+**Payment Method:** {{ $order['payment_method'] }}
 
-## Các bước tiếp theo
+## Next Steps
 
-Nhân viên của chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ để xác nhận đơn hàng và hướng dẫn bạn các bước tiếp theo.
+Our staff will contact you within 24 hours to confirm your order and guide you through the next steps.
 
-@component('mail::button', ['url' => config('app.url')])
-Xem xe khác
+@component('mail::button', ['url' => 'http://127.0.0.1:8000/cars'])
+Browse More Cars
 @endcomponent
 
-Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc hotline: **0123-456-789**.
+If you have any questions, please contact us via email or call our hotline: **0123-456-789**.
 
-Trân trọng,<br>
+Best regards,<br>
 {{ config('app.name') }}
 
-<small>Đây là email tự động, vui lòng không trả lời email này.</small>
+<small>This is an automated email. Please do not reply to this email.</small>
 @endcomponent

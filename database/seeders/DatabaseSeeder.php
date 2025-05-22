@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             CarSeeder::class,
             // Finally we can create Car Details
             CarDetailSeeder::class,
-            BlogPostSeeder::class
+            BlogPostSeeder::class,
+            BannerSeeder::class,
         ]);
     }
 }

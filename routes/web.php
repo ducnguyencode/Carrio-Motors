@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\SuccessController;
 
 // Public routes
 Route::get('/', [PageController::class, 'home'])->name('home');
@@ -36,6 +37,9 @@ Route::get('/cars/{id}', [PageController::class, 'carDetail']);
 Route::get('/buy/{carId}', [BuyController::class, 'showPurchaseForm'])->name('buy.form');
 Route::post('/buy/process', [BuyController::class, 'processPurchase'])->name('buy.process');
 Route::get('/buy/success', [BuyController::class, 'showSuccessPage'])->name('buy.success');
+
+// New direct success page route
+Route::get('/purchase-success', [SuccessController::class, 'index'])->name('purchase.success');
 
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::post('/contact', [PageController::class, 'submitContact'])->name('contact.submit');
@@ -93,6 +97,13 @@ Route::middleware(['auth', 'role:admin,content,saler'])->prefix('admin')->name('
     Route::resource('car_colors', CarColorController::class);
     Route::resource('banners', BannerController::class);
     Route::resource('car_details', CarDetailController::class)->except(['destroy']);
+});
+
+// Social Media Management (admin and content only)
+Route::middleware(['auth', 'role:admin,content'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('social-media', App\Http\Controllers\Admin\SocialMediaController::class);
+    Route::post('social-media/{socialMedia}/toggle-active', [App\Http\Controllers\Admin\SocialMediaController::class, 'toggleActive'])->name('social-media.toggle-active');
+    Route::post('social-media/update-order', [App\Http\Controllers\Admin\SocialMediaController::class, 'updateOrder'])->name('social-media.update-order');
 });
 
 // Cars routes accessible to all admin roles
@@ -182,3 +193,11 @@ Route::middleware(['auth', 'role:admin,content'])->prefix('admin')->name('admin.
     Route::patch('/blog/{id}/status', [App\Http\Controllers\Admin\BlogController::class, 'changeStatus'])->name('blog.status');
     Route::post('/upload/image', [App\Http\Controllers\Admin\BlogController::class, 'uploadImage'])->name('upload.image');
 });
+
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy');
+})->name('privacy-policy');
+
+Route::get('/terms-of-service', function () {
+    return view('terms-of-service');
+})->name('terms-of-service');

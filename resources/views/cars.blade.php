@@ -176,25 +176,33 @@
                             @if($car->carDetails && $car->carDetails->count() > 0)
                             <div class="available-colors mb-3">
                                 <small class="text-muted d-block mb-1">Available colors:</small>
-                                <div class="d-flex flex-wrap">
+                                <div class="car-color-selector" data-car-id="{{ $car->id }}">
                                     @foreach($car->carDetails as $detail)
                                         @if($detail->carColor)
-                                            <span class="color-dot mr-2"
-                                                  onclick="updateCarColor('{{ $car->id }}', '{{ $detail->price }}', '{{ $detail->main_image ? asset($detail->main_image) : asset('images/cars/default.jpg') }}', event)"
-                                                  data-car-id="{{ $car->id }}"
-                                                  data-color-id="{{ $detail->id }}"
-                                                  data-price="{{ $detail->price }}"
-                                                  data-image="{{ $detail->main_image ? asset($detail->main_image) : asset('images/cars/default.jpg') }}"
-                                                  data-color-name="{{ $detail->carColor->name }}"
-                                                  style="background-color: {{ $detail->carColor->hex_code ?? '#ccc' }};
-                                                       display: inline-block;
-                                                       width: 30px;
-                                                       height: 30px;
-                                                       border-radius: 50%;
-                                                       margin: 0 8px 8px 0;
-                                                       cursor: pointer;
-                                                       border: 3px solid #ddd;
-                                                       box-shadow: 0 0 3px rgba(0,0,0,0.3);"></span>
+                                            <div class="car-color-option"
+                                                data-car-id="{{ $car->id }}"
+                                                data-color-id="{{ $detail->id }}"
+                                                data-price="{{ $detail->price }}"
+                                                data-image="{{ $detail->main_image ? asset($detail->main_image) : asset('images/cars/default.jpg') }}"
+                                                data-color-name="{{ $detail->carColor->name }}"
+                                                @if($loop->first)data-selected="true"@endif
+                                                style="display: inline-block; margin-right: 10px; margin-bottom: 10px; text-align: center; cursor: pointer;">
+                                                <div class="color-circle-wrapper" style="position: relative; display: inline-block;">
+                                                    <span class="color-circle"
+                                                         style="background-color: {{ $detail->carColor->hex_code ?? '#ccc' }};
+                                                             display: block;
+                                                             width: 30px;
+                                                             height: 30px;
+                                                             border-radius: 50%;
+                                                             border: 3px solid {{ $loop->first ? '#0d6efd' : '#ddd' }};
+                                                             box-shadow: 0 0 3px rgba(0,0,0,0.3);
+                                                             transition: all 0.2s ease;">
+                                                    </span>
+                                                </div>
+                                                <div class="color-name" style="font-size: 0.75rem; margin-top: 3px;">
+                                                    {{ $detail->carColor->name }}
+                                                </div>
+                                            </div>
                                         @endif
                                     @endforeach
                                 </div>
@@ -248,6 +256,133 @@
 
 @section('footer')
     @include('partials.footer')
+    <!-- Emergency inline script to ensure color selection works -->
+    <script>
+        // Make sure updateCarColorDirect is defined even if other scripts fail
+        if (typeof updateCarColorDirect !== 'function') {
+            console.log('Emergency: Defining updateCarColorDirect function');
+
+            window.updateCarColorDirect = function(carId, price, imageUrl, colorName, element) {
+                try {
+                    console.log('Color selected:', colorName, 'Price:', price);
+
+                    // Find all siblings (other color options for this car)
+                    const parentSelector = element.closest('.car-color-selector');
+                    if (parentSelector) {
+                        // Remove selected state from all options
+                        parentSelector.querySelectorAll('.car-color-option').forEach(option => {
+                            option.removeAttribute('data-selected');
+                            const circle = option.querySelector('.color-circle');
+                            if (circle) {
+                                circle.style.border = '3px solid #ddd';
+                                circle.style.transform = 'scale(1)';
+                                circle.style.boxShadow = '0 0 3px rgba(0,0,0,0.3)';
+                            }
+
+                            const name = option.querySelector('.color-name');
+                            if (name) {
+                                name.style.fontWeight = 'normal';
+                                name.style.color = '';
+                            }
+                        });
+
+                        // Add selected state to clicked option
+                        element.setAttribute('data-selected', 'true');
+                        const circle = element.querySelector('.color-circle');
+                        if (circle) {
+                            circle.style.border = '3px solid #0d6efd';
+                            circle.style.transform = 'scale(1.1)';
+                            circle.style.boxShadow = '0 0 5px rgba(13, 110, 253, 0.5)';
+                        }
+
+                        const name = element.querySelector('.color-name');
+                        if (name) {
+                            name.style.fontWeight = 'bold';
+                            name.style.color = '#0d6efd';
+                        }
+                    }
+
+                    // Find the car card - try multiple methods
+                    let card = element.closest('.card');
+                    if (!card) {
+                        // Alternative method - go up through parents
+                        const col = element.closest('.col-md-6');
+                        if (col) {
+                            card = col.querySelector('.card');
+                        }
+                        if (!card) {
+                            console.error('Could not find car card');
+                            return;
+                        }
+                    }
+
+                    // Update price
+                    const priceElement = card.querySelector('.fw-bold:not(.card-title)');
+                    if (priceElement) {
+                        // Parse price to ensure it's a number
+                        let numericPrice = price;
+                        if (typeof price === 'string') {
+                            numericPrice = price.replace(/[^\d.]/g, '');
+                        }
+
+                        const parsedPrice = parseFloat(numericPrice);
+                        if (!isNaN(parsedPrice)) {
+                            const formattedPrice = parsedPrice.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+
+                            console.log('Updating price to:', formattedPrice);
+                            priceElement.textContent = '$' + formattedPrice;
+                        }
+                    } else {
+                        console.error('Price element not found');
+                    }
+
+                    // Update image
+                    const imageElement = card.querySelector('.card-img-top');
+                    if (imageElement) {
+                        console.log('Updating image to:', imageUrl);
+                        imageElement.src = imageUrl;
+                    } else {
+                        console.error('Image element not found');
+                    }
+                } catch (error) {
+                    console.error('Error in emergency updateCarColorDirect:', error);
+                }
+            };
+        }
+
+        // Apply initial styling to selected colors
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded: Applying initial color styling');
+
+            document.querySelectorAll('.car-color-option[data-selected="true"]').forEach(element => {
+                const circle = element.querySelector('.color-circle');
+                if (circle) {
+                    circle.style.border = '3px solid #0d6efd';
+                    circle.style.transform = 'scale(1.1)';
+                }
+            });
+
+            // Add direct click handlers to ensure color selection works
+            document.querySelectorAll('.car-color-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    console.log('Color option clicked directly');
+                    const carId = this.getAttribute('data-car-id');
+                    const price = this.getAttribute('data-price');
+                    const imageUrl = this.getAttribute('data-image');
+                    const colorName = this.getAttribute('data-color-name');
+
+                    if (typeof updateCarColorDirect === 'function') {
+                        updateCarColorDirect(carId, price, imageUrl, colorName, this);
+                    } else {
+                        console.error('updateCarColorDirect function not available');
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
 
 @push('styles')
@@ -275,7 +410,56 @@
         color: white;
     }
 
-    /* Available Colors */
+    /* Enhanced Car Color Selectors */
+    .car-color-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .car-color-option {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 4px;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .car-color-option:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+        transform: translateY(-2px);
+    }
+
+    .car-color-option[data-selected="true"] {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+
+    .car-color-option .color-circle {
+        transition: all 0.2s ease;
+    }
+
+    .car-color-option:hover .color-circle {
+        transform: scale(1.1);
+    }
+
+    /* Special styling for white color */
+    .car-color-option .color-circle[style*="background-color: #fff"],
+    .car-color-option .color-circle[style*="background-color: #ffffff"],
+    .car-color-option .color-circle[style*="background-color: white"] {
+        border: 2px solid #aaa;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Special styling for black color */
+    .car-color-option .color-circle[style*="background-color: #000"],
+    .car-color-option .color-circle[style*="background-color: black"] {
+        border: 2px solid #666;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Old styles for compatibility */
     .color-button {
         display: flex;
         flex-direction: column;
@@ -361,72 +545,198 @@
 
 @push('scripts')
 <script>
-    // Hàm cập nhật màu cho xe
-    function updateCarColor(carId, price, imageUrl, event) {
-        console.log(`Updating car ${carId} with price ${price} and image ${imageUrl}`);
+    // Direct function for color selection - will be available globally
+    function updateCarColorDirect(carId, price, imageUrl, colorName, element) {
+        try {
+            // Mark selected color
+            const allColorElements = document.querySelectorAll(`.car-color-option[data-car-id="${carId}"]`);
+            // Reset all color elements for this car
+            allColorElements.forEach(el => {
+                el.removeAttribute('data-selected');
+                const circle = el.querySelector('.color-circle');
+                if (circle) {
+                    circle.style.border = '3px solid #ddd';
+                    circle.style.transform = 'scale(1)';
+                    circle.style.boxShadow = '0 0 3px rgba(0,0,0,0.3)';
+                }
 
-        // Đảm bảo price là một số
-        let numericPrice = price;
-        if (typeof price === 'string') {
-            // Loại bỏ các ký tự không phải số hoặc dấu chấm
-            numericPrice = price.replace(/[^\d.]/g, '');
-            console.log('Cleaned price string: ' + numericPrice);
-        }
+                const name = el.querySelector('.color-name');
+                if (name) {
+                    name.style.fontWeight = 'normal';
+                    name.style.color = '';
+                }
+            });
 
-        const parsedPrice = parseFloat(numericPrice);
-        console.log('Parsed price as number: ' + parsedPrice);
+            // Highlight selected color
+            element.setAttribute('data-selected', 'true');
+            const circle = element.querySelector('.color-circle');
+            if (circle) {
+                circle.style.border = '3px solid #0d6efd';
+                circle.style.transform = 'scale(1.1)';
+                circle.style.boxShadow = '0 0 5px rgba(13, 110, 253, 0.5)';
+            }
 
-        if (isNaN(parsedPrice)) {
-            console.error('Price is not a valid number: ' + price);
-            return;
-        }
+            const name = element.querySelector('.color-name');
+            if (name) {
+                name.style.fontWeight = 'bold';
+                name.style.color = '#0d6efd';
+            }
 
-        // Cập nhật giá
-        const priceElement = document.querySelector(`.car-price[data-car-id="${carId}"]`);
-        if (priceElement) {
-            const formattedPrice = new Intl.NumberFormat('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(parsedPrice);
+            // Find car card containing this color
+            let card = null;
 
-            priceElement.textContent = '$' + formattedPrice;
-            console.log(`Updated price to $${formattedPrice}`);
-        }
+            // Try different methods to find the card
+            // Method 1: Find by card ancestor
+            card = element.closest('.card');
 
-        // Cập nhật hình ảnh
-        const imageElement = document.querySelector(`.car-image[data-car-id="${carId}"]`);
-        if (imageElement && imageUrl) {
-            imageElement.src = imageUrl;
-            console.log(`Updated image to ${imageUrl}`);
-        }
+            // Method 2: Find by col class containing card
+            if (!card) {
+                const col = element.closest('.col-md-6, .col-lg-4, .col-lg-3, .mb-4');
+                if (col) card = col.querySelector('.card');
+            }
 
-        // Thêm hiệu ứng cho màu được chọn
-        document.querySelectorAll(`.color-dot[data-car-id="${carId}"]`).forEach(dot => {
-            dot.style.border = '3px solid #ddd';
-        });
+            // Method 3: Find card based on carId
+            if (!card) {
+                // Find all cards in the page
+                const allCards = document.querySelectorAll('.card');
+                for (let i = 0; i < allCards.length; i++) {
+                    const cardElement = allCards[i];
+                    // Check if card contains image with matching data-car-id
+                    const img = cardElement.querySelector(`img[data-car-id="${carId}"]`);
+                    if (img) {
+                        card = cardElement;
+                        break;
+                    }
 
-        // Sử dụng event.currentTarget thay vì event.target để đảm bảo lấy đúng phần tử
-        if (event && event.currentTarget) {
-            event.currentTarget.style.border = '3px solid #0d6efd';
-        } else if (event && event.target) {
-            event.target.style.border = '3px solid #0d6efd';
+                    // Or check if card contains color option with matching data-car-id
+                    const colorOption = cardElement.querySelector(`.car-color-option[data-car-id="${carId}"]`);
+                    if (colorOption) {
+                        card = cardElement;
+                        break;
+                    }
+                }
+            }
+
+            if (!card) {
+                throw new Error(`Could not find card for car with id ${carId}`);
+            }
+
+            // Update price
+            updateCarPriceDirect(card, price);
+
+            // Update image
+            updateCarImageDirect(card, imageUrl);
+
+            // Set focus on card to ensure user sees the change
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (error) {
+            console.error('Error in updateCarColorDirect:', error);
         }
     }
 
+    // Update car price
+    function updateCarPriceDirect(card, price) {
+        if (!card || !price) return;
+
+        // Convert price to number
+        let numericPrice = price;
+        if (typeof price === 'string') {
+            numericPrice = price.replace(/[^\d.]/g, '');
+        }
+
+        const parsedPrice = parseFloat(numericPrice);
+        if (isNaN(parsedPrice)) {
+            return;
+        }
+
+        // Format price
+        const formattedPrice = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(parsedPrice);
+
+        // Find all possible price elements
+        const priceSelectors = [
+            '.fw-bold:not(.card-title)',
+            '.car-price',
+            '.mb-3 .fw-bold',
+            '.card-body .fw-bold'
+        ];
+
+        // Try each selector
+        let priceElement = null;
+        for (const selector of priceSelectors) {
+            const elements = card.querySelectorAll(selector);
+            for (const el of elements) {
+                if (el.textContent.includes('$')) {
+                    priceElement = el;
+                    break;
+                }
+            }
+            if (priceElement) break;
+        }
+
+        if (priceElement) {
+            priceElement.textContent = '$' + formattedPrice;
+            // Highlight to show user the change
+            priceElement.style.transition = 'background-color 0.3s';
+            priceElement.style.backgroundColor = 'rgba(255, 255, 0, 0.2)';
+            setTimeout(() => {
+                priceElement.style.backgroundColor = 'transparent';
+            }, 1000);
+        }
+    }
+
+    // Update car image
+    function updateCarImageDirect(card, imageUrl) {
+        if (!card || !imageUrl) return;
+
+        const imageElement = card.querySelector('.card-img-top, .car-image');
+        if (!imageElement) {
+            return;
+        }
+
+        // Create timestamp to avoid caching
+        const timestamp = new Date().getTime();
+        const newUrl = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 'ts=' + timestamp;
+
+        // Create fade effect when changing image
+        imageElement.style.transition = 'opacity 0.3s';
+        imageElement.style.opacity = '0.5';
+
+        // Create new image to preload
+        const preloadImg = new Image();
+        preloadImg.onload = function() {
+            imageElement.src = this.src;
+            imageElement.style.opacity = '1';
+        };
+        preloadImg.onerror = function() {
+            imageElement.src = '/images/cars/default.jpg';
+            imageElement.style.opacity = '1';
+        };
+        preloadImg.src = newUrl;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Debug: Hiển thị giá cho tất cả các color dot
-        console.log('---DEBUG COLOR DOTS---');
-        document.querySelectorAll('.color-dot').forEach(dot => {
-            const carId = dot.getAttribute('data-car-id');
-            const colorName = dot.getAttribute('data-color-name');
-            const price = dot.getAttribute('data-price');
-            const colorId = dot.getAttribute('data-color-id');
+        // Initialize colors
+        document.querySelectorAll('.car-color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const carId = this.getAttribute('data-car-id');
+                const price = this.getAttribute('data-price');
+                const imageUrl = this.getAttribute('data-image');
+                const colorName = this.getAttribute('data-color-name');
 
-            console.log(`Car: ${carId}, Color: ${colorName}, Price: ${price}, ID: ${colorId}`);
+                // Call update function
+                updateCarColorDirect(carId, price, imageUrl, colorName, this);
+            });
         });
-        console.log('---------------------');
 
-        // Wishlist functionality
+        // Initialize wishlist buttons
+        initWishlistButtons();
+    });
+
+    // Initialize wishlist buttons
+    function initWishlistButtons() {
         const wishlistButtons = document.querySelectorAll('.add-to-wishlist');
         wishlistButtons.forEach(button => {
             const carId = parseInt(button.getAttribute('data-car-id'));
@@ -468,8 +778,9 @@
                 }
             });
         });
-    });
+    }
 </script>
 @endpush
+
 
 

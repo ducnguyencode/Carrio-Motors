@@ -31,6 +31,11 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        parent::boot();
+
+        Route::model('social_medium', \App\Models\SocialMediaLink::class);
+        Route::model('socialMedia', \App\Models\SocialMediaLink::class);
+
         $this->configureRateLimiting();
 
         $this->routes(function () {

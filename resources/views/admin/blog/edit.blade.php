@@ -476,7 +476,25 @@
         // Initialize CKEditor with image upload functionality
         ClassicEditor
             .create(document.querySelector('#editor'), {
-                toolbar: ['heading', '|', 'bold', 'italic', 'link', '|', 'bulletedList', 'numberedList', '|', 'indent', 'outdent', '|', 'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo'],
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'indent', 'outdent', '|',
+                        'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', '|',
+                        'undo', 'redo'
+                    ],
+                    shouldNotGroupWhenFull: true
+                },
+                image: {
+                    toolbar: [
+                        'imageTextAlternative',
+                        'imageStyle:inline',
+                        'imageStyle:block',
+                        'imageStyle:side'
+                    ]
+                },
                 simpleUpload: {
                     // The URL that the images are uploaded to.
                     uploadUrl: '{{ route("admin.upload.image") }}',
@@ -484,10 +502,26 @@
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
-                }
+                },
+                language: 'en',
+                placeholder: 'Start writing your blog post here...'
+            })
+            .then(editor => {
+                console.log('CKEditor initialized successfully');
+
+                // Log success message when image is uploaded
+                editor.plugins.get('FileRepository').on('uploaded', (evt, { data }) => {
+                    console.log('Image uploaded successfully', data.url);
+                });
+
+                // Log error if upload fails
+                editor.plugins.get('FileRepository').on('uploadFailed', (evt, { data }) => {
+                    console.error('Image upload failed', data);
+                    alert('Image upload failed. Please try again or use a smaller image.');
+                });
             })
             .catch(error => {
-                console.error(error);
+                console.error('CKEditor initialization error:', error);
             });
 
         // Handle tags
@@ -499,12 +533,8 @@
 
         // Load any existing tags
         if (tagsInput.value) {
-            try {
-                tags = JSON.parse(tagsInput.value);
-                renderTags();
-            } catch (e) {
-                console.error('Error parsing tags', e);
-            }
+            tags = tagsInput.value.split(',').map(tag => tag.trim());
+            renderTags();
         }
 
         // Add tag when enter key is pressed
@@ -520,7 +550,7 @@
             const tag = tagInput.value.trim();
             if (tag && !tags.includes(tag)) {
                 tags.push(tag);
-                tagsInput.value = JSON.stringify(tags);
+                tagsInput.value = tags.join(',');
                 tagInput.value = '';
                 renderTags();
             }
@@ -547,7 +577,7 @@
         // Expose the removeTag function to the global scope
         window.removeTag = function(index) {
             tags.splice(index, 1);
-            tagsInput.value = JSON.stringify(tags);
+            tagsInput.value = tags.join(',');
             renderTags();
         };
     });
@@ -555,7 +585,7 @@
     function previewImage(input) {
         const preview = document.getElementById('image-preview');
         const img = preview.querySelector('img');
-        const currentImage = document.getElementById('current-image');
+        const placeholder = document.getElementById('image-placeholder');
 
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -563,26 +593,21 @@
             reader.onload = function(e) {
                 img.src = e.target.result;
                 preview.classList.remove('hidden');
-                if (currentImage) {
-                    currentImage.classList.add('hidden');
-                }
+                if (placeholder) placeholder.classList.add('hidden');
             }
 
             reader.readAsDataURL(input.files[0]);
         }
     }
 
-    function removeNewImage() {
+    function removeImage() {
         const preview = document.getElementById('image-preview');
         const input = document.getElementById('featured_image');
-        const currentImage = document.getElementById('current-image');
+        const placeholder = document.getElementById('image-placeholder');
 
         preview.classList.add('hidden');
         input.value = '';
-
-        if (currentImage) {
-            currentImage.classList.remove('hidden');
-        }
+        if (placeholder) placeholder.classList.remove('hidden');
     }
 
     function removeCurrentImage() {

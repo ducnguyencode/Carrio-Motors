@@ -23,6 +23,39 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            font-size: 20px;
+            z-index: 1000;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
         }
 
         .ticker {
@@ -45,9 +78,25 @@
             z-index: 1030;
         }
 
+        /* Improved Sticky Header */
         .navbar-modern.sticky-top {
-            top: -100px;
-            transition: top 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            animation: slideDown 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
         }
 
         .navbar-modern.sticky-top.visible {
@@ -560,6 +609,11 @@
 
     @yield('footer')
 
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top" id="backToTop">
+        <i class="fas fa-chevron-up"></i>
+    </a>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function updateTicker() {
@@ -583,6 +637,25 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
+            // Back to top button functionality
+            const backToTopButton = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
+            });
+
+            backToTopButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
             // Slide Banner functionality
             const slides = document.querySelectorAll('.carousel-slide');
             const dots = document.querySelectorAll('.carousel-indicators .dot');
@@ -632,14 +705,6 @@
 
                 if (scrollTop > 100) {
                     navbar.classList.add('sticky-top');
-
-                    if (scrollTop > lastScrollTop) {
-                        // Scrolling down
-                        navbar.classList.remove('visible');
-                    } else {
-                        // Scrolling up
-                        navbar.classList.add('visible');
-                    }
                 } else {
                     navbar.classList.remove('sticky-top');
                 }

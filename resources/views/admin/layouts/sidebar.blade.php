@@ -11,3 +11,16 @@
         Blog
     </a>
 </li>
+
+                    <!-- Resources -->
+                    <li class="nav-header">RESOURCES</li>
+
+                    @if(auth()->user()->hasRole(['admin', 'content']))
+                    <!-- Social Media Links -->
+                    <li class="nav-item">
+                        <a href="{{ route('admin.social-media.index') }}" class="nav-link {{ Request::is('admin/social-media*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-share-alt"></i>
+                            <p>Social Media</p>
+                        </a>
+                    </li>
+                    @endif

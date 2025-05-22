@@ -41,7 +41,7 @@ class BuyController extends Controller
         // Validate the request
         $validated = $request->validate([
             'car_id' => 'required|exists:cars,id',
-            'car_detail_id' => 'required|exists:car_details,id',
+            'car_detail_id' => 'required|exists:cars_details,id',
             'fullname' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:255',
@@ -109,8 +109,9 @@ class BuyController extends Controller
             ]);
         }
 
+        // Use new success route
         return redirect()
-            ->route('buy.success')
+            ->route('purchase.success')
             ->with('order', $customerData);
     }
 
@@ -119,11 +120,26 @@ class BuyController extends Controller
      */
     public function showSuccessPage()
     {
-        if (!session('order')) {
-            return redirect()->route('home');
+        // Check if we have order data in the session
+        if (session('order')) {
+            return view('buy_success', ['order' => session('order')]);
         }
 
-        return view('buy_success', ['order' => session('order')]);
+        // If no order data in session, create sample data for testing
+        $sampleOrder = [
+            'name' => 'Test Customer',
+            'email' => 'customer@example.com',
+            'car' => 'Sample Car Model',
+            'color' => 'Silver',
+            'price' => '9,000.00',
+            'quantity' => 1,
+            'total' => '9,000.00',
+            'payment_method' => 'Cash on Delivery',
+            'order_id' => 'ORD-' . uniqid(),
+            'order_date' => now()->format('F j, Y'),
+        ];
+
+        return view('buy_success', ['order' => $sampleOrder]);
     }
 
     /**
@@ -132,9 +148,9 @@ class BuyController extends Controller
     private function formatPaymentMethod($method)
     {
         $methods = [
-            'bank_transfer' => 'Chuyển khoản ngân hàng',
-            'credit_card' => 'Thẻ tín dụng / Ghi nợ',
-            'cash' => 'Thanh toán khi nhận xe',
+            'bank_transfer' => 'Bank Transfer',
+            'credit_card' => 'Credit Card / Debit Card',
+            'cash' => 'Cash on Delivery',
         ];
 
         return $methods[$method] ?? $method;

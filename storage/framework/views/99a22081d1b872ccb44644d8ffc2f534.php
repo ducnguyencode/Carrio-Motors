@@ -9,6 +9,11 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
         /* Custom styles */
@@ -319,6 +324,10 @@
                             Blog
                         </a>
                         <?php endif; ?>
+                        <a href="<?php echo e(route('admin.social-media.index')); ?>" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white <?php echo e(request()->routeIs('admin.social-media*') ? 'bg-gray-700' : ''); ?>">
+                            <i class="mr-3 text-lg fas fa-share-alt"></i>
+                            Social Media
+                        </a>
                         <a href="<?php echo e(route('admin.banners.index')); ?>" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white">
                             <i class="mr-3 text-lg fas fa-images"></i>
                             Banners
@@ -326,12 +335,6 @@
                         <?php endif; ?>
 
                         <?php if(auth()->user()->role === 'admin' || auth()->user()->role === 'saler'): ?>
-                        <?php if(auth()->user()->role === 'admin'): ?>
-                        <a href="<?php echo e(route('admin.cars.index')); ?>" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white">
-                            <i class="mr-3 text-lg fas fa-car"></i>
-                            Cars
-                        </a>
-                        <?php endif; ?>
                         <a href="<?php echo e(route('admin.invoices.index')); ?>" class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white">
                             <i class="mr-3 text-lg fas fa-file-invoice-dollar"></i>
                             Invoices
@@ -379,21 +382,90 @@
             </div>
 
             <main class="relative flex-1 overflow-y-auto focus:outline-none p-6">
-                <?php if(session('success') && !isset($hideFlashMessages) && !request()->routeIs('admin.blog*')): ?>
-                    <div class="mb-4 p-3 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex justify-between items-center">
-                        <span><?php echo e(session('success')); ?></span>
-                        <button onclick="this.parentElement.style.display='none'" class="ml-4 text-green-700 hover:text-green-900">&times;</button>
+                <div class="p-6 overflow-y-auto" style="height: calc(100vh - 64px);">
+                    <!-- Messages from controllers or views -->
+                    <?php if(session('success')): ?>
+                    <div id="success-alert" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-sm">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm"><?php echo e(session('success')); ?></p>
+                            </div>
+                            <div class="ml-auto pl-3">
+                                <div class="-mx-1.5 -my-1.5">
+                                    <button type="button" onclick="document.getElementById('success-alert').style.display='none'" class="inline-flex rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400">
+                                        <span class="sr-only">Dismiss</span>
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                <?php endif; ?>
+                    <?php endif; ?>
 
-                <?php if(session('error') && !isset($hideFlashMessages) && !request()->routeIs('admin.blog*')): ?>
-                    <div class="mb-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-700 rounded flex justify-between items-center">
-                        <span><?php echo e(session('error')); ?></span>
-                        <button onclick="this.parentElement.style.display='none'" class="ml-4 text-red-700 hover:text-red-900">&times;</button>
+                    <?php if(session('error')): ?>
+                    <div id="error-alert" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-sm">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm"><?php echo e(session('error')); ?></p>
+                            </div>
+                            <div class="ml-auto pl-3">
+                                <div class="-mx-1.5 -my-1.5">
+                                    <button type="button" onclick="document.getElementById('error-alert').style.display='none'" class="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400">
+                                        <span class="sr-only">Dismiss</span>
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                <?php endif; ?>
+                    <?php endif; ?>
 
-                <?php echo $__env->yieldContent('content'); ?>
+                    <?php if($errors->any()): ?>
+                    <div id="validation-errors" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-sm">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">There were <?php echo e($errors->count()); ?> error(s) with your submission</p>
+                                <ul class="mt-1 list-disc list-inside text-sm text-red-700">
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </ul>
+                            </div>
+                            <div class="ml-auto pl-3">
+                                <div class="-mx-1.5 -my-1.5">
+                                    <button type="button" onclick="document.getElementById('validation-errors').style.display='none'" class="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400">
+                                        <span class="sr-only">Dismiss</span>
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php echo $__env->yieldContent('content'); ?>
+                </div>
             </main>
         </div>
     </div>

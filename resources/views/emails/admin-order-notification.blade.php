@@ -1,32 +1,32 @@
 @component('mail::message')
-# Đơn hàng mới
+# New Order
 
-Có một đơn hàng mới đã được tạo trên hệ thống.
+A new order has been created in the system.
 
-**Mã đơn hàng:** {{ $order['order_id'] }}
-**Ngày đặt hàng:** {{ $order['order_date'] }}
+**Order ID:** {{ $order['order_id'] }}
+**Order Date:** {{ $order['order_date'] }}
 
-## Thông tin khách hàng
+## Customer Information
 
-**Tên:** {{ $order['name'] }}
+**Name:** {{ $order['name'] }}
 **Email:** {{ $order['email'] }}
-**Điện thoại:** {{ $order['phone'] ?? 'Không có' }}
+**Phone:** {{ $order['phone'] ?? 'Not provided' }}
 
-## Chi tiết đơn hàng
+## Order Details
 
 @component('mail::table')
-| Xe | Màu sắc | Số lượng | Giá |
+| Car | Color | Quantity | Price |
 |:------------- |:------------- |:------------- |:------------- |
 | {{ $order['car'] }} | {{ $order['color'] }} | {{ $order['quantity'] }} | ${{ $order['price'] }} |
 @endcomponent
 
-**Tổng cộng:** ${{ $order['total'] }}
-**Phương thức thanh toán:** {{ $order['payment_method'] }}
+**Total:** ${{ $order['total'] }}
+**Payment Method:** {{ $order['payment_method'] }}
 
-@component('mail::button', ['url' => config('app.url') . '/admin/orders'])
-Xem chi tiết đơn hàng
+@component('mail::button', ['url' => 'http://127.0.0.1:8000/admin/orders'])
+View Order Details
 @endcomponent
 
-Trân trọng,<br>
+Regards,<br>
 {{ config('app.name') }}
 @endcomponent

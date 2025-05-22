@@ -361,7 +361,25 @@
         // Initialize CKEditor with image upload functionality
         ClassicEditor
             .create(document.querySelector('#editor'), {
-                toolbar: ['heading', '|', 'bold', 'italic', 'link', '|', 'bulletedList', 'numberedList', '|', 'indent', 'outdent', '|', 'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo'],
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'indent', 'outdent', '|',
+                        'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', '|',
+                        'undo', 'redo'
+                    ],
+                    shouldNotGroupWhenFull: true
+                },
+                image: {
+                    toolbar: [
+                        'imageTextAlternative',
+                        'imageStyle:inline',
+                        'imageStyle:block',
+                        'imageStyle:side'
+                    ]
+                },
                 simpleUpload: {
                     // The URL that the images are uploaded to.
                     uploadUrl: '{{ route("admin.upload.image") }}',
@@ -369,10 +387,26 @@
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
-                }
+                },
+                language: 'en',
+                placeholder: 'Start writing your blog post here...'
+            })
+            .then(editor => {
+                console.log('CKEditor initialized successfully');
+
+                // Log success message when image is uploaded
+                editor.plugins.get('FileRepository').on('uploaded', (evt, { data }) => {
+                    console.log('Image uploaded successfully', data.url);
+                });
+
+                // Log error if upload fails
+                editor.plugins.get('FileRepository').on('uploadFailed', (evt, { data }) => {
+                    console.error('Image upload failed', data);
+                    alert('Image upload failed. Please try again or use a smaller image.');
+                });
             })
             .catch(error => {
-                console.error(error);
+                console.error('CKEditor initialization error:', error);
             });
 
         // Handle tags
