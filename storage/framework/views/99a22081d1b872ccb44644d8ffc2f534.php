@@ -384,6 +384,7 @@
             <main class="relative flex-1 overflow-y-auto focus:outline-none p-6">
                 <div class="p-6 overflow-y-auto" style="height: calc(100vh - 64px);">
                     <!-- Messages from controllers or views -->
+                    <?php if(!isset($hideFlashMessages) || !$hideFlashMessages): ?>
                     <?php if(session('success')): ?>
                     <div id="success-alert" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-sm">
                         <div class="flex">
@@ -462,6 +463,7 @@
                             </div>
                         </div>
                     </div>
+                    <?php endif; ?>
                     <?php endif; ?>
 
                     <?php echo $__env->yieldContent('content'); ?>

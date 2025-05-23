@@ -143,7 +143,7 @@
                                 <div class="text-center">
                                     <p class="mb-0">
                                         Already have an account?
-                                        <a href="{{ url('/login') }}" class="text-decoration-none">Sign in</a>
+                                        <a href="{{ url('/admin') }}" class="text-decoration-none">Sign in</a>
                                     </p>
                                 </div>
                             </form>
