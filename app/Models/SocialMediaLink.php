@@ -15,11 +15,13 @@ class SocialMediaLink extends Model
         'icon_class',
         'is_active',
         'display_order',
+        'show_on_car_detail',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'display_order' => 'integer',
+        'show_on_car_detail' => 'boolean',
     ];
 
     // Scope to get only active social media links

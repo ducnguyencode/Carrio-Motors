@@ -152,6 +152,15 @@
             <p class="mt-1 text-sm text-gray-500">Inactive links will not be displayed on the website.</p>
         </div>
 
+        <div class="mt-4">
+            <div class="flex items-center">
+                <input type="checkbox" id="show_on_car_detail" name="show_on_car_detail" value="1" {{ old('show_on_car_detail', true) ? 'checked' : '' }}
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                <label for="show_on_car_detail" class="ml-2 block text-sm text-gray-700">Show on Car Detail Page</label>
+            </div>
+            <p class="mt-1 text-sm text-gray-500">Toggle to show or hide this link on car detail pages.</p>
+        </div>
+
         <div class="flex items-center justify-end space-x-3 pt-5 border-t border-gray-200">
             <a href="{{ route('admin.social-media.index') }}" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 Cancel

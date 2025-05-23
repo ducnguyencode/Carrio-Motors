@@ -87,7 +87,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $users->links() }}
+        @include('components.admin-pagination', ['paginator' => $users, 'elements' => $users->links()->elements])
     </div>
 </div>
 @endsection

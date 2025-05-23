@@ -244,9 +244,13 @@
                         </div>
                     </div>
                     <div class="share-buttons">
-                        <button class="btn btn-sm btn-outline-primary" onclick="shareOnSocial('facebook')"><i class="bi bi-facebook"></i></button>
-                        <button class="btn btn-sm btn-outline-info" onclick="shareOnSocial('twitter')"><i class="bi bi-twitter"></i></button>
-                        <button class="btn btn-sm btn-outline-dark" onclick="shareOnSocial('email')"><i class="bi bi-envelope"></i></button>
+                        @if(!empty($socialLinks))
+                            @foreach($socialLinks as $link)
+                                <a href="{{ $link->url }}" class="btn btn-sm btn-outline-secondary me-1" target="_blank" title="{{ $link->platform_name }}">
+                                    <i class="{{ $link->icon_class }}"></i>
+                                </a>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
 
@@ -740,21 +744,23 @@
         <div class="col-12">
             <h3 class="mb-4">Similar Cars You Might Like</h3>
             <div class="row">
-                @for($i = 1; $i <= 4; $i++)
+                @forelse($similarCars as $simCar)
                 <div class="col-md-6 col-lg-3 mb-4">
                     <div class="card h-100 hover-shadow">
-                        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Similar Car">
-                        <div class="card-body">
-                            <h5 class="card-title">Similar Car {{ $i }}</h5>
-                            <p class="card-text text-muted">Brand • Model Year</p>
-                            <div class="mb-2">
-                                <span class="fw-bold">${{ number_format(rand(30000, 80000), 2) }}</span>
+                        <img src="{{ $simCar->main_image ? asset('storage/' . $simCar->main_image) : ($simCar->carDetails->first() && $simCar->carDetails->first()->main_image ? asset($simCar->carDetails->first()->main_image) : asset('images/cars/default.jpg')) }}" class="card-img-top" alt="{{ $simCar->name }}" style="height: 180px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mb-1">{{ $simCar->name }}</h5>
+                            <p class="card-text small text-muted">{{ $simCar->model->make->name ?? 'N/A' }}</p>
+                            <p class="h5 fw-bold mb-3">${{ number_format($simCar->carDetails->sortBy('price')->first()->price ?? $simCar->price ?? 0, 2) }}</p>
+                            <a href="{{ route('car.detail', $simCar->id) }}" class="btn btn-outline-primary btn-sm mt-auto">View Details</a>
                             </div>
-                            <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
                         </div>
                     </div>
+                @empty
+                <div class="col-12">
+                    <p class="text-muted">No similar cars found.</p>
                 </div>
-                @endfor
+                @endforelse
             </div>
         </div>
     </div>

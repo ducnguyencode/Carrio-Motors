@@ -20,8 +20,10 @@ class DatabaseSeeder extends Seeder
             ModelSeeder::class,
             // Then we can create Cars
             CarSeeder::class,
+            AdditionalCarSeeder::class,
             // Finally we can create Car Details
             CarDetailSeeder::class,
+            AdditionalCarDetailSeeder::class,
             BlogPostSeeder::class,
             BannerSeeder::class,
         ]);

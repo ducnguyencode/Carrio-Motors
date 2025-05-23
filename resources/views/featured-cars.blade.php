@@ -25,7 +25,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $cars->links() }}
+        @include('components.modern-pagination', ['paginator' => $cars, 'elements' => $cars->links()->elements])
     </div>
 </div>
 @endsection
