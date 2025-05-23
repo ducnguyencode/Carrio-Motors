@@ -85,7 +85,7 @@
 
             <!-- Pagination with modern styling -->
             <div class="d-flex justify-content-center mt-5 mb-5">
-                {{ $posts->links() }}
+                @include('components.modern-pagination', ['paginator' => $posts, 'elements' => $posts->links()->elements])
             </div>
         </div>
     </div>

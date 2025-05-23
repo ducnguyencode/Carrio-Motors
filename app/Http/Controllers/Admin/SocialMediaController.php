@@ -13,7 +13,7 @@ class SocialMediaController extends Controller
      */
     public function index()
     {
-        $socialMediaLinks = SocialMediaLink::orderBy('display_order')->get();
+        $socialMediaLinks = SocialMediaLink::orderBy('display_order')->paginate(10);
         return view('admin.social_media.index', compact('socialMediaLinks'));
     }
 
@@ -40,6 +40,8 @@ class SocialMediaController extends Controller
         // Handle checkbox - set is_active to 0 if not present in request
         $data = $request->all();
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
+        // Handle show_on_car_detail - set to 1 if checked, otherwise 0
+        $data['show_on_car_detail'] = $request->has('show_on_car_detail') ? 1 : 0;
 
         SocialMediaLink::create($data);
 
@@ -78,6 +80,8 @@ class SocialMediaController extends Controller
         // Handle checkbox - set is_active to 0 if not present in request
         $data = $request->all();
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
+        // Handle show_on_car_detail
+        $data['show_on_car_detail'] = $request->has('show_on_car_detail') ? 1 : 0;
 
         $social_medium->update($data);
 

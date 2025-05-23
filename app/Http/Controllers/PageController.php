@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Engine;
+use App\Models\SocialMediaLink;
 
 class PageController extends Controller
 {
@@ -403,7 +404,7 @@ class PageController extends Controller
         }
 
         // Get cars with pagination
-        $cars = $query->paginate(10);
+        $cars = $query->paginate(9);
 
         // Load additional data for each car
         foreach ($cars as $car) {
@@ -449,6 +450,9 @@ class PageController extends Controller
             'model.make'
         ])->findOrFail($id);
 
+        // Load active social media links
+        $socialLinks = SocialMediaLink::active()->ordered()->where('show_on_car_detail', true)->get();
+
         // For debugging - log the car details to see what variants are available
         \Illuminate\Support\Facades\Log::info('Car Details for ID: ' . $id, [
             'total_details' => $car->carDetails->count(),
@@ -472,7 +476,19 @@ class PageController extends Controller
             }
         }
 
-        return view('cars_detail', compact('car'));
+        // Fetch similar cars: same make, exclude current
+        $makeId = $car->model->make_id ?? null;
+        $similarCars = collect();
+        if ($makeId) {
+            $similarCars = Car::with(['engine','model.make','carDetails.carColor'])
+                ->whereHas('model', function($q) use ($makeId) {
+                    $q->where('make_id', $makeId);
+                })
+                ->where('id', '!=', $car->id)
+                ->take(4)
+                ->get();
+        }
+        return view('cars_detail', compact('car', 'socialLinks', 'similarCars'));
     }
 
     public function buyForm($id = null) {

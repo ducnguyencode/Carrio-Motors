@@ -688,7 +688,6 @@ function initLinkBehavior() {
     function checkLinkState() {
         // If car is selected, disable custom URL
         if (carSelect.value) {
-            customUrlInput.value = '';
             customUrlInput.disabled = true;
             customUrlParent.style.opacity = '0.5';
             customUrlParent.querySelector('.text-gray-500').innerHTML =

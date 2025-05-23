@@ -273,7 +273,7 @@
 
     <!-- Pagination -->
     <div class="d-flex justify-content-center mt-4">
-        {{ $cars->appends(request()->query())->links() }}
+        @include('components.modern-pagination', ['paginator' => $cars, 'elements' => $cars->appends(request()->query())->links()->elements])
     </div>
 
     <!-- Brand History Section -->

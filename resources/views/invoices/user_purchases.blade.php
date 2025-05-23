@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="mt-4">
-                    {{ $invoices->links() }}
+                    @include('components.modern-pagination', ['paginator' => $invoices, 'elements' => $invoices->links()->elements])
                 </div>
             </div>
         </div>

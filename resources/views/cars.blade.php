@@ -133,7 +133,7 @@
 
             <!-- Results count -->
             <div class="mb-4">
-                <p class="text-muted mb-4">Showing {{ $cars->count() }} of {{ $cars->count() }} cars</p>
+                <p class="text-muted mb-4">Showing {{ $cars->firstItem() }} to {{ $cars->lastItem() }} of {{ $cars->total() }} cars</p>
             </div>
 
             <!-- Car Grid View -->
@@ -233,21 +233,9 @@
                 @endforeach
             </div>
 
-            <!-- Pagination -->
+            <!-- Dynamic Pagination -->
             <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                @include('components.modern-pagination', ['paginator' => $cars, 'elements' => $cars->appends(request()->all())->links()->elements])
             </div>
         </div>
     </div>

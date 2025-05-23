@@ -403,7 +403,7 @@
 <div class="video-carousel">
     @foreach($banners as $index => $banner)
     <div class="carousel-slide {{ $index == 0 ? 'active' : '' }}">
-        <a href="{{ $banner->click_url ?? ($banner->car_id ? route('car.detail', $banner->car_id) : '#') }}" class="video-link">
+        <a href="{{ $banner->car_id ? route('car.detail', $banner->car_id) : ($banner->click_url ?? '#') }}" class="video-link">
             <video class="background-video" autoplay muted loop>
                 <source src="{{ asset('storage/'.$banner->video_url) }}" type="video/mp4">
                 Your browser does not support the video tag.

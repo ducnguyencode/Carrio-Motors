@@ -120,7 +120,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $posts->links() }}
+        @include('components.admin-pagination', ['paginator' => $posts->withQueryString(), 'elements' => $posts->withQueryString()->links()->elements])
     </div>
 </div>
 @endsection

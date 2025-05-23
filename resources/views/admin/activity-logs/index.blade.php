@@ -105,7 +105,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $logs->withQueryString()->links() }}
+        @include('components.admin-pagination', ['paginator' => $logs->withQueryString(), 'elements' => $logs->withQueryString()->links()->elements])
     </div>
 </div>
 @endsection

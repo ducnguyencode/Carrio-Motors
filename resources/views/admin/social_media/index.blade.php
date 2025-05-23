@@ -78,6 +78,11 @@
             </tbody>
         </table>
     </div>
+    @if($socialMediaLinks->hasPages())
+    <div class="mt-4">
+        @include('components.admin-pagination', ['paginator' => $socialMediaLinks, 'elements' => $socialMediaLinks->links()->elements])
+    </div>
+    @endif
 </div>
 @endsection
 

@@ -106,7 +106,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $banners->links() }}
+        @include('components.admin-pagination', ['paginator' => $banners, 'elements' => $banners->links()->elements])
     </div>
 </div>
 

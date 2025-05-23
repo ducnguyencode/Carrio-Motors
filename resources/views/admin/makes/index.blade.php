@@ -93,7 +93,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $makes->withQueryString()->links() }}
+        @include('components.admin-pagination', ['paginator' => $makes->withQueryString(), 'elements' => $makes->withQueryString()->links()->elements])
     </div>
 </div>
 @endsection

@@ -83,7 +83,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $cars->withQueryString()->links() }}
+        @include('components.admin-pagination', ['paginator' => $cars->withQueryString(), 'elements' => $cars->withQueryString()->links()->elements])
     </div>
 </div>
 @endsection

@@ -402,7 +402,7 @@
 <div class="video-carousel">
     <?php $__currentLoopData = $banners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $banner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <div class="carousel-slide <?php echo e($index == 0 ? 'active' : ''); ?>">
-        <a href="<?php echo e($banner->click_url ?? ($banner->car_id ? route('car.detail', $banner->car_id) : '#')); ?>" class="video-link">
+        <a href="<?php echo e($banner->car_id ? route('car.detail', $banner->car_id) : ($banner->click_url ?? '#')); ?>" class="video-link">
             <video class="background-video" autoplay muted loop>
                 <source src="<?php echo e(asset('storage/'.$banner->video_url)); ?>" type="video/mp4">
                 Your browser does not support the video tag.
