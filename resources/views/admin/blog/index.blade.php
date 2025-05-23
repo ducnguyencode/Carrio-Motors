@@ -1,4 +1,5 @@
 @extends('admin.layouts.app')
+@use('Illuminate\Support\Facades\Route')
 
 @section('title', 'Blog Management')
 
@@ -31,13 +32,6 @@
             </a>
         </div>
     </div>
-
-    @if(session('success'))
-    <div class="mb-4 p-3 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex justify-between items-center">
-        <span>{{ session('success') }}</span>
-        <button onclick="this.parentElement.style.display='none'" class="ml-4 text-green-700 hover:text-green-900">&times;</button>
-    </div>
-    @endif
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
