@@ -7,7 +7,7 @@
 @section('content')
 <div class="bg-white rounded-lg shadow-md p-6">
     <div class="mb-4">
-        <a href="{{ route('activity-logs.index') }}" class="inline-flex items-center px-4 py-2 rounded-full border border-blue-500 text-blue-500 bg-white hover:bg-blue-50 transition-all text-sm font-medium">
+        <a href="{{ route('admin.activity-logs.index') }}" class="inline-flex items-center px-4 py-2 rounded-full border border-blue-500 text-blue-500 bg-white hover:bg-blue-50 transition-all text-sm font-medium">
             <i class="fas fa-arrow-left mr-2"></i> Back to Logs
         </a>
     </div>
